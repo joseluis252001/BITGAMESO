@@ -1,0 +1,130 @@
+/* Importar tipografías de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap');
+
+/* Variables de colores para facilitar cambios */
+:root {
+    --rosa-pastel: #FFB6C1;
+    --morado-suave: #CBA6F7;
+    --azul-cielo: #A0E7E5;
+    --amarillo-suave: #FFF5BA;
+    --blanco: #FFFFFF;
+    --texto-oscuro: #333333;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--blanco);
+    color: var(--texto-oscuro);
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+}
+
+/* --- HEADER --- */
+header {
+    background-color: var(--morado-suave);
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    font-family: 'Fredoka', sans-serif;
+    color: var(--blanco);
+    font-size: 2rem;
+}
+
+nav button {
+    background-color: var(--rosa-pastel);
+    border: none;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border-radius: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+nav button:hover {
+    transform: scale(1.1);
+    background-color: var(--azul-cielo);
+}
+
+/* --- CUERPO (BODY) --- */
+main {
+    padding: 40px 10%;
+}
+
+.contenido {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 50px;
+    background-color: var(--blanco);
+    border-radius: 15px;
+    overflow: hidden;
+    /* Efecto de sombra suave */
+    box-shadow: 10px 10px 0px var(--amarillo-suave);
+    border: 2px solid #eee;
+}
+
+/* Invertir el orden para la imagen 2 para que se vea dinámico */
+.contenido:nth-child(2) {
+    flex-direction: row-reverse;
+}
+
+.imagen-placeholder {
+    width: 50%;
+    background-color: #f0f0f0;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.imagen-placeholder img {
+    max-width: 100%;
+    height: auto;
+}
+
+.texto {
+    width: 50%;
+    padding: 40px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--morado-suave);
+}
+
+/* --- FOOTER --- */
+footer {
+    background-color: var(--azul-cielo);
+    padding: 30px;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.footer-logo {
+    width: 80px;
+    margin-bottom: 15px;
+}
+
+footer p {
+    font-size: 0.9rem;
+    font-weight: 400;
+    margin-bottom: 10px;
+}
+
+footer a img {
+    transition: filter 0.3s;
+}
+
+footer a img:hover {
+    filter: brightness(1.2);
+}
