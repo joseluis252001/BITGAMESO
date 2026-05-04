@@ -1,0 +1,167 @@
+/* game.css - Estética BITGAMESO */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap');
+
+:root {
+    --rosa: #FFB6C1;
+    --morado: #CBA6F7;
+    --celeste: #A0E7E5;
+    --amarillo: #FFF5BA;
+    --blanco: #FFFFFF;
+    --negro: #333333;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--amarillo);
+    color: var(--negro);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden; /* Evita scroll en el body, lo usaremos en el main */
+}
+
+/* --- HEADER --- */
+.game-header {
+    background-color: var(--blanco);
+    padding: 10px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--negro);
+}
+
+.header-left { display: flex; align-items: center; gap: 15px; }
+.logo-placeholder { 
+    width: 40px; height: 40px; background: var(--morado); 
+    border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;
+}
+
+.header-center .btn-tutorial {
+    background-color: var(--celeste);
+    border: 2px solid var(--negro);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-family: 'Fredoka', sans-serif;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.header-right { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+.user-icon-btn { 
+    background: var(--rosa); border: 2px solid var(--negro); 
+    border-radius: 50%; cursor: pointer; padding: 5px 10px; 
+}
+
+/* --- NAV (SCORE & ACTIONS) --- */
+.game-nav {
+    background-color: var(--morado);
+    color: white;
+    padding: 10px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.score-container { font-family: 'Fredoka', sans-serif; font-size: 1.2rem; }
+.nav-actions button {
+    background: var(--blanco);
+    border: none;
+    margin-left: 10px;
+    padding: 5px 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--morado);
+}
+
+/* --- CONTENEDOR PRINCIPAL --- */
+.game-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden; /* El scroll será interno */
+}
+
+/* Lado Izquierdo (Top 5) */
+.sidebar-investments {
+    width: 200px;
+    background-color: var(--blanco);
+    border-right: 3px solid var(--negro);
+    padding: 20px;
+}
+
+.sidebar-investments ul { list-style: none; padding: 0; }
+.sidebar-investments li {
+    padding: 10px;
+    margin-bottom: 10px;
+    background: var(--amarillo);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    border: 1px solid var(--negro);
+}
+
+/* Panel Central (Lista de 50) */
+.market-main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto; /* Aquí sí hay scroll */
+    background: #fdfdfd;
+}
+
+.market-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr 1fr;
+    font-weight: bold;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--morado);
+    margin-bottom: 15px;
+}
+
+.asset-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr 1fr;
+    align-items: center;
+    background: white;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid #eee;
+    transition: 0.2s;
+}
+
+.asset-item:hover { border-color: var(--rosa); transform: scale(1.01); }
+
+.item-actions button {
+    width: 30px; height: 30px; margin-right: 5px;
+    border-radius: 5px; border: 1px solid #ccc; cursor: pointer;
+}
+
+/* Lado Derecho (Conejo) */
+.pet-aside {
+    width: 250px;
+    background-color: var(--blanco);
+    border-left: 3px solid var(--negro);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.pet-container {
+    text-align: center;
+    background: var(--celeste);
+    padding: 30px;
+    border-radius: 50% 50% 20% 20%;
+    border: 3px solid var(--negro);
+    margin-bottom: 20px;
+}
+
+/* --- FOOTER --- */
+.game-footer {
+    text-align: center;
+    font-size: 0.7rem;
+    padding: 5px;
+    background: var(--blanco);
+    border-top: 1px solid #ddd;
+}

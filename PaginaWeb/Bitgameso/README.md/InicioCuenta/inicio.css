@@ -1,8 +1,8 @@
-/* styleRegistro.css */
+/* styleLogin.css */
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap');
 
 body {
-    background-color: #FFF5BA; /* Amarillo suave de fondo */
+    background-color: #FFF5BA; /* Amarillo suave para mantener la identidad */
     font-family: 'Poppins', sans-serif;
     display: flex;
     justify-content: center;
@@ -15,7 +15,7 @@ body {
     background-color: #FFFFFF;
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 10px 10px 0px #CBA6F7; /* Sombra morada sólida */
+    box-shadow: 10px 10px 0px #CBA6F7; /* Sombra morada sólida de BITGAMESO */
     border: 3px solid #333;
     width: 350px;
     text-align: center;
@@ -24,24 +24,26 @@ body {
 h2 {
     font-family: 'Fredoka', sans-serif;
     color: #CBA6F7;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
 }
 
 input {
     width: 100%;
     padding: 12px;
-    margin: 10px 0;
-    border: 2px solid #FFB6C1; /* Borde rosa */
+    margin: 12px 0;
+    border: 2px solid #FFB6C1; /* Rosa pastel en los bordes */
     border-radius: 10px;
     outline: none;
+    font-family: 'Poppins', sans-serif;
 }
 
 input:focus {
-    border-color: #A0E7E5; /* Cambia a azul cielo al escribir */
+    border-color: #A0E7E5; /* Azul cielo al hacer clic */
 }
 
 button {
-    background-color: #FFB6C1;
+    background-color: #CBA6F7; /* Morado para el botón de Entrar */
     color: white;
     border: none;
     padding: 15px;
@@ -50,28 +52,30 @@ button {
     font-weight: bold;
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
-    margin-top: 10px;
-    transition: 0.3s;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
 }
 
 button:hover {
-    background-color: #CBA6F7;
+    background-color: #FFB6C1; /* Cambia a rosa al pasar el mouse */
     transform: translateY(-3px);
 }
-footer {
+
+.footer-login {
     position: fixed;
     bottom: 20px;
     width: 100%;
     text-align: center;
     font-size: 0.8rem;
-    color: #333;
-    font-family: 'Poppins', sans-serif;
+    color: #555;
 }
 
-/* Estilo para que el link de iniciar sesión se vea como un botón pequeño */
+/* Estilo para el enlace de "Regístrate aquí" */
 a {
+    color: #CBA6F7;
     text-decoration: none;
-    transition: 0.3s;
+    font-weight: bold;
 }
 
 a:hover {

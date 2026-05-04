@@ -1,38 +1,22 @@
-// Esperamos a que todo el HTML esté cargado
+// script.js - BITGAMESO
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Seleccionamos todos los botones dentro del nav
     const botones = document.querySelectorAll('nav button');
 
-    // Botón 1: ¿Qué es?
+    // Solo dejamos funciones para los botones que NO tienen enlace <a>
+    
+    // Botón ¿Qué es?
     botones[0].addEventListener('click', () => {
-        alert("¡Bienvenido a BITGAMESO! Somos una plataforma educativa sobre gaming y finanzas.");
+        alert("¡Bienvenido a BITGAMESO!");
     });
 
-    // Botón 2: Productos
+    // Botón Productos
     botones[1].addEventListener('click', () => {
-        // Esto desplaza la página hacia abajo suavemente
         window.scrollTo({
-            top: 500,
+            top: 700,
             behavior: 'smooth'
         });
-        console.log("El usuario está explorando los productos.");
     });
 
-    // Botón 3: Iniciar Sesión
-    botones[2].addEventListener('click', () => {
-        const usuario = prompt("Ingresa tu nombre de usuario:");
-        if (usuario) {
-            alert(`Hola ${usuario}, ¡qué bueno verte de nuevo!`);
-        }
-    });
-
-    // Botón 4: Crear Cuenta
-    botones[3].addEventListener('click', () => {
-        const confirmar = confirm("¿Quieres crear una cuenta nueva en BITGAMESO?");
-        if (confirmar) {
-            alert("¡Genial! Te redirigiremos al formulario de registro muy pronto.");
-        }
-    });
-
+    // IMPORTANTE: No pongas botones[2] ni botones[3] aquí.
+    // Al dejarlos vacíos en JS, el navegador usará el enlace <a> del HTML.
 });

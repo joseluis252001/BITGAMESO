@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BITGAMESO - El Juego</title>
+    <link rel="stylesheet" href="game.css">
+    <!-- Fuente Fredoka para el estilo aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="game-header">
+        <div class="header-left">
+            <div class="logo-placeholder">LOGO</div>
+            <h1>BITGAMESO</h1>
+        </div>
+
+        <div class="header-center">
+            <button class="btn-tutorial">TUTORIAL</button>
+        </div>
+
+        <div class="header-right">
+            <span id="nombre-usuario">Cargando...</span>
+            <button class="user-icon-btn">👤</button>
+        </div>
+    </header>
+
+    <nav class="game-nav">
+        <div class="score-container">
+            <span>Monedas: </span>
+            <span id="monedas-count">1000</span>
+        </div>
+        <div class="nav-actions">
+            <button>Depositar</button>
+            <button>Comprar</button>
+            <button>Vender</button>
+            <button>Enviar</button>
+        </div>
+    </nav>
+
+    <div class="game-container">
+        <!-- Barra lateral izquierda -->
+        <aside class="sidebar-investments">
+            <h3>Top 5 Mejores Lugares de Inversión</h3>
+            <ul>
+                <li>Criptomoneda Ficticia</li>
+                <li>Acciones Tech</li>
+                <li>IA Systems</li>
+                <li>Gaming/NFTs</li>
+                <li>Blockchain Gold</li>
+            </ul>
+        </aside>
+
+        <!-- Panel Central (Mercado) -->
+        <main class="market-main">
+            <div class="market-header">
+                <span>Moneda</span>
+                <span>Precio</span>
+                <span>Acciones</span>
+                <span>Gráfica</span>
+            </div>
+            <div id="lista-activos" class="market-list">
+                <!-- Aquí el JS generará los 50 elementos -->
+                <div class="asset-item">
+                    <span>BITCOIN-F</span>
+                    <span class="price">$500</span>
+                    <div class="item-actions">
+                        <button>D</button><button>C</button><button>V</button><button>E</button>
+                    </div>
+                    <div class="mini-chart">📈</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Barra lateral derecha (Mascota) -->
+        <aside class="pet-aside">
+            <div class="pet-container">
+                <!-- Espacio para el Conejo -->
+                <div id="conejo-placeholder">
+                    [IMAGEN CONEJO]
+                </div>
+                <!-- Espacio para la Zanahoria -->
+                <div id="zanahoria-placeholder">
+                    [IMAGEN ZANAHORIA]
+                </div>
+            </div>
+            <div class="pet-status">
+                <p id="pet-message">¡El conejo tiene hambre!</p>
+            </div>
+        </aside>
+    </div>
+
+    <footer class="game-footer">
+        <p>Esta app es solo para fines educativos</p>
+    </footer>
+
+    <script src="game.js"></script>
+</body>
+</html>
