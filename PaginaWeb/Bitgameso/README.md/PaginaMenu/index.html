@@ -3,61 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BITGAMESO</title>
+    <title>BITGAMESO - Aprende a Invertir</title>
+    <!-- Enlazamos el archivo CSS que reconstruimos anteriormente -->
     <link rel="stylesheet" href="style.css">
+    <!-- Importamos las fuentes para que se vean desde el inicio -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header>
+    <header class="game-header">
         <div class="logo-container">
+            <!-- Representación visual del logo con el estilo del juego -->
+            <div class="logo-placeholder">BG</div>
+            <img src="assets/logo/logo.png" alt="Logo BITGAMESO" class="main-logo" style="width: 50px; height: auto;">
             <h1>BITGAMESO</h1>
         </div>
         <nav>
-            <button>¿Qué es?</button>
-            <button>Productos</button>
-            <!-- Corregimos la ruta: usamos minúsculas para que coincida con tu archivo -->
-            <a href="../InicioCuenta/inico.html"><button>Iniciar sesión</button></a>
-            <a href="../CrearCuenta/registro.html"><button>Crear cuenta</button></a>
+            <button id="btn-que-es" class="btn-nav">¿Qué es?</button>
+            <button id="btn-productos" class="btn-nav">Productos</button>
+            <!-- Enlaces a las carpetas de cuenta del proyecto -->
+            <a href="../InicioCuenta/inico.html"><button class="btn-login">Iniciar sesión</button></a>
+            <a href="../CrearCuenta/registro.html"><button class="btn-register">Crear cuenta</button></a>
         </nav>
     </header>
 
     <main>
-        <section class="contenido">
+        <!-- Sección 1: Explicación del Simulador Educativo -->
+        <section class="contenido" id="que-es-section">
             <div class="imagen-placeholder">
-                <img src="img1.jpg" alt="Imagen 1">
+                <!-- Imagen representativa del mercado educativo -->
+                <img src="img1.jpg" alt="Simulador de Mercado BITGAMESO">
             </div>
             <div class="texto">
-                <p>Texto 1</p>
+                <h2>¿Qué es BITGAMESO?</h2>
+                <p>Es una plataforma educativa diseñada para que aprendas el mundo de las inversiones de forma segura. Practica con activos reales en un entorno de juego.</p>
             </div>
         </section>
 
-        <section class="contenido">
-            <div class="imagen-placeholder">
-                <img src="img2.jpg" alt="Imagen 2">
-            </div>
+        <!-- Sección 2: Productos (Stocks y Crypto) -->
+        <section class="contenido" id="productos-section">
             <div class="texto">
-                <p>Texto 2</p>
+                <h2>Explora Productos</h2>
+                <p>Desde acciones de empresas tecnológicas hasta las criptomonedas más populares. Aprende a gestionar tu portafolio con datos simulados del mercado.</p>
+            </div>
+            <div class="imagen-placeholder">
+                <!-- Imagen de la lista de activos del dashboard -->
+                <img src="img2.jpg" alt="Lista de activos y criptomonedas">
             </div>
         </section>
 
-        <section class="contenido">
+        <!-- Sección 3: El Cuidado de la Mascota -->
+        <section class="contenido" id="pet-section">
             <div class="imagen-placeholder">
-                <img src="img3.jpg" alt="Imagen 3">
+                <!-- Imagen del conejo y su barra de salud -->
+                <img src="img3.jpg" alt="Cuidado de mascota virtual en BITGAMESO">
             </div>
             <div class="texto">
-                <p>Texto 3</p>
+                <h2>Tu Mascota Inversionista</h2>
+                <p>En BITGAMESO, tienes un conejo cuya salud depende de tus decisiones financieras. ¡Mantén tus inversiones estables para que tu mascota esté sana!</p>
             </div>
         </section>
     </main>
 
-    <footer>
-        <img src="logo.png" alt="Logo BITGAMESO" class="footer-logo">
-        <p>Esta app es solo para fines educativos</p>
-        <a href="https://bitso.com" target="_blank">
-            <img src="icono-bitso.png" alt="Bitso" width="30">
-        </a>
+    <footer class="game-footer">
+        <div class="footer-content">
+            <img src="logo.png" alt="Logo BITGAMESO" class="footer-logo">
+            <p>Esta app es solo para fines educativos</p>
+            <!-- Enlace externo a Bitso para referencia real -->
+            <a href="https://bitso.com" target="_blank" rel="noopener">
+                <img src="icono-bitso.png" alt="Enlace a Bitso" width="35">
+            </a>
+        </div>
     </footer>
 
+    <!-- Archivo JS para la lógica de navegación y simulación -->
     <script src="script.js"></script>
 </body>
 </html>

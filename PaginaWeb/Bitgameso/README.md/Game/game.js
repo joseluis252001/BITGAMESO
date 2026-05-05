@@ -1,143 +1,284 @@
-// game.js - El motor de BITGAMESO con lógica de riesgo real
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Cargar nombre de usuario desde localStorage
-    const datosUsuario = JSON.parse(localStorage.getItem('usuarioRegistrado'));
-    if (datosUsuario) {
-        document.getElementById('nombre-usuario').textContent = datosUsuario.nombre;
-    }
+    const state = {
+        monedas: 1000,
+        saludConejo: 75,
+        selectedAssetId: null,
+        market: new Map(),
+        portfolio: new Map()
+    };
 
-    // 2. Variables de estado del juego
-    let monedas = 1000;
-    let saludConejo = 50; 
-    const listaActivos = document.getElementById('lista-activos');
-    const monedasDisplay = document.getElementById('monedas-count');
-    const mensajePet = document.getElementById('pet-message');
+    const refs = {
+        username: document.getElementById('nombre-usuario'),
+        marketUpdated: document.getElementById('market-updated'),
+        marketList: document.getElementById('lista-activos'),
+        monedasCount: document.getElementById('monedas-count'),
+        portfolioTotal: document.getElementById('portfolio-total'),
+        portfolioList: document.getElementById('portfolio-list'),
+        petMessage: document.getElementById('pet-message'),
+        petHealthFill: document.getElementById('pet-health-fill'),
+        btnTutorial: document.getElementById('btn-tutorial'),
+        btnDepositar: document.getElementById('btn-depositar'),
+        btnComprar: document.getElementById('btn-comprar'),
+        btnVender: document.getElementById('btn-vender'),
+        btnEnviar: document.getElementById('btn-enviar')
+    };
 
-    // 3. Generador de 50 activos ficticios
-    const categorias = ['COIN', 'STOCK', 'AI', 'NFT', 'BLOCK'];
-    const sufijos = ['Alpha', 'Delta', 'Prime', 'Zenith', 'Nexus', 'Flux', 'Void', 'Nova'];
+    const formatCurrency = (value) =>
+        new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'USD' }).format(value);
 
-    for (let i = 1; i <= 50; i++) {
-        const cat = categorias[Math.floor(Math.random() * categorias.length)];
-        const suf = sufijos[Math.floor(Math.random() * sufijos.length)];
-        const nombreInversion = `${cat}-${suf}-${i}`;
-        const precioInicial = (Math.random() * 1000 + 10).toFixed(2);
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-        const assetDiv = document.createElement('div');
-        assetDiv.className = 'asset-item';
-        assetDiv.innerHTML = `
-            <span>${nombreInversion}</span>
-            <span class="price" id="price-${i}" data-precio-compra="0">$${precioInicial}</span>
-            <div class="item-actions">
-                <button onclick="operar('dep', ${i})">D</button>
-                <button onclick="operar('com', ${i})">C</button>
-                <button onclick="operar('ven', ${i})">V</button>
-                <button onclick="operar('env', ${i})">E</button>
-            </div>
-            <div class="mini-chart" id="chart-${i}">➖</div>
-        `;
-        listaActivos.appendChild(assetDiv);
 
-        simularMercado(i, parseFloat(precioInicial));
-    }
+    const updateCoins = () => {
+        refs.monedasCount.textContent = state.monedas.toFixed(2);
+    };
 
-    // 4. Simulación de mercado
-    function simularMercado(id, precioActual) {
-        setInterval(() => {
-            const cambio = (Math.random() * 2 - 1) * (precioActual * 0.05);
-            const nuevoPrecio = Math.max(1, precioActual + cambio);
-            
-            const precioLabel = document.getElementById(`price-${id}`);
-            const chartLabel = document.getElementById(`chart-${id}`);
+    const updatePet = () => {
+        state.saludConejo = clamp(state.saludConejo, 0, 100);
+        refs.petHealthFill.style.width = `${state.saludConejo}%`;
 
-            if (nuevoPrecio > precioActual) {
-                precioLabel.style.color = "#4CAF50"; // Verde
-                chartLabel.textContent = "📈";
-            } else {
-                precioLabel.style.color = "#FF5252"; // Rojo
-                chartLabel.textContent = "📉";
-            }
+        if (state.saludConejo > 70) {
+            refs.petMessage.textContent = 'El conejo está feliz y motivado para invertir.';
+            refs.petMessage.style.color = '#22c55e';
+        } else if (state.saludConejo > 35) {
+            refs.petMessage.textContent = 'El conejo está estable, pero necesita atención.';
+            refs.petMessage.style.color = '#f59e0b';
+        } else if (state.saludConejo > 0) {
+            refs.petMessage.textContent = 'El conejo está débil por el estrés del mercado.';
+            refs.petMessage.style.color = '#ef4444';
+        } else {
+            refs.petMessage.textContent = 'GAME OVER: el conejo colapsó por volatilidad extrema.';
+            refs.petMessage.style.color = '#ef4444';
+        }
+    };
 
-            precioLabel.textContent = `$${nuevoPrecio.toFixed(2)}`;
-            precioActual = nuevoPrecio;
-        }, 3000);
-    }
+    const calculatePortfolioTotals = () => {
+        let total = 0;
+        let invested = 0;
 
-    // 5. Sistema de la mascota dinámico (Afectado por el mercado)
-    setInterval(() => {
-        // Pérdida de salud base
-        saludConejo -= 0.5;
-
-        // El conejo se estresa si ve muchos números rojos en pantalla
-        const precios = document.querySelectorAll('.price');
-        precios.forEach(p => {
-            if (p.style.color === "rgb(255, 82, 82)") { // Si el color es rojo
-                saludConejo -= 0.05; 
-            }
+        state.portfolio.forEach((position, id) => {
+            const marketAsset = state.market.get(id);
+            if (!marketAsset) return;
+            total += marketAsset.price * position.quantity;
+            invested += position.avgBuyPrice * position.quantity;
         });
 
-        actualizarMascota();
-    }, 2000);
+        return { total, invested };
+    };
 
-    function actualizarMascota() {
-        saludConejo = Math.max(0, Math.min(100, saludConejo)); // Mantener entre 0 y 100
-        
-        if (saludConejo > 80) {
-            mensajePet.textContent = "¡El conejo está gordito y feliz! 🐰✨";
-            mensajePet.style.color = "#4CAF50";
-        } else if (saludConejo > 30) {
-            mensajePet.textContent = "El conejo tiene hambre... 🥕";
-            mensajePet.style.color = "#FF9800";
-        } else if (saludConejo > 0) {
-            mensajePet.textContent = "¡El conejo está muy débil! 😰";
-            mensajePet.style.color = "#FF5252";
-        } else {
-            mensajePet.textContent = "El conejo ha muerto... 💀";
-            alert("GAME OVER: El mercado acabó con tu mascota.");
-            location.reload();
+    const renderPortfolio = () => {
+        if (state.portfolio.size === 0) {
+            refs.portfolioList.innerHTML = '<li class="empty-state">Aún no tienes posiciones abiertas.</li>';
+            refs.portfolioTotal.textContent = '$0.00';
+            return;
         }
-    }
 
-    // 6. Función de operaciones con lógica de "Números Rojos"
-    window.operar = (tipo, id) => {
-        const precioLabel = document.getElementById(`price-${id}`);
-        const precioActual = parseFloat(precioLabel.textContent.replace('$', ''));
-        
-        if (tipo === 'com') {
-            if (monedas >= precioActual) {
-                monedas -= precioActual;
-                precioLabel.dataset.precioCompra = precioActual; // Guardamos precio de compra
-                alert(`Compraste a $${precioActual.toFixed(2)}`);
-            } else {
-                alert("No tienes suficientes monedas.");
-            }
-        } 
-        
-        else if (tipo === 'ven') {
-            const precioCompra = parseFloat(precioLabel.dataset.precioCompra);
-            
-            if (precioCompra === 0) {
-                alert("No tienes este activo para vender.");
+        const rows = [];
+        state.portfolio.forEach((position, id) => {
+            const asset = state.market.get(id);
+            if (!asset) return;
+
+            const currentValue = asset.price * position.quantity;
+            const investedValue = position.avgBuyPrice * position.quantity;
+            const pnlPercent = ((currentValue - investedValue) / investedValue) * 100;
+            const pnlClass = pnlPercent >= 0 ? 'up' : 'down';
+
+            rows.push(`
+                <li class="portfolio-item">
+                    <div>
+                        <strong>${asset.symbol} · ${position.quantity}u</strong>
+                        <small>Precio promedio: ${formatCurrency(position.avgBuyPrice)}</small>
+                    </div>
+                    <div class="change ${pnlClass}">
+                        ${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%
+                    </div>
+                </li>
+            `);
+        });
+
+        refs.portfolioList.innerHTML = rows.join('');
+        const totals = calculatePortfolioTotals();
+        refs.portfolioTotal.textContent = `${formatCurrency(totals.total)} | PnL ${(totals.total - totals.invested >= 0 ? '+' : '')}${formatCurrency(totals.total - totals.invested)}`;
+    };
+
+    const renderMarket = () => {
+        const assets = Array.from(state.market.values());
+
+        if (assets.length === 0) {
+            refs.marketList.innerHTML = '<p class="empty-state">No hay datos de mercado disponibles.</p>';
+            return;
+        }
+
+        refs.marketList.innerHTML = assets
+            .map((asset) => {
+                const isSelected = state.selectedAssetId === asset.id ? 'selected' : '';
+                const changeClass = asset.changePercent >= 0 ? 'up' : 'down';
+                const changeSign = asset.changePercent >= 0 ? '+' : '';
+
+                return `
+                    <article class="asset-item ${isSelected}" data-asset-id="${asset.id}">
+                        <div>
+                            <div class="asset-symbol">${asset.symbol}</div>
+                            <div class="asset-name">${asset.name}</div>
+                        </div>
+                        <span class="pill ${asset.type}">${asset.type}</span>
+                        <strong>${formatCurrency(asset.price)}</strong>
+                        <strong class="change ${changeClass}">${changeSign}${asset.changePercent.toFixed(2)}%</strong>
+                        <div class="item-actions">
+                            <button data-action="dep" data-id="${asset.id}" title="Depositar">D</button>
+                            <button data-action="com" data-id="${asset.id}" title="Comprar">C</button>
+                            <button data-action="ven" data-id="${asset.id}" title="Vender">V</button>
+                            <button data-action="env" data-id="${asset.id}" title="Enviar">E</button>
+                        </div>
+                    </article>
+                `;
+            })
+            .join('');
+    };
+
+    const buyAsset = (assetId) => {
+        const asset = state.market.get(assetId);
+        if (!asset) return;
+
+        if (state.monedas < asset.price) {
+            alert('No tienes suficientes monedas para comprar.');
+            return;
+        }
+
+        const position = state.portfolio.get(assetId) || { quantity: 0, avgBuyPrice: 0 };
+        const newQuantity = position.quantity + 1;
+        const totalInvested = position.avgBuyPrice * position.quantity + asset.price;
+        position.quantity = newQuantity;
+        position.avgBuyPrice = totalInvested / newQuantity;
+        state.portfolio.set(assetId, position);
+
+        state.monedas -= asset.price;
+        state.saludConejo += 1.2;
+        updateCoins();
+        updatePet();
+        renderPortfolio();
+    };
+
+    const sellAsset = (assetId) => {
+        const asset = state.market.get(assetId);
+        const position = state.portfolio.get(assetId);
+        if (!asset || !position || position.quantity <= 0) {
+            alert('No tienes unidades de este activo para vender.');
+            return;
+        }
+
+        const profit = asset.price - position.avgBuyPrice;
+        position.quantity -= 1;
+        if (position.quantity === 0) {
+            state.portfolio.delete(assetId);
+        } else {
+            state.portfolio.set(assetId, position);
+        }
+
+        state.monedas += asset.price;
+        state.saludConejo += profit >= 0 ? 4 : -8;
+        updateCoins();
+        updatePet();
+        renderPortfolio();
+    };
+
+    const runAction = (action, assetId = state.selectedAssetId) => {
+        if (!assetId || !state.market.has(assetId)) {
+            alert('Selecciona un activo del mercado primero.');
+            return;
+        }
+
+        if (action === 'dep') {
+            state.monedas += 100;
+            updateCoins();
+            return;
+        }
+
+        if (action === 'com') {
+            buyAsset(assetId);
+            return;
+        }
+
+        if (action === 'ven') {
+            sellAsset(assetId);
+            return;
+        }
+
+        if (action === 'env') {
+            if (state.monedas < 25) {
+                alert('No tienes monedas suficientes para enviar apoyo.');
                 return;
             }
+            state.monedas -= 25;
+            state.saludConejo += 6;
+            updateCoins();
+            updatePet();
+        }
+    };
 
-            if (precioActual < precioCompra) {
-                // VENTA EN PÉRDIDA (NÚMEROS ROJOS)
-                const perdida = precioCompra - precioActual;
-                saludConejo -= 15; // Castigo al conejo
-                alert(`¡Venta en rojo! Perdiste $${perdida.toFixed(2)}. El conejo sufre.`);
-            } else {
-                // VENTA EN GANANCIA
-                const ganancia = precioActual - precioCompra;
-                saludConejo += 20; // Recompensa al conejo
-                alert(`¡Excelente! Ganaste $${ganancia.toFixed(2)}. El conejo come feliz.`);
+    const fetchMarket = async () => {
+        try {
+            const response = await fetch('/api/market');
+            if (!response.ok) throw new Error('Sin respuesta del servidor');
+            const data = await response.json();
+
+            data.assets.forEach((asset) => {
+                state.market.set(asset.id, asset);
+            });
+
+            if (!state.selectedAssetId && data.assets.length > 0) {
+                state.selectedAssetId = data.assets[0].id;
             }
 
-            monedas += precioActual;
-            precioLabel.dataset.precioCompra = "0"; // Resetear compra
+            refs.marketUpdated.textContent = `Última actualización: ${new Date(data.updatedAt).toLocaleTimeString()}`;
+            renderMarket();
+            renderPortfolio();
+        } catch (error) {
+            refs.marketUpdated.textContent = 'No se pudo actualizar el mercado.';
         }
-        
-        monedasDisplay.textContent = monedas.toFixed(2);
-        actualizarMascota();
     };
+
+    refs.marketList.addEventListener('click', (event) => {
+        const actionButton = event.target.closest('button[data-action]');
+        if (actionButton) {
+            const action = actionButton.dataset.action;
+            const assetId = Number(actionButton.dataset.id);
+            state.selectedAssetId = assetId;
+            runAction(action, assetId);
+            renderMarket();
+            return;
+        }
+
+        const row = event.target.closest('.asset-item');
+        if (row) {
+            state.selectedAssetId = Number(row.dataset.assetId);
+            renderMarket();
+        }
+    });
+
+    refs.btnDepositar.addEventListener('click', () => {
+        state.monedas += 250;
+        updateCoins();
+    });
+
+    refs.btnComprar.addEventListener('click', () => runAction('com'));
+    refs.btnVender.addEventListener('click', () => runAction('ven'));
+    refs.btnEnviar.addEventListener('click', () => runAction('env'));
+
+    refs.btnTutorial.addEventListener('click', () => {
+        alert('Selecciona un activo, compra en caídas y vende cuando estés en verde para mantener sano al conejo.');
+    });
+
+    const user = JSON.parse(localStorage.getItem('usuarioRegistrado'));
+    refs.username.textContent = user?.nombre || 'Invitado';
+
+    updateCoins();
+    updatePet();
+    fetchMarket();
+    setInterval(fetchMarket, 5000);
+    setInterval(() => {
+        const negatives = Array.from(state.market.values()).filter((asset) => asset.changePercent < 0).length;
+        state.saludConejo -= 0.9 + negatives * 0.12;
+        updatePet();
+    }, 5000);
 });

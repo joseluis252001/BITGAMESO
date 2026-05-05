@@ -1,130 +1,209 @@
-/* Importar tipografías de Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap');
+/* =========================================
+   CONFIGURACIÓN Y VARIABLES (BITGAMESO)
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;700&family=Nunito:wght@600&display=swap');
 
-/* Variables de colores para facilitar cambios */
 :root {
+    /* Paleta Pastel Solicitada */
     --rosa-pastel: #FFB6C1;
     --morado-suave: #CBA6F7;
     --azul-cielo: #A0E7E5;
     --amarillo-suave: #FFF5BA;
     --blanco: #FFFFFF;
-    --texto-oscuro: #333333;
+    --texto-oscuro: #4A4A4A;
+    
+    /* Fuentes */
+    --fuente-titulos: 'Fredoka', sans-serif;
+    --fuente-cuerpo: 'Poppins', sans-serif;
 }
 
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
+    font-family: var(--fuente-cuerpo);
     background-color: var(--blanco);
     color: var(--texto-oscuro);
-    font-family: 'Poppins', sans-serif;
     line-height: 1.6;
 }
 
-/* --- HEADER --- */
+/* =========================================
+   HEADER Y NAVEGACIÓN
+   ========================================= */
 header {
-    background-color: var(--morado-suave);
-    padding: 1rem 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 1rem 5%;
+    background-color: var(--blanco);
+    border-bottom: 4px solid var(--azul-cielo);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-placeholder {
+    background: var(--morado-suave);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-family: var(--fuente-titulos);
+    font-weight: bold;
 }
 
 header h1 {
-    font-family: 'Fredoka', sans-serif;
-    color: var(--blanco);
-    font-size: 2rem;
+    font-family: var(--fuente-titulos);
+    color: var(--morado-suave);
+    font-size: 1.8rem;
 }
 
-nav button {
-    background-color: var(--rosa-pastel);
-    border: none;
+nav {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* Estilo de Botones */
+button {
+    font-family: var(--fuente-titulos);
     padding: 10px 20px;
-    margin-left: 10px;
-    border-radius: 20px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
+    border-radius: 15px;
+    border: none;
     cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
+    transition: all 0.3s ease;
+    font-size: 1rem;
 }
 
-nav button:hover {
-    transform: scale(1.1);
-    background-color: var(--azul-cielo);
+#btn-que-es, #btn-productos {
+    background-color: transparent;
+    color: var(--texto-oscuro);
+    border: 2px solid var(--azul-cielo);
 }
 
-/* --- CUERPO (BODY) --- */
+.btn-login {
+    background-color: var(--morado-suave);
+    color: white;
+}
+
+.btn-register {
+    background-color: var(--rosa-pastel);
+    color: white;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    filter: brightness(1.05);
+}
+
+/* =========================================
+   CONTENIDO PRINCIPAL (Z-PATTERN)
+   ========================================= */
 main {
-    padding: 40px 10%;
+    padding: 2rem 0;
 }
 
 .contenido {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 50px;
-    background-color: var(--blanco);
-    border-radius: 15px;
-    overflow: hidden;
-    /* Efecto de sombra suave */
-    box-shadow: 10px 10px 0px var(--amarillo-suave);
-    border: 2px solid #eee;
+    justify-content: center;
+    padding: 4rem 10%;
+    gap: 4rem;
+    min-height: 400px;
 }
 
-/* Invertir el orden para la imagen 2 para que se vea dinámico */
-.contenido:nth-child(2) {
+/* Alternancia de color y orden (Zig-Zag) */
+.contenido:nth-child(even) {
     flex-direction: row-reverse;
+    background-color: var(--amarillo-suave);
 }
 
+.texto {
+    flex: 1;
+}
+
+.texto h2 {
+    font-family: var(--fuente-titulos);
+    color: var(--morado-suave);
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+}
+
+.texto p {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+/* Estilo de Imágenes */
 .imagen-placeholder {
-    width: 50%;
-    background-color: #f0f0f0;
-    height: 300px;
+    flex: 1;
     display: flex;
-    align-items: center;
     justify-content: center;
 }
 
 .imagen-placeholder img {
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    max-width: 450px;
+    border-radius: 25px;
+    border: 5px solid var(--azul-cielo);
+    box-shadow: 10px 10px 0px var(--rosa-pastel);
+    transition: transform 0.3s ease;
 }
 
-.texto {
-    width: 50%;
-    padding: 40px;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--morado-suave);
+.imagen-placeholder img:hover {
+    transform: scale(1.02) rotate(1deg);
 }
 
-/* --- FOOTER --- */
+/* =========================================
+   FOOTER
+   ========================================= */
 footer {
-    background-color: var(--azul-cielo);
-    padding: 30px;
+    padding: 3rem 10%;
+    background-color: #f9f9f9;
+    border-top: 4px solid var(--morado-suave);
     text-align: center;
-    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
 }
 
 .footer-logo {
-    width: 80px;
-    margin-bottom: 15px;
+    max-width: 120px;
 }
 
 footer p {
-    font-size: 0.9rem;
-    font-weight: 400;
-    margin-bottom: 10px;
+    font-family: 'Nunito', sans-serif;
+    color: var(--texto-oscuro);
+    font-weight: 600;
 }
 
-footer a img {
-    transition: filter 0.3s;
-}
-
-footer a img:hover {
-    filter: brightness(1.2);
+/* =========================================
+   RESPONSIVIDAD (Móviles)
+   ========================================= */
+@media (max-width: 850px) {
+    header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .contenido, .contenido:nth-child(even) {
+        flex-direction: column;
+        text-align: center;
+        padding: 3rem 5%;
+    }
+    
+    nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }

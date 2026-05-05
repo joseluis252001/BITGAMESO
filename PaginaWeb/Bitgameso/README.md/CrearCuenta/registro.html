@@ -4,25 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styleRegistro.css">
+    <title>Registro - BITGAMESO</title>
 </head>
-<main>
-    <section class="registro-container">
-        <h2>Únete a BITGAMESO</h2>
-        <form id="form-registro">
-            <input type="text" placeholder="Nombre de usuario" required>
-            <input type="email" placeholder="Correo electrónico" required>
-            <input type="password" placeholder="Contraseña" required>
-            <input type="password" id="pass2" placeholder="Confirmar contraseña" required>
-            <button type="submit">Registrarme</button>
-        </form>
-        <!-- Botón pequeño para iniciar sesión -->
-    <p style="margin-top: 15px; font-size: 0.8rem;">
-        ¿Ya tienes cuenta? <a href="../PaginaMenu/index.html" style="color: #CBA6F7; font-weight: bold;">Iniciar sesión</a>
-    </p>
-    </section>
-</main>
-
-<footer>
-    <p>Esta app es solo para fines educativos</p>
-</footer>
+<body>
+    <main>
+        <section class="registro-container">
+            <h2>Únete a BITGAMESO</h2>
+            <form id="form-registro">
+                <input type="text" id="nombre" placeholder="Nombre de usuario" required>
+                <input type="email" id="email" placeholder="Correo electrónico" required>
+                <input type="password" id="pass1" placeholder="Contraseña" required>
+                <input type="password" id="pass2" placeholder="Confirmar contraseña" required>
+                <button type="submit">Registrarme</button>
+            </form>
+            <p style="margin-top: 15px; font-size: 0.8rem;">
+                ¿Ya tienes cuenta? <a href="../InicioCuenta/inico.html" style="color: #CBA6F7; font-weight: bold;">Iniciar sesión</a>
+            </p>
+        </section>
+    </main>
+    <footer>
+        <p>Esta app es solo para fines educativos</p>
+    </footer>
+    <script src="registro.js"></script>
+</body>
 </html>
