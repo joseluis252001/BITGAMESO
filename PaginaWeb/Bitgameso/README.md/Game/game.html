@@ -27,9 +27,22 @@
         </div>
 
         <div class="header-right">
-            <span id="nombre-usuario">joseluis</span>
-            <div class="avatar-wrapper">
-                <img src="../assets/avatares/Avatar-Boy-2-128.png" id="current-avatar" class="user-avatar-img">
+            <div class="profile-trigger" onclick="toggleSettingsMenu(event)">
+                <span id="nombre-usuario">joseluis</span>
+                <div class="avatar-wrapper">
+                    <img src="../assets/avatares/Avatar-Boy-2-128.png" id="current-avatar-header" class="user-avatar-img" alt="Perfil">
+                </div>
+            </div>
+
+            <div id="settings-dropdown-menu" class="settings-dropdown">
+                <p class="dropdown-title">Cambiar Avatar:</p>
+                <div class="avatar-options">
+                    <img src="../assets/avatares/Avatar-Boy-2-128.png" onclick="handleAvatarChange(this.src)" alt="Avatar Boy 2">
+                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange(this.src)" alt="Avatar Girl 2">
+                    <img src="../assets/avatares/Avatar-Boy-1-128.png" onclick="handleAvatarChange(this.src)" alt="Avatar Boy 1">
+                </div>
+                <hr class="dropdown-divider">
+                <button onclick="handleLogout()" class="btn-logout">Cerrar Sesión</button>
             </div>
         </div>
     </header>
@@ -38,7 +51,7 @@
         <div class="score-container">
             <img src="../assets/coins/Coins-3-128.png" class="coin-icon" alt="Coins">
             <span>Monedas: </span>
-            <span id="monedas-count">1000</span>
+            <span id="monedas-count">1000.00</span>
         </div>
         <div class="nav-actions">
             <button id="btn-depositar">Depositar</button>
@@ -49,6 +62,7 @@
     </nav>
 
     <main class="dashboard-grid">
+        
         <section class="market-main card">
             <div class="section-header">
                 <h2>Mercado Global</h2>
@@ -71,10 +85,11 @@
 
         <aside class="portfolio-aside card">
             <h2>Cartera</h2>
-            <p id="portfolio-total">$0.00</p>
-            <ul id="portfolio-list" class="portfolio-list">
-                <li class="empty-state">Sin posiciones.</li>
-            </ul>
+            <div class="portfolio-list-wrapper">
+                <ul id="portfolio-list" class="portfolio-list">
+                    <li>Aún no tienes posiciones abiertas.</li>
+                </ul>
+            </div>
         </aside>
 
         <aside class="pet-aside card">
@@ -85,68 +100,10 @@
                     <div id="pet-health-fill"></div>
                 </div>
             </div>
-            <p id="pet-message">En observación...</p>
-            <button id="btn-cambiar-pet" disabled>🔄 Cambiar Mascota</button>
+            <p id="pet-message">¡Todo bajo control!</p>
         </aside>
+
     </main>
-
-    <script src="game.js"></script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BITGAMESO - El Juego</title>
-    <link rel="stylesheet" href="game.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-
-    <header class="game-header">
-        <div class="header-left">
-            <img src="../assets/logo/Coin-128.png" alt="Logo" class="mini-logo">
-            <h1>BITGAMESO</h1>
-        </div>
-
-        <div class="tutorial-box">
-            <div class="tutorial-item">
-                <img src="../assets/arrows/Arrow-Complete-Left-128.png" alt="Compra">
-                <span><b>C:</b> Comprar</span>
-            </div>
-            <div class="tutorial-item">
-                <img src="../assets/arrows/Arrow-Complete-Right-128.png" alt="Venta">
-                <span><b>V:</b> Vender</span>
-            </div>
-        </div>
-
-        <div class="header-right">
-            <div class="profile-trigger" onclick="toggleSettingsMenu(event)">
-                <span id="nombre-usuario">joseluis</span>
-                <div class="avatar-wrapper">
-                    <img src="../assets/avatares/Avatar-Boy-2-128.png" id="current-avatar-header" class="user-avatar-img" alt="Perfil">
-                </div>
-            </div>
-
-            <div id="settings-dropdown-menu" class="settings-dropdown">
-                <p class="dropdown-title">Cambiar Avatar:</p>
-                <div class="avatar-options">
-                    <img src="../assets/avatares/Avatar-Boy-2-128.png" onclick="handleAvatarChange('../assets/avatares/Avatar-Boy-2-128.png')" alt="Avatar Boy 2">
-                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange('../assets/avatares/Avatar-Girl-2-128.png')" alt="Avatar Girl 2">
-                    <img src="../assets/avatares/Avatar-Boy-1-128.png" onclick="handleAvatarChange('../assets/avatares/Avatar-Boy-1-128.png')" alt="Avatar Boy 1">
-                </div>
-                <hr class="dropdown-divider">
-                <button onclick="handleLogout()" class="btn-logout">Cerrar Sesión</button>
-            </div>
-        </div>
-    </header>
-
-    <nav class="game-nav">
-        </nav>
-    <main class="dashboard-grid">
-        </main>
 
     <script src="game.js"></script>
 </body>

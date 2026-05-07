@@ -1,111 +1,99 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;700&display=swap');
-
-:root {
-    --primary: #CBA6F7;
-    --accent: #A0E7E5;
-    --danger: #FFB6C1;
-    --surface: #FFF5BA;
-    --text: #4A4A4A;
-    --green: #2ecc71;
-    --red: #e74c3c;
+/* --- DASHBOARD GRID: Restaurando el diseño de 3 columnas --- */
+.dashboard-grid {
+    display: grid;
+    /* Mercado ocupa 1.5 partes, Cartera 0.8 y Mascota 0.8 (más equilibrado) */
+    grid-template-columns: 1.5fr 0.8fr 0.8fr; 
+    gap: 20px;
+    padding: 0 2rem 2rem;
+    align-items: start; /* Alinea las tarjetas arriba */
 }
 
-body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: radial-gradient(circle at top, #FFFFFF 0%, #FFF5BA 100%);
-    padding-top: 100px;
+/* --- ESTILOS DE LA MASCOTA (Volviendo a la 3ra imagen) --- */
+.pet-aside {
+    text-align: center; /* Centra el título y el mensaje */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra el contenido internamente */
+    justify-content: center;
+    padding: 25px; /* Más espacio interno */
 }
 
-/* HEADER CORREGIDO */
-.game-header {
-    position: fixed; top: 0; left: 0; width: 100%; height: 80px;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 0 2rem; background: rgba(255, 255, 255, 0.95);
-    border-bottom: 4px solid var(--primary); z-index: 1000; box-sizing: border-box;
+.pet-aside h2 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.6rem;
+    margin-bottom: 15px;
 }
 
-.mini-logo { width: 45px; height: auto; margin-right: 10px; }
-
-.tutorial-box {
-    display: flex; gap: 20px; background: #f8f9fa;
-    padding: 8px 15px; border-radius: 12px; border: 1px solid #ddd;
+/* Contenedor del sprite para centrarlo y darle tamaño */
+.pet-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 130px; /* Tamaño del conejito */
+    height: 130px;
+    margin-bottom: 20px;
 }
 
-.tutorial-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
-.tutorial-item img { width: 25px; height: auto; } /* Evita que las flechas sean gigantes */
-
-.user-avatar-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--primary); }
-
-/* NAV Y BOTONES */
-.game-nav { display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; margin-bottom: 1rem; }
-.score-container { display: flex; align-items: center; gap: 8px; background: white; padding: 10px 20px; border-radius: 50px; border: 3px solid var(--accent); font-family: 'Fredoka'; }
-.coin-icon { width: 25px; height: 25px; }
-
-.nav-actions { display: flex; gap: 10px; }
-.nav-actions button {
-    background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 12px; 
-    font-family: 'Fredoka'; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #b085e6; transition: 0.2s;
+/* El sprite en sí */
+.pet-sprite {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
-.nav-actions button:hover { transform: translateY(-2px); filter: brightness(1.1); }
-.nav-actions button:active { transform: translateY(2px); box-shadow: none; }
 
-/* MERCADO */
-.dashboard-grid { display: grid; gap: 1.5rem; padding: 0 2rem; grid-template-columns: 2fr 1fr; grid-template-areas: "market portfolio" "market pet"; }
-.market-main { grid-area: market; }
-.card { background: white; border: 3px solid var(--accent); border-radius: 20px; padding: 1.2rem; box-shadow: 6px 6px 0 var(--accent); }
-
-.market-list { max-height: 400px; overflow-y: auto; padding-right: 5px; }
-.asset-item { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
-.market-arrow { width: 16px; vertical-align: middle; margin-right: 4px; }
-.up { color: var(--green); font-weight: bold; }
-.down { color: var(--red); font-weight: bold; }
-.market-header { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; font-weight: bold; padding: 10px; border-bottom: 2px solid #eee; }
-
-/* MASCOTA RUTAS CORREGIDAS */
-.pet-sprite { width: 128px; height: 128px; margin: 0 auto; background-size: contain; background-repeat: no-repeat; background-position: center; }
+/* Rutas de las imágenes de las mascotas (asegúrate de que existen) */
 .Bunny-Pink-128 { background-image: url('../assets/pets/Bunny-Pink-128.png'); }
 .Bear-100 { background-image: url('../assets/pets/Bear-100.png'); }
 .Cat-Beige-128 { background-image: url('../assets/pets/Cat-Beige-128.png'); }
 
-.pet-health-bar { width: 100%; height: 15px; background: #eee; border-radius: 10px; overflow: hidden; margin: 10px 0; border: 2px solid var(--danger); }
-#pet-health-fill { height: 100%; background: var(--danger); width: 0%; transition: 0.5s; }
-
-/* Colores por tipo de Activo */
-.pill {
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: bold;
-    text-transform: uppercase;
+/* La Barra de Vida Pastel */
+.pet-health-bar {
+    width: 100%;
+    height: 18px; /* Un poco más gruesa */
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
 }
 
-.type-bluechip { background: #e3f2fd; color: #1976d2; }
-.type-ia { background: #f3e5f5; color: #7b1fa2; }
-.type-digital { background: #fff3e0; color: #f57c00; }
-.type-gaming { background: #e8f5e9; color: #388e3c; }
-.type-nft { background: #fce4ec; color: #c2185b; }
-.type-metal { background: #fffde7; color: #fbc02d; }
-
-/* Ajuste de la fila de activos */
-.asset-item {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; /* Más espacio para el nombre */
-    align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid #f0f0f0;
+/* El relleno de la barra (color pastel) */
+#pet-health-fill {
+    height: 100%;
+    /* Un rosa pastel como el de la 3ra imagen */
+    background: #FFB6C1; 
+    width: 75%; /* Ancho inicial por defecto */
+    transition: width 0.5s ease, background-color 0.3s ease;
 }
 
-.asset-info { display: flex; flex-direction: column; }
-.asset-info small { color: #888; font-size: 0.7rem; }
+/* El mensaje de estado debajo de la barra */
+#pet-message {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    color: #555;
+    margin: 0;
+}
+/* --- VARIABLES Y BASE --- */
+:root {
+    --primary: #CBA6F7;    /* Lavanda */
+    --accent: #94E2D5;     /* Turquesa */
+    --text: #4C4F69;       /* Gris Oscuro */
+    --danger: #F38BA8;     /* Rojo Pastel */
+    --bg: #EFF1F5;         /* Fondo Claro */
+    --card-bg: #FFFFFF;
+}
 
-.market-btns { display: flex; gap: 5px; }
-.btn-buy { background: var(--accent); border: none; border-radius: 4px; cursor: pointer; }
-.btn-sell { background: #eee; border: none; border-radius: 4px; cursor: pointer; }
+body {
+    margin: 0;
+    padding-top: 100px; /* Espacio para el header fijo */
+    background-color: var(--bg);
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+}
 
-/* ... (Mantenemos tus estilos base de :root, body, etc.) ... */
-
-/* --- HEADER UNIFICADO Y CORREGIDO --- */
+/* --- HEADER --- */
 .game-header {
     position: fixed; top: 0; left: 0; width: 100%; height: 80px;
     display: flex; justify-content: space-between; align-items: center;
@@ -113,129 +101,110 @@ body {
     border-bottom: 4px solid var(--primary); z-index: 1000; box-sizing: border-box;
 }
 
-/* Izquierda: Logo y Título juntos */
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Espacio pequeño entre logo y texto */
-}
+.header-left { display: flex; align-items: center; gap: 10px; }
 .mini-logo { width: 45px; height: auto; }
 .header-left h1 { font-family: 'Fredoka', sans-serif; color: var(--primary); margin: 0; font-size: 1.5rem; }
 
-/* Centro: Tutorial */
+/* Tutorial */
 .tutorial-box {
     display: flex; gap: 20px; background: #f8f9fa;
     padding: 8px 15px; border-radius: 12px; border: 1px solid #ddd;
 }
-.tutorial-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text); }
-.tutorial-item img { width: 25px; height: auto; }
+.tutorial-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+.tutorial-item img { width: 22px; }
 
-/* Derecha: Perfil y Dropdown */
-.header-right {
-    position: relative; /* Necesario para posicionar el dropdown */
-    display: flex;
-    align-items: center;
-}
-
-/* Grupo Nombre + Avatar pegados */
+/* Perfil y Dropdown */
+.header-right { position: relative; }
 .profile-trigger {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Espacio pequeño entre nombre y avatar */
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 20px;
-    transition: background-color 0.2s;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; padding: 5px 15px; border-radius: 30px;
+    background: #f0f0f0; transition: 0.3s;
 }
-.profile-trigger:hover {
-    background-color: #f0f0f0;
-}
-
-#nombre-usuario {
-    font-family: 'Poppins', sans-serif;
-    color: var(--text);
-    font-weight: 700;
-}
+.profile-trigger:hover { background: #e0e0e0; }
 
 .user-avatar-img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 2px solid var(--primary);
-    background-color: white;
-    display: block;
+    width: 45px; height: 45px; border-radius: 50%;
+    border: 2px solid var(--primary); background: white;
 }
 
-/* --- ESTILOS DEL MENU DESPLEGABLE (DROPDOWN) --- */
 .settings-dropdown {
-    display: none; /* Oculto por defecto */
-    position: absolute;
-    top: 65px; /* Ajustado para aparecer debajo del perfil */
-    right: 0;
-    background-color: white;
+    display: none; position: absolute; top: 65px; right: 0;
+    background: white; border: 3px solid var(--text);
+    border-radius: 15px; padding: 15px; width: 220px;
+    box-shadow: 6px 6px 0px var(--primary); z-index: 1100;
+}
+.settings-dropdown.show-menu { display: block; }
+
+.avatar-options { display: flex; justify-content: space-between; margin: 10px 0; }
+.avatar-options img { 
+    width: 45px; cursor: pointer; border-radius: 50%; 
+    transition: 0.2s; border: 2px solid transparent;
+}
+.avatar-options img:hover { transform: scale(1.1); border-color: var(--accent); }
+
+/* --- NAVEGACIÓN --- */
+.game-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 2rem; background: white; margin-bottom: 20px;
+}
+.score-container { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.2rem; }
+.coin-icon { width: 35px; }
+.nav-actions button {
+    padding: 8px 15px; margin-left: 10px; border-radius: 8px;
+    border: none; background: var(--primary); color: white;
+    font-weight: bold; cursor: pointer; transition: 0.2s;
+}
+.nav-actions button:hover { opacity: 0.8; transform: translateY(-2px); }
+
+/* --- DASHBOARD GRID --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px; /* Mercado grande, laterales pequeños */
+    grid-template-rows: auto auto;
+    gap: 20px;
+    padding: 0 2rem 2rem;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 20px;
     border: 3px solid var(--text);
-    border-radius: 15px;
-    padding: 15px;
-    width: 220px;
-    box-shadow: 6px 6px 0px var(--primary);
-    z-index: 1100;
+    box-shadow: 5px 5px 0px var(--text);
 }
 
-/* Clase que activa el JS para mostrarlo */
-.settings-dropdown.show-menu {
-    display: block;
+/* Mercado */
+.market-main { grid-row: 1 / 3; }
+.market-header {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    padding: 10px; font-weight: bold; border-bottom: 2px solid #eee;
+}
+.asset-item {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    align-items: center; padding: 15px 10px; border-bottom: 1px solid #f0f0f0;
+}
+.market-arrow { width: 12px; margin-right: 5px; }
+.up { color: #40a02b; }
+.down { color: var(--danger); }
+
+/* Cartera */
+.portfolio-aside { height: fit-content; }
+.portfolio-item {
+    display: flex; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid #eee;
 }
 
-.dropdown-title {
-    margin: 0 0 10px 0;
-    font-family: 'Fredoka', sans-serif;
-    color: var(--text);
-    font-size: 0.9rem;
-    font-weight: bold;
+/* Mascota */
+.pet-aside { text-align: center; }
+.pet-container { padding: 20px; }
+.pet-health-bar {
+    width: 100%; height: 20px; background: #eee;
+    border-radius: 10px; overflow: hidden; margin-top: 10px;
+}
+#pet-health-fill {
+    height: 100%; width: 75%; background: var(--accent);
+    transition: width 0.5s ease;
 }
 
-.avatar-options {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.avatar-options img {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: transform 0.2s, border-color 0.2s;
-}
-
-.avatar-options img:hover {
-    transform: scale(1.1);
-    border-color: var(--accent);
-}
-
-.dropdown-divider {
-    border: 0;
-    border-top: 2px solid #eee;
-    margin: 10px 0;
-}
-
-.btn-logout {
-    width: 100%;
-    background-color: var(--danger);
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 10px;
-    font-family: 'Fredoka', sans-serif;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.btn-logout:hover {
-    background-color: #ff9cad; /* Un tono más oscuro de danger */
-}
-
-/* ... (Mantenemos el resto de tus estilos de nav, main, mercado, mascota, etc.) ... */
+/* Utilidades de Scroll */
+.market-list { max-height: 500px; overflow-y: auto; }
