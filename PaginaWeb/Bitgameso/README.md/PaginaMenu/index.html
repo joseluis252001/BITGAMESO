@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="manifest" href="../manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BITGAMESO - Aprende a Invertir</title>
@@ -65,5 +66,12 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('../sw.js')
+      .then(() => console.log("Menú listo para instalar como App"))
+      .catch(err => console.log("Error de registro:", err));
+  }
+</script>
 </body>
 </html>
