@@ -4,27 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styleRegistro.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <title>Registro - BITGAMESO</title>
 </head>
 <body>
-    <main>
-        <section class="registro-container">
-            <h2>Únete a BITGAMESO</h2>
-            <form id="form-registro">
-                <input type="text" id="nombre" placeholder="Nombre de usuario" required>
-                <input type="email" id="email" placeholder="Correo electrónico" required>
-                <input type="password" id="pass1" placeholder="Contraseña" required>
-                <input type="password" id="pass2" placeholder="Confirmar contraseña" required>
-                <button type="submit">Registrarme</button>
-            </form>
-            <p style="margin-top: 15px; font-size: 0.8rem;">
-                ¿Ya tienes cuenta? <a href="../InicioCuenta/inico.html" style="color: #CBA6F7; font-weight: bold;">Iniciar sesión</a>
-            </p>
-        </section>
+
+    <header class="login-header">
+        <div class="logo-container-header">
+            <img src="../assets/logo/Coin-128.png" alt="Logo BITGAMESO" class="mini-logo">
+            <h1>BITGAMESO</h1>
+        </div>
+    </header>
+
+    <div id="rain-container"></div>
+
+    <main class="registro-container">
+        <div class="back-container">
+            <a href="../PaginaMenu/index.html" class="btn-back">
+                <img src="../assets/arrows/Arrow-Complete-Left-128.png" alt="Volver" class="arrow-icon">
+                <span>Volver</span>
+            </a>
+        </div>
+
+        <h2>Únete a BITGAMESO</h2>
+        <form id="form-registro">
+            <input type="text" id="nombre" placeholder="Nombre de usuario" required>
+            <input type="email" id="email" placeholder="Correo electrónico" required>
+            <input type="password" id="pass1" placeholder="Contraseña" required>
+            <input type="password" id="pass2" placeholder="Confirmar contraseña" required>
+            <button type="submit">Registrarme</button>
+        </form>
+        <p style="margin-top: 15px; font-size: 0.8rem;">
+            ¿Ya tienes cuenta? <a href="../InicioCuenta/inico.html" class="link-highlight">Iniciar sesión</a>
+        </p>
     </main>
-    <footer>
+
+    <footer class="footer-login">
         <p>Esta app es solo para fines educativos</p>
     </footer>
+
     <script src="registro.js"></script>
 </body>
 </html>

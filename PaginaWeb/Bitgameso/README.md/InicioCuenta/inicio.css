@@ -1,24 +1,87 @@
-/* styleLogin.css */
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap');
 
 body {
-    background-color: #FFF5BA; /* Amarillo suave para mantener la identidad */
+    background-color: #FFF5BA; 
     font-family: 'Poppins', sans-serif;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
 }
 
+/* HEADER SUPERIOR - Corregido para alinear logo y nombre */
+.login-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 10px 5%;
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid #A0E7E5;
+    z-index: 1000;
+}
+
+.logo-container-header {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Espacio entre logo y texto */
+}
+
+.mini-logo {
+    width: 35px;
+    height: auto;
+}
+
+.login-header h1 {
+    font-family: 'Fredoka', sans-serif;
+    color: #CBA6F7;
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+/* CONTENEDOR DE LOGIN */
 .registro-container {
     background-color: #FFFFFF;
-    padding: 40px;
+    padding: 30px 40px;
     border-radius: 20px;
-    box-shadow: 10px 10px 0px #CBA6F7; /* Sombra morada sólida de BITGAMESO */
+    box-shadow: 10px 10px 0px #CBA6F7; 
     border: 3px solid #333;
     width: 350px;
     text-align: center;
+    position: relative;
+    margin-top: 60px; /* Espacio para no chocar con el header fijo */
+}
+
+/* BOTÓN VOLVER (FLECHA PEQUEÑA) */
+.back-container {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.arrow-icon {
+    width: 22px; /* Flecha pequeña */
+    height: auto;
+    margin-right: 8px;
+}
+
+.btn-back:hover {
+    transform: translateX(-5px);
+    color: #CBA6F7;
 }
 
 h2 {
@@ -32,18 +95,18 @@ input {
     width: 100%;
     padding: 12px;
     margin: 12px 0;
-    border: 2px solid #FFB6C1; /* Rosa pastel en los bordes */
+    border: 2px solid #FFB6C1; 
     border-radius: 10px;
     outline: none;
     font-family: 'Poppins', sans-serif;
 }
 
 input:focus {
-    border-color: #A0E7E5; /* Azul cielo al hacer clic */
+    border-color: #A0E7E5;
 }
 
 button {
-    background-color: #CBA6F7; /* Morado para el botón de Entrar */
+    background-color: #CBA6F7;
     color: white;
     border: none;
     padding: 15px;
@@ -58,7 +121,7 @@ button {
 }
 
 button:hover {
-    background-color: #FFB6C1; /* Cambia a rosa al pasar el mouse */
+    background-color: #FFB6C1;
     transform: translateY(-3px);
 }
 
@@ -71,13 +134,12 @@ button:hover {
     color: #555;
 }
 
-/* Estilo para el enlace de "Regístrate aquí" */
-a {
+.link-highlight {
     color: #CBA6F7;
     text-decoration: none;
     font-weight: bold;
 }
 
-a:hover {
+.link-highlight:hover {
     text-decoration: underline;
 }

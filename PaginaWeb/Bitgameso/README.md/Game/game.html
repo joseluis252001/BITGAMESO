@@ -11,19 +11,32 @@
 
     <header class="game-header">
         <div class="header-left">
-            <div class="logo-placeholder">LOGO</div>
+            <img src="../assets/logo/Coin-128.png" alt="Logo" class="mini-logo">
             <h1>BITGAMESO</h1>
         </div>
-        <button class="btn-tutorial" id="btn-tutorial">TUTORIAL</button>
+
+        <div class="tutorial-box">
+            <div class="tutorial-item">
+                <img src="../assets/arrows/Arrow-Complete-Left-128.png" alt="Compra">
+                <span><b>C:</b> Comprar</span>
+            </div>
+            <div class="tutorial-item">
+                <img src="../assets/arrows/Arrow-Complete-Right-128.png" alt="Venta">
+                <span><b>V:</b> Vender</span>
+            </div>
+        </div>
 
         <div class="header-right">
-            <span id="nombre-usuario">Cargando...</span>
-            <button class="user-icon-btn">👤</button>
+            <span id="nombre-usuario">joseluis</span>
+            <div class="avatar-wrapper">
+                <img src="../assets/avatares/Avatar-Boy-2-128.png" id="current-avatar" class="user-avatar-img">
+            </div>
         </div>
     </header>
 
     <nav class="game-nav">
         <div class="score-container">
+            <img src="../assets/coins/Coins-3-128.png" class="coin-icon" alt="Coins">
             <span>Monedas: </span>
             <span id="monedas-count">1000</span>
         </div>
@@ -34,49 +47,106 @@
             <button id="btn-enviar">Enviar</button>
         </div>
     </nav>
+
     <main class="dashboard-grid">
         <section class="market-main card">
             <div class="section-header">
-                <h2>Mercado Activo</h2>
-                <p id="market-updated">Actualizando...</p>
+                <h2>Mercado Global</h2>
+                <div class="market-nav-btns">
+                    <button id="scroll-up"><img src="../assets/arrows/Arrow-Up-128.png" width="15"></button>
+                    <button id="scroll-down"><img src="../assets/arrows/Arrow-Down-128.png" width="15"></button>
+                </div>
+                <p id="market-updated">Sincronizando...</p>
             </div>
             <div class="market-header">
                 <span>Activo</span>
-                <span>Tipo</span>
+                <span>Categoría</span>
                 <span>Precio</span>
-                <span>Variación</span>
-                <span>Acciones</span>
+                <span>24h Var.</span>
+                <span>Operar</span>
             </div>
             <div id="lista-activos" class="market-list">
-                <p class="empty-state">Cargando datos de mercado...</p>
-            </div>
+                </div>
         </section>
+
         <aside class="portfolio-aside card">
-            <div class="section-header">
-                <h2>Cartera de Inversión</h2>
-                <p id="portfolio-total">$0.00</p>
-            </div>
+            <h2>Cartera</h2>
+            <p id="portfolio-total">$0.00</p>
             <ul id="portfolio-list" class="portfolio-list">
-                <li class="empty-state">Aún no tienes posiciones abiertas.</li>
+                <li class="empty-state">Sin posiciones.</li>
             </ul>
         </aside>
+
         <aside class="pet-aside card">
             <h2>Estado de la Mascota</h2>
             <div class="pet-container">
-                <div class="pet-icon">🐰</div>
+                <div id="pet-character" class="pet-sprite Bunny-Pink-128"></div>
                 <div class="pet-health-bar">
                     <div id="pet-health-fill"></div>
                 </div>
             </div>
-            <div class="pet-status">
-                <p id="pet-message">El conejo está en observación...</p>
-            </div>
+            <p id="pet-message">En observación...</p>
+            <button id="btn-cambiar-pet" disabled>🔄 Cambiar Mascota</button>
         </aside>
     </main>
 
-    <footer class="game-footer">
-        <p>Esta app es solo para fines educativos</p>
-    </footer>
+    <script src="game.js"></script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BITGAMESO - El Juego</title>
+    <link rel="stylesheet" href="game.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="game-header">
+        <div class="header-left">
+            <img src="../assets/logo/Coin-128.png" alt="Logo" class="mini-logo">
+            <h1>BITGAMESO</h1>
+        </div>
+
+        <div class="tutorial-box">
+            <div class="tutorial-item">
+                <img src="../assets/arrows/Arrow-Complete-Left-128.png" alt="Compra">
+                <span><b>C:</b> Comprar</span>
+            </div>
+            <div class="tutorial-item">
+                <img src="../assets/arrows/Arrow-Complete-Right-128.png" alt="Venta">
+                <span><b>V:</b> Vender</span>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="profile-trigger" onclick="toggleSettingsMenu(event)">
+                <span id="nombre-usuario">joseluis</span>
+                <div class="avatar-wrapper">
+                    <img src="../assets/avatares/Avatar-Boy-2-128.png" id="current-avatar-header" class="user-avatar-img" alt="Perfil">
+                </div>
+            </div>
+
+            <div id="settings-dropdown-menu" class="settings-dropdown">
+                <p class="dropdown-title">Cambiar Avatar:</p>
+                <div class="avatar-options">
+                    <img src="../assets/avatares/Avatar-Boy-2-128.png" onclick="handleAvatarChange('../assets/avatares/Avatar-Boy-2-128.png')" alt="Avatar Boy 2">
+                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange('../assets/avatares/Avatar-Girl-2-128.png')" alt="Avatar Girl 2">
+                    <img src="../assets/avatares/Avatar-Boy-1-128.png" onclick="handleAvatarChange('../assets/avatares/Avatar-Boy-1-128.png')" alt="Avatar Boy 1">
+                </div>
+                <hr class="dropdown-divider">
+                <button onclick="handleLogout()" class="btn-logout">Cerrar Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="game-nav">
+        </nav>
+    <main class="dashboard-grid">
+        </main>
 
     <script src="game.js"></script>
 </body>

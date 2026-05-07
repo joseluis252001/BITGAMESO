@@ -51,13 +51,10 @@ header {
     gap: 10px;
 }
 
-.logo-placeholder {
-    background: var(--morado-suave);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 12px;
-    font-family: var(--fuente-titulos);
-    font-weight: bold;
+/* El logo principal mantiene su tamaño perfecto */
+.main-logo {
+    width: 50px;
+    height: auto;
 }
 
 header h1 {
@@ -143,31 +140,35 @@ main {
     color: #666;
 }
 
-/* Estilo de Imágenes */
+/* =========================================
+   ESTILO DE IMÁGENES (PETS Y COINS)
+   ========================================= */
 .imagen-placeholder {
     flex: 1;
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
+/* Reducimos el tamaño de las mascotas y monedas aquí */
 .imagen-placeholder img {
-    width: 100%;
-    max-width: 450px;
-    border-radius: 25px;
-    border: 5px solid var(--azul-cielo);
-    box-shadow: 10px 10px 0px var(--rosa-pastel);
+    width: 120px; /* Tamaño reducido para que parezcan iconos */
+    height: auto;
+    border-radius: 20px;
+    /* Quitamos el borde grueso para que el PNG transparente luzca mejor */
+    filter: drop-shadow(5px 5px 0px var(--azul-cielo)); 
     transition: transform 0.3s ease;
 }
 
 .imagen-placeholder img:hover {
-    transform: scale(1.02) rotate(1deg);
+    transform: scale(1.1) rotate(2deg);
 }
 
 /* =========================================
    FOOTER
    ========================================= */
 footer {
-    padding: 3rem 10%;
+    padding: 2rem 10%;
     background-color: #f9f9f9;
     border-top: 4px solid var(--morado-suave);
     text-align: center;
@@ -178,13 +179,24 @@ footer {
 }
 
 .footer-logo {
-    max-width: 120px;
+    max-width: 40px; /* Logo del footer pequeño */
 }
 
 footer p {
     font-family: 'Nunito', sans-serif;
     color: var(--texto-oscuro);
     font-weight: 600;
+}
+
+/* Estilo para el icono de Bitso o moneda de oro externa */
+footer a img {
+    width: 30px;
+    height: auto;
+    transition: opacity 0.3s;
+}
+
+footer a img:hover {
+    opacity: 0.7;
 }
 
 /* =========================================
@@ -200,10 +212,15 @@ footer p {
         flex-direction: column;
         text-align: center;
         padding: 3rem 5%;
+        gap: 2rem;
     }
     
     nav {
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    .imagen-placeholder img {
+        width: 100px; /* Aún más pequeño en móviles */
     }
 }
