@@ -9,13 +9,12 @@
 </head>
 <body>
 
-    <!-- ===== HEADER ===== -->
+    <!-- ====== HEADER ====== -->
     <header class="game-header">
         <div class="header-left">
             <img src="../assets/logo/Coin-128.png" alt="Logo" class="mini-logo">
             <h1>BITGAMESO</h1>
         </div>
-
         <div class="header-right">
             <div class="profile-trigger" onclick="toggleSettingsMenu(event)">
                 <div class="avatar-wrapper">
@@ -24,25 +23,24 @@
                 <span id="nombre-usuario">joseluis</span>
                 <span class="chevron">▾</span>
             </div>
-
             <div id="settings-dropdown-menu" class="settings-dropdown" style="display:none;">
                 <p class="dropdown-title">✨ Cambiar Avatar</p>
                 <div class="avatar-options">
-                    <img src="../assets/avatares/Avatar-Boy-1-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 1">
-                    <img src="../assets/avatares/Avatar-Boy-2-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 2">
-                    <img src="../assets/avatares/Avatar-Boy-3-200.png"   onclick="handleAvatarChange(this.src)" alt="Boy 3">
-                    <img src="../assets/avatares/Avatar-Boy-4-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 4">
-                    <img src="../assets/avatares/Avatar-Boy-5-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 5">
-                    <img src="../assets/avatares/Avatar-Boy-6-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 6">
-                    <img src="../assets/avatares/Avatar-Boy-7-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 7">
-                    <img src="../assets/avatares/Avatar-Girl-1-128.png"  onclick="handleAvatarChange(this.src)" alt="Girl 1">
-                    <img src="../assets/avatares/Avatar-Girl-2-128.png"  onclick="handleAvatarChange(this.src)" alt="Girl 2">
-                    <img src="../assets/avatares/Avatar-Girl-3-128.png"  onclick="handleAvatarChange(this.src)" alt="Girl 3">
-                    <img src="../assets/avatares/Avatar-Girl-4-128.png"  onclick="handleAvatarChange(this.src)" alt="Girl 4">
-                    <img src="../assets/avatares/Avatar-Girl-5-200.png"  onclick="handleAvatarChange(this.src)" alt="Girl 5">
-                    <img src="../assets/avatares/Avatar-Girl-6-200.png"  onclick="handleAvatarChange(this.src)" alt="Girl 6">
-                    <img src="../assets/avatares/Avatar-Girl-7-256.png"  onclick="handleAvatarChange(this.src)" alt="Girl 7">
-                    <img src="../assets/avatares/Avatar-Girl-8-256.png"  onclick="handleAvatarChange(this.src)" alt="Girl 8">
+                    <img src="../assets/avatares/Avatar-Boy-1-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 1">
+                    <img src="../assets/avatares/Avatar-Boy-2-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 2">
+                    <img src="../assets/avatares/Avatar-Boy-3-200.png"  onclick="handleAvatarChange(this.src)" alt="Boy 3">
+                    <img src="../assets/avatares/Avatar-Boy-4-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 4">
+                    <img src="../assets/avatares/Avatar-Boy-5-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 5">
+                    <img src="../assets/avatares/Avatar-Boy-6-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 6">
+                    <img src="../assets/avatares/Avatar-Boy-7-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 7">
+                    <img src="../assets/avatares/Avatar-Girl-1-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 1">
+                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 2">
+                    <img src="../assets/avatares/Avatar-Girl-3-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 3">
+                    <img src="../assets/avatares/Avatar-Girl-4-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 4">
+                    <img src="../assets/avatares/Avatar-Girl-5-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 5">
+                    <img src="../assets/avatares/Avatar-Girl-6-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 6">
+                    <img src="../assets/avatares/Avatar-Girl-7-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 7">
+                    <img src="../assets/avatares/Avatar-Girl-8-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 8">
                 </div>
                 <hr class="dropdown-divider">
                 <button onclick="handleLogout()" class="btn-logout">🚪 Cerrar Sesión</button>
@@ -50,7 +48,7 @@
         </div>
     </header>
 
-    <!-- ===== NAV / SCORE BAR ===== -->
+    <!-- ====== NAV BAR ====== -->
     <nav class="game-nav">
         <div class="nav-left">
             <div class="score-container">
@@ -58,47 +56,42 @@
                 <span>Monedas:</span>
                 <span id="monedas-count">1000.00</span>
             </div>
-            <!-- Badges de efectos activos -->
-            <div id="effect-badges"></div>
+            <div id="active-effects" class="active-effects"></div>
         </div>
         <div class="nav-actions">
-            <button id="btn-depositar" class="nav-btn nav-btn-pink">💰 Depositar</button>
-            <button id="btn-comprar"   class="nav-btn nav-btn-pink">🛒 Comprar</button>
-            <button id="btn-vender"    class="nav-btn nav-btn-outline" onclick="showToast('Selecciona un item de tu inventario 👇')">🏷️ Vender</button>
-            <button id="btn-enviar"    class="nav-btn nav-btn-outline" onclick="showToast('Selecciona un item de tu inventario y dale a Dar 🎁')">📦 Enviar</button>
+            <button id="btn-depositar">💳 Depositar</button>
+            <button id="btn-comprar">🛒 Comprar</button>
+            <button id="btn-vender">📦 Vender</button>
+            <button id="btn-enviar">🐾 Enviar</button>
         </div>
     </nav>
 
-    <!-- ===== BARRA DE INVENTARIO ===== -->
-    <div class="inventory-strip">
-        <div id="inventory-bar" class="inventory-bar"></div>
-        <div id="inv-action-panel" class="inv-action-panel" style="display:none;"></div>
+    <!-- ====== INVENTARIO BAR ====== -->
+    <div class="inventory-section">
+        <span class="inv-title">🎒 Inventario:</span>
+        <div id="inventory-bar" class="inventory-bar">
+            <span class="inv-empty">Sin ítems</span>
+        </div>
+        <span id="inv-selected-label" class="inv-selected-label" style="display:none;"></span>
     </div>
 
-    <!-- ===== MAIN GRID ===== -->
+    <!-- ====== DASHBOARD ====== -->
     <main class="dashboard-grid">
 
         <!-- MERCADO GLOBAL -->
         <section class="market-main card">
             <div class="section-header">
-                <h2>📈 Mercado Global</h2>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <select id="market-filter" class="market-filter-select">
-                        <option value="Todos">Todos</option>
-                        <option value="Crypto">Crypto</option>
-                        <option value="IA">IA</option>
-                        <option value="Bluechip">Bluechip</option>
-                        <option value="Gaming">Gaming</option>
-                        <option value="NFT">NFT</option>
-                    </select>
-                    <p id="market-updated" class="market-time">Sincronizando...</p>
-                </div>
+                <h2>
+                    Mercado Global
+                    <button class="btn-market-info" onclick="openMarketInfo()" title="¿Qué es cada sector?">
+                        <img src="../assets/arrows/Arrow-Down-128.png" alt="Info sectores" class="market-info-icon">
+                    </button>
+                </h2>
+                <p id="market-updated" style="font-size:10px;color:#aaa;">Sincronizando...</p>
             </div>
+            <div id="market-filters" class="market-filters"></div>
             <div class="market-header">
-                <span>Activo</span>
-                <span>Tipo</span>
-                <span>Precio</span>
-                <span>24h Var.</span>
+                <span>Activo</span><span>Tipo</span><span>Precio</span><span>24h Var.</span>
                 <span style="text-align:center;">Operar</span>
             </div>
             <div id="lista-activos" class="market-list"></div>
@@ -106,12 +99,15 @@
 
         <!-- CARTERA -->
         <aside class="portfolio-aside card">
-            <h2>💼 Cartera</h2>
+            <h2>
+                <img src="../assets/coins/Coins-1-Chest-128.png" class="section-icon" alt="Cartera">
+                Cartera
+            </h2>
             <div id="portfolio-list" class="portfolio-list">
                 <p class="empty-msg">Aún no tienes posiciones.</p>
             </div>
             <div class="portfolio-summary" id="portfolio-summary" style="display:none;">
-                <span>Total invertido:</span>
+                <span>Total valor:</span>
                 <span id="portfolio-total">$0.00</span>
             </div>
         </aside>
@@ -122,65 +118,190 @@
             <div class="pet-container">
                 <div id="pet-character" class="pet-sprite"></div>
             </div>
-            <div class="pet-health-bar">
-                <div id="pet-health-fill" style="width:75%;"></div>
-            </div>
+            <!-- 5 corazones -->
+            <div id="pet-hearts" class="pet-hearts"></div>
             <p class="pet-health-label"><span id="pet-health-value">75</span>% salud</p>
             <p id="pet-message">¡Todo bajo control!</p>
             <button id="btn-cambiar-mascota" class="btn-change-pet" onclick="openPetSelector()" style="display:none;">
                 🎉 ¡Cambiar Mascota!
             </button>
         </aside>
-
     </main>
 
-    <!-- ===== MODAL: TIENDA DE COMIDA ===== -->
-    <div id="modal-tienda" class="modal-overlay" style="display:none;">
+    <!-- ====== MODAL: DEPOSITAR ====== -->
+    <div id="modal-depositar" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <h3>💳 Depositar Monedas</h3>
+            <p class="modal-subtitle">Elige cuánto depositar. ¡Cuesta vida de tu mascota!</p>
+            <div class="deposit-options">
+                <div class="deposit-card" onclick="doDeposit(100, 1)">
+                    <span class="dep-amount">🪙 100</span>
+                    <span class="dep-cost cost-low">-1% ❤️</span>
+                    <span class="dep-note">Siempre disponible</span>
+                </div>
+                <div class="deposit-card" onclick="doDeposit(1000, 10)">
+                    <span class="dep-amount">🪙 1,000</span>
+                    <span class="dep-cost cost-mid">-10% ❤️</span>
+                    <span class="dep-note">Necesitas ≥11% salud</span>
+                </div>
+                <div class="deposit-card" onclick="doDeposit(10000, 40)">
+                    <span class="dep-amount">🪙 10,000</span>
+                    <span class="dep-cost cost-high">-40% ❤️</span>
+                    <span class="dep-note">Necesitas ≥41% salud</span>
+                </div>
+                <div class="deposit-card" onclick="doDeposit(100000, 70)">
+                    <span class="dep-amount">🪙 100,000</span>
+                    <span class="dep-cost cost-danger">-70% ❤️</span>
+                    <span class="dep-note">Necesitas ≥71% salud</span>
+                </div>
+            </div>
+            <p id="deposit-warning" class="deposit-warning" style="display:none;"></p>
+            <button onclick="closeDeposit()" class="btn-modal-close" style="margin-top:16px;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- ====== MODAL: TIENDA DE COMIDA ====== -->
+    <div id="modal-food-shop" class="modal-overlay" style="display:none;">
         <div class="modal-box modal-wide">
             <div class="modal-header">
                 <h3>🛒 Tienda de Comida</h3>
-                <button onclick="closeFoodShop()" class="btn-modal-x">✕</button>
+                <p class="modal-subtitle">Precios basados en el mercado actual</p>
             </div>
-            <p class="modal-sub">Compra comida para tu mascota. Algunas dan efectos especiales.</p>
-            <div id="food-shop-grid"></div>
+            <div class="food-legend">
+                <span class="legend-tag veg">🥦 Verdura → ❤️ Salud</span>
+                <span class="legend-tag fruit">🍎 Fruta → ⚡ Mercado rápido</span>
+                <span class="legend-tag protein">🥩 Proteína → 💰 Ganancias x2</span>
+                <span class="legend-tag candy">🍬 Dulce → 🔮 Ver el futuro</span>
+                <span class="legend-tag misc">🍄 Otros → 💎 Reventa aleatoria</span>
+            </div>
+            <div id="food-shop-grid" class="food-shop-grid"></div>
+            <button onclick="closeFoodShop()" class="btn-modal-close">Cerrar</button>
         </div>
     </div>
 
-    <!-- ===== MODAL: DEPOSITAR ===== -->
-    <div id="modal-depositar" class="modal-overlay" style="display:none;">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3>💰 Depositar Monedas</h3>
-                <button onclick="closeDepositar()" class="btn-modal-x">✕</button>
-            </div>
-            <p class="modal-sub">Elige cuántas monedas quieres añadir a tu cuenta.</p>
-            <div class="deposit-options">
-                <button onclick="depositar(500)"   class="btn-deposit">+500 🪙</button>
-                <button onclick="depositar(1000)"  class="btn-deposit">+1,000 🪙</button>
-                <button onclick="depositar(5000)"  class="btn-deposit">+5,000 🪙</button>
-                <button onclick="depositar(10000)" class="btn-deposit">+10,000 🪙</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== MODAL: CAMBIAR MASCOTA ===== -->
+    <!-- ====== MODAL: SELECTOR DE MASCOTA ====== -->
     <div id="modal-mascota" class="modal-overlay" style="display:none;">
         <div class="modal-box">
-            <div class="modal-header">
-                <h3>🐾 Elige tu nueva mascota</h3>
-                <button onclick="closePetSelector()" class="btn-modal-x">✕</button>
-            </div>
+            <h3>🐾 Elige tu nueva mascota</h3>
             <div class="pet-grid" id="pet-grid"></div>
+            <button onclick="closePetSelector()" class="btn-modal-close">Cancelar</button>
         </div>
     </div>
 
-    <!-- ===== MODAL: GAME OVER ===== -->
+    <!-- ====== MODAL: GAME OVER ====== -->
     <div id="modal-gameover" class="modal-overlay" style="display:none;">
         <div class="modal-box gameover-box">
             <h2>💀 GAME OVER</h2>
             <p id="gameover-reason">Tu mascota murió de hambre...</p>
             <button onclick="resetGame()" class="btn-restart">🔄 Volver a intentar</button>
             <button onclick="handleLogout()" class="btn-logout-go">🚪 Ir al Menú</button>
+        </div>
+    </div>
+
+    <!-- ====== MODAL: FUTURO (Candy Vision) ====== -->
+    <div id="modal-future" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <h3>🔮 Visión del Mercado</h3>
+            <p class="modal-subtitle">Predicción para los próximos segundos</p>
+            <div id="future-list" class="future-list"></div>
+            <button onclick="closeFutureModal()" class="btn-modal-close">Cerrar</button>
+        </div>
+    </div>
+
+
+    <!-- ====== MODAL: INFO DE SECTORES ====== -->
+    <div id="modal-market-info" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-wide modal-info">
+            <h3>📊 Guía de Sectores del Mercado</h3>
+            <p class="modal-subtitle">Aprende qué es cada categoría antes de invertir</p>
+            <div class="info-grid">
+
+                <div class="info-card ia">
+                    <span class="info-emoji">🤖</span>
+                    <h4>IA — Inteligencia Artificial</h4>
+                    <p><b>Qué es:</b> Tecnología que permite a las máquinas "pensar", aprender y resolver problemas como humanos.</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Es la revolución industrial de nuestra era. Apostar a que las máquinas harán el trabajo más rápido, generando ganancias masivas.</p>
+                </div>
+
+                <div class="info-card bluechip">
+                    <span class="info-emoji">💎</span>
+                    <h4>Bluechip</h4>
+                    <p><b>Qué es:</b> Empresas gigantes, estables y con historial impecable (ej. Microsoft).</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Son el "refugio seguro". No te harán millonario de la noche a la mañana, pero es muy difícil que pierdan valor.</p>
+                </div>
+
+                <div class="info-card digital">
+                    <span class="info-emoji">🌐</span>
+                    <h4>Digital</h4>
+                    <p><b>Qué es:</b> Negocios basados 100% en internet: ciberseguridad, nube y redes sociales.</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> El mundo vive en la red. Si el tráfico de internet sube, estas empresas ganan.</p>
+                </div>
+
+                <div class="info-card gaming">
+                    <span class="info-emoji">🎮</span>
+                    <h4>Gaming</h4>
+                    <p><b>Qué es:</b> Empresas de videojuegos, consolas y eSports.</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Una de las industrias que más dinero mueve, superando al cine. Los lanzamientos generan picos de ganancias.</p>
+                </div>
+
+                <div class="info-card nft">
+                    <span class="info-emoji">🖼️</span>
+                    <h4>NFT — Tokens No Fungibles</h4>
+                    <p><b>Qué es:</b> Activos digitales únicos certificados por blockchain (arte, coleccionables).</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Alto riesgo, alta recompensa. Si un NFT se vuelve tendencia, su precio puede subir miles de veces.</p>
+                </div>
+
+                <div class="info-card metaverso">
+                    <span class="info-emoji">🥽</span>
+                    <h4>Metaverso</h4>
+                    <p><b>Qué es:</b> Mundos virtuales donde la gente socializa, trabaja y compra.</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Invertir aquí es como comprar terrenos en una ciudad que apenas se está construyendo.</p>
+                </div>
+
+                <div class="info-card fintech">
+                    <span class="info-emoji">💳</span>
+                    <h4>Fintech</h4>
+                    <p><b>Qué es:</b> "Financial Technology". Bancos digitales, apps de pago y préstamos online.</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Los bancos tradicionales son lentos; las Fintech son rápidas. Inviertes en la modernización del dinero.</p>
+                </div>
+
+                <div class="info-card energia">
+                    <span class="info-emoji">⚡</span>
+                    <h4>Energía</h4>
+                    <p><b>Qué es:</b> Producción de electricidad, desde petróleo hasta paneles solares y reactores.</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Todo lo demás necesita energía para funcionar. Es la base de la economía mundial.</p>
+                </div>
+
+                <div class="info-card biotech">
+                    <span class="info-emoji">🔬</span>
+                    <h4>Biotech — Biotecnología</h4>
+                    <p><b>Qué es:</b> Uso de organismos vivos para crear medicinas, vacunas o mejorar cultivos.</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Un solo descubrimiento médico puede hacer que las acciones se disparen en un día.</p>
+                </div>
+
+                <div class="info-card espacio">
+                    <span class="info-emoji">🚀</span>
+                    <h4>Espacio</h4>
+                    <p><b>Qué es:</b> Turismo espacial, satélites y minería en asteroides.</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Es la "última frontera". Una inversión a largo plazo pensando en que la humanidad saldrá de la Tierra.</p>
+                </div>
+
+                <div class="info-card meme">
+                    <span class="info-emoji">🐸</span>
+                    <h4>Meme — Memecoins</h4>
+                    <p><b>Qué es:</b> Criptomonedas que nacen de chistes en internet (como Dogecoin).</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Pura especulación y diversión. Si una comunidad se organiza, el precio vuela por los cielos.</p>
+                </div>
+
+                <div class="info-card defi">
+                    <span class="info-emoji">🏦</span>
+                    <h4>DeFi — Finanzas Descentralizadas</h4>
+                    <p><b>Qué es:</b> Sistemas financieros sin bancos, funcionando con contratos inteligentes.</p>
+                    <p class="info-why"><b>💡 Por qué invertir:</b> Eliminas al "intermediario". Tú eres tu propio banco y ganas intereses directamente.</p>
+                </div>
+
+            </div>
+            <button onclick="closeMarketInfo()" class="btn-modal-close">Cerrar</button>
         </div>
     </div>
 
