@@ -9,14 +9,13 @@
 </head>
 <body>
 
+    <!-- ===== HEADER ===== -->
     <header class="game-header">
-        <!-- IZQUIERDA: Logo + Título -->
         <div class="header-left">
             <img src="../assets/logo/Coin-128.png" alt="Logo" class="mini-logo">
             <h1>BITGAMESO</h1>
         </div>
 
-        <!-- DERECHA: Perfil de usuario -->
         <div class="header-right">
             <div class="profile-trigger" onclick="toggleSettingsMenu(event)">
                 <div class="avatar-wrapper">
@@ -26,24 +25,24 @@
                 <span class="chevron">▾</span>
             </div>
 
-            <div id="settings-dropdown-menu" class="settings-dropdown" style="display: none;">
+            <div id="settings-dropdown-menu" class="settings-dropdown" style="display:none;">
                 <p class="dropdown-title">✨ Cambiar Avatar</p>
                 <div class="avatar-options">
-                    <img src="../assets/avatares/Avatar-Boy-1-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 1" title="Boy 1">
-                    <img src="../assets/avatares/Avatar-Boy-2-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 2" title="Boy 2">
-                    <img src="../assets/avatares/Avatar-Boy-3-200.png" onclick="handleAvatarChange(this.src)" alt="Boy 3" title="Boy 3">
-                    <img src="../assets/avatares/Avatar-Boy-4-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 4" title="Boy 4">
-                    <img src="../assets/avatares/Avatar-Boy-5-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 5" title="Boy 5">
-                    <img src="../assets/avatares/Avatar-Boy-6-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 6" title="Boy 6">
-                    <img src="../assets/avatares/Avatar-Boy-7-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 7" title="Boy 7">
-                    <img src="../assets/avatares/Avatar-Girl-1-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 1" title="Girl 1">
-                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 2" title="Girl 2">
-                    <img src="../assets/avatares/Avatar-Girl-3-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 3" title="Girl 3">
-                    <img src="../assets/avatares/Avatar-Girl-4-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 4" title="Girl 4">
-                    <img src="../assets/avatares/Avatar-Girl-5-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 5" title="Girl 5">
-                    <img src="../assets/avatares/Avatar-Girl-6-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 6" title="Girl 6">
-                    <img src="../assets/avatares/Avatar-Girl-7-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 7" title="Girl 7">
-                    <img src="../assets/avatares/Avatar-Girl-8-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 8" title="Girl 8">
+                    <img src="../assets/avatares/Avatar-Boy-1-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 1">
+                    <img src="../assets/avatares/Avatar-Boy-2-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 2">
+                    <img src="../assets/avatares/Avatar-Boy-3-200.png"   onclick="handleAvatarChange(this.src)" alt="Boy 3">
+                    <img src="../assets/avatares/Avatar-Boy-4-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 4">
+                    <img src="../assets/avatares/Avatar-Boy-5-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 5">
+                    <img src="../assets/avatares/Avatar-Boy-6-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 6">
+                    <img src="../assets/avatares/Avatar-Boy-7-128.png"   onclick="handleAvatarChange(this.src)" alt="Boy 7">
+                    <img src="../assets/avatares/Avatar-Girl-1-128.png"  onclick="handleAvatarChange(this.src)" alt="Girl 1">
+                    <img src="../assets/avatares/Avatar-Girl-2-128.png"  onclick="handleAvatarChange(this.src)" alt="Girl 2">
+                    <img src="../assets/avatares/Avatar-Girl-3-128.png"  onclick="handleAvatarChange(this.src)" alt="Girl 3">
+                    <img src="../assets/avatares/Avatar-Girl-4-128.png"  onclick="handleAvatarChange(this.src)" alt="Girl 4">
+                    <img src="../assets/avatares/Avatar-Girl-5-200.png"  onclick="handleAvatarChange(this.src)" alt="Girl 5">
+                    <img src="../assets/avatares/Avatar-Girl-6-200.png"  onclick="handleAvatarChange(this.src)" alt="Girl 6">
+                    <img src="../assets/avatares/Avatar-Girl-7-256.png"  onclick="handleAvatarChange(this.src)" alt="Girl 7">
+                    <img src="../assets/avatares/Avatar-Girl-8-256.png"  onclick="handleAvatarChange(this.src)" alt="Girl 8">
                 </div>
                 <hr class="dropdown-divider">
                 <button onclick="handleLogout()" class="btn-logout">🚪 Cerrar Sesión</button>
@@ -51,33 +50,56 @@
         </div>
     </header>
 
+    <!-- ===== NAV / SCORE BAR ===== -->
     <nav class="game-nav">
-        <div class="score-container">
-            <img src="../assets/coins/Coins-3-128.png" class="coin-icon" alt="Coins">
-            <span>Monedas: </span>
-            <span id="monedas-count">1000.00</span>
+        <div class="nav-left">
+            <div class="score-container">
+                <img src="../assets/coins/Coins-3-128.png" class="coin-icon" alt="Coins">
+                <span>Monedas:</span>
+                <span id="monedas-count">1000.00</span>
+            </div>
+            <!-- Badges de efectos activos -->
+            <div id="effect-badges"></div>
         </div>
         <div class="nav-actions">
-            <button id="btn-depositar">Depositar</button>
-            <button id="btn-comprar">Comprar</button>
-            <button id="btn-vender">Vender</button>
-            <button id="btn-enviar">Enviar</button>
+            <button id="btn-depositar" class="nav-btn nav-btn-pink">💰 Depositar</button>
+            <button id="btn-comprar"   class="nav-btn nav-btn-pink">🛒 Comprar</button>
+            <button id="btn-vender"    class="nav-btn nav-btn-outline" onclick="showToast('Selecciona un item de tu inventario 👇')">🏷️ Vender</button>
+            <button id="btn-enviar"    class="nav-btn nav-btn-outline" onclick="showToast('Selecciona un item de tu inventario y dale a Dar 🎁')">📦 Enviar</button>
         </div>
     </nav>
 
+    <!-- ===== BARRA DE INVENTARIO ===== -->
+    <div class="inventory-strip">
+        <div id="inventory-bar" class="inventory-bar"></div>
+        <div id="inv-action-panel" class="inv-action-panel" style="display:none;"></div>
+    </div>
+
+    <!-- ===== MAIN GRID ===== -->
     <main class="dashboard-grid">
+
         <!-- MERCADO GLOBAL -->
         <section class="market-main card">
             <div class="section-header">
-                <h2>Mercado Global</h2>
-                <p id="market-updated" style="font-size: 10px; color: #aaa;">Sincronizando...</p>
+                <h2>📈 Mercado Global</h2>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <select id="market-filter" class="market-filter-select">
+                        <option value="Todos">Todos</option>
+                        <option value="Crypto">Crypto</option>
+                        <option value="IA">IA</option>
+                        <option value="Bluechip">Bluechip</option>
+                        <option value="Gaming">Gaming</option>
+                        <option value="NFT">NFT</option>
+                    </select>
+                    <p id="market-updated" class="market-time">Sincronizando...</p>
+                </div>
             </div>
             <div class="market-header">
                 <span>Activo</span>
-                <span>Categoría</span>
+                <span>Tipo</span>
                 <span>Precio</span>
                 <span>24h Var.</span>
-                <span style="text-align: center;">Operar</span>
+                <span style="text-align:center;">Operar</span>
             </div>
             <div id="lista-activos" class="market-list"></div>
         </section>
@@ -101,28 +123,58 @@
                 <div id="pet-character" class="pet-sprite"></div>
             </div>
             <div class="pet-health-bar">
-                <div id="pet-health-fill" style="width: 75%;"></div>
+                <div id="pet-health-fill" style="width:75%;"></div>
             </div>
             <p class="pet-health-label"><span id="pet-health-value">75</span>% salud</p>
             <p id="pet-message">¡Todo bajo control!</p>
-
-            <!-- Botón cambiar mascota (solo aparece cuando salud = 100%) -->
             <button id="btn-cambiar-mascota" class="btn-change-pet" onclick="openPetSelector()" style="display:none;">
                 🎉 ¡Cambiar Mascota!
             </button>
         </aside>
+
     </main>
 
-    <!-- MODAL: Selector de Mascota -->
-    <div id="modal-mascota" class="modal-overlay" style="display:none;">
-        <div class="modal-box">
-            <h3>🐾 Elige tu nueva mascota</h3>
-            <div class="pet-grid" id="pet-grid"></div>
-            <button onclick="closePetSelector()" class="btn-modal-close">Cancelar</button>
+    <!-- ===== MODAL: TIENDA DE COMIDA ===== -->
+    <div id="modal-tienda" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-wide">
+            <div class="modal-header">
+                <h3>🛒 Tienda de Comida</h3>
+                <button onclick="closeFoodShop()" class="btn-modal-x">✕</button>
+            </div>
+            <p class="modal-sub">Compra comida para tu mascota. Algunas dan efectos especiales.</p>
+            <div id="food-shop-grid"></div>
         </div>
     </div>
 
-    <!-- MODAL: Game Over -->
+    <!-- ===== MODAL: DEPOSITAR ===== -->
+    <div id="modal-depositar" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>💰 Depositar Monedas</h3>
+                <button onclick="closeDepositar()" class="btn-modal-x">✕</button>
+            </div>
+            <p class="modal-sub">Elige cuántas monedas quieres añadir a tu cuenta.</p>
+            <div class="deposit-options">
+                <button onclick="depositar(500)"   class="btn-deposit">+500 🪙</button>
+                <button onclick="depositar(1000)"  class="btn-deposit">+1,000 🪙</button>
+                <button onclick="depositar(5000)"  class="btn-deposit">+5,000 🪙</button>
+                <button onclick="depositar(10000)" class="btn-deposit">+10,000 🪙</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: CAMBIAR MASCOTA ===== -->
+    <div id="modal-mascota" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>🐾 Elige tu nueva mascota</h3>
+                <button onclick="closePetSelector()" class="btn-modal-x">✕</button>
+            </div>
+            <div class="pet-grid" id="pet-grid"></div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: GAME OVER ===== -->
     <div id="modal-gameover" class="modal-overlay" style="display:none;">
         <div class="modal-box gameover-box">
             <h2>💀 GAME OVER</h2>
