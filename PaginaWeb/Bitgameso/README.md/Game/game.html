@@ -10,39 +10,43 @@
 <body>
 
     <header class="game-header">
+        <!-- IZQUIERDA: Logo + Título -->
         <div class="header-left">
             <img src="../assets/logo/Coin-128.png" alt="Logo" class="mini-logo">
             <h1>BITGAMESO</h1>
         </div>
 
-        <div class="tutorial-box">
-            <div class="tutorial-item">
-                <img src="../assets/arrows/Arrow-Complete-Left-128.png" alt="Compra">
-                <span><b>C:</b> Comprar</span>
-            </div>
-            <div class="tutorial-item">
-                <img src="../assets/arrows/Arrow-Complete-Right-128.png" alt="Venta">
-                <span><b>V:</b> Vender</span>
-            </div>
-        </div>
-
+        <!-- DERECHA: Perfil de usuario -->
         <div class="header-right">
             <div class="profile-trigger" onclick="toggleSettingsMenu(event)">
-                <span id="nombre-usuario">joseluis</span>
                 <div class="avatar-wrapper">
                     <img src="../assets/avatares/Avatar-Boy-2-128.png" id="current-avatar-header" class="user-avatar-img" alt="Perfil">
                 </div>
+                <span id="nombre-usuario">joseluis</span>
+                <span class="chevron">▾</span>
             </div>
 
-            <div id="settings-dropdown-menu" class="settings-dropdown">
-                <p class="dropdown-title">Cambiar Avatar:</p>
+            <div id="settings-dropdown-menu" class="settings-dropdown" style="display: none;">
+                <p class="dropdown-title">✨ Cambiar Avatar</p>
                 <div class="avatar-options">
-                    <img src="../assets/avatares/Avatar-Boy-2-128.png" onclick="handleAvatarChange(this.src)" alt="Avatar Boy 2">
-                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange(this.src)" alt="Avatar Girl 2">
-                    <img src="../assets/avatares/Avatar-Boy-1-128.png" onclick="handleAvatarChange(this.src)" alt="Avatar Boy 1">
+                    <img src="../assets/avatares/Avatar-Boy-1-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 1" title="Boy 1">
+                    <img src="../assets/avatares/Avatar-Boy-2-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 2" title="Boy 2">
+                    <img src="../assets/avatares/Avatar-Boy-3-200.png" onclick="handleAvatarChange(this.src)" alt="Boy 3" title="Boy 3">
+                    <img src="../assets/avatares/Avatar-Boy-4-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 4" title="Boy 4">
+                    <img src="../assets/avatares/Avatar-Boy-5-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 5" title="Boy 5">
+                    <img src="../assets/avatares/Avatar-Boy-6-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 6" title="Boy 6">
+                    <img src="../assets/avatares/Avatar-Boy-7-128.png" onclick="handleAvatarChange(this.src)" alt="Boy 7" title="Boy 7">
+                    <img src="../assets/avatares/Avatar-Girl-1-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 1" title="Girl 1">
+                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 2" title="Girl 2">
+                    <img src="../assets/avatares/Avatar-Girl-3-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 3" title="Girl 3">
+                    <img src="../assets/avatares/Avatar-Girl-4-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 4" title="Girl 4">
+                    <img src="../assets/avatares/Avatar-Girl-5-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 5" title="Girl 5">
+                    <img src="../assets/avatares/Avatar-Girl-6-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 6" title="Girl 6">
+                    <img src="../assets/avatares/Avatar-Girl-7-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 7" title="Girl 7">
+                    <img src="../assets/avatares/Avatar-Girl-8-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 8" title="Girl 8">
                 </div>
                 <hr class="dropdown-divider">
-                <button onclick="handleLogout()" class="btn-logout">Cerrar Sesión</button>
+                <button onclick="handleLogout()" class="btn-logout">🚪 Cerrar Sesión</button>
             </div>
         </div>
     </header>
@@ -62,48 +66,71 @@
     </nav>
 
     <main class="dashboard-grid">
-        
+        <!-- MERCADO GLOBAL -->
         <section class="market-main card">
             <div class="section-header">
                 <h2>Mercado Global</h2>
-                <div class="market-nav-btns">
-                    <button id="scroll-up"><img src="../assets/arrows/Arrow-Up-128.png" width="15"></button>
-                    <button id="scroll-down"><img src="../assets/arrows/Arrow-Down-128.png" width="15"></button>
-                </div>
-                <p id="market-updated">Sincronizando...</p>
+                <p id="market-updated" style="font-size: 10px; color: #aaa;">Sincronizando...</p>
             </div>
             <div class="market-header">
                 <span>Activo</span>
                 <span>Categoría</span>
                 <span>Precio</span>
                 <span>24h Var.</span>
-                <span>Operar</span>
+                <span style="text-align: center;">Operar</span>
             </div>
-            <div id="lista-activos" class="market-list">
-                </div>
+            <div id="lista-activos" class="market-list"></div>
         </section>
 
+        <!-- CARTERA -->
         <aside class="portfolio-aside card">
-            <h2>Cartera</h2>
-            <div class="portfolio-list-wrapper">
-                <ul id="portfolio-list" class="portfolio-list">
-                    <li>Aún no tienes posiciones abiertas.</li>
-                </ul>
+            <h2>💼 Cartera</h2>
+            <div id="portfolio-list" class="portfolio-list">
+                <p class="empty-msg">Aún no tienes posiciones.</p>
+            </div>
+            <div class="portfolio-summary" id="portfolio-summary" style="display:none;">
+                <span>Total invertido:</span>
+                <span id="portfolio-total">$0.00</span>
             </div>
         </aside>
 
+        <!-- MASCOTA -->
         <aside class="pet-aside card">
-            <h2>Estado de la Mascota</h2>
+            <h2>🐾 Mascota</h2>
             <div class="pet-container">
-                <div id="pet-character" class="pet-sprite Bunny-Pink-128"></div>
-                <div class="pet-health-bar">
-                    <div id="pet-health-fill"></div>
-                </div>
+                <div id="pet-character" class="pet-sprite"></div>
             </div>
+            <div class="pet-health-bar">
+                <div id="pet-health-fill" style="width: 75%;"></div>
+            </div>
+            <p class="pet-health-label"><span id="pet-health-value">75</span>% salud</p>
             <p id="pet-message">¡Todo bajo control!</p>
-        </aside>
 
+            <!-- Botón cambiar mascota (solo aparece cuando salud = 100%) -->
+            <button id="btn-cambiar-mascota" class="btn-change-pet" onclick="openPetSelector()" style="display:none;">
+                🎉 ¡Cambiar Mascota!
+            </button>
+        </aside>
     </main>
+
+    <!-- MODAL: Selector de Mascota -->
+    <div id="modal-mascota" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <h3>🐾 Elige tu nueva mascota</h3>
+            <div class="pet-grid" id="pet-grid"></div>
+            <button onclick="closePetSelector()" class="btn-modal-close">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: Game Over -->
+    <div id="modal-gameover" class="modal-overlay" style="display:none;">
+        <div class="modal-box gameover-box">
+            <h2>💀 GAME OVER</h2>
+            <p id="gameover-reason">Tu mascota murió de hambre...</p>
+            <button onclick="resetGame()" class="btn-restart">🔄 Volver a intentar</button>
+            <button onclick="handleLogout()" class="btn-logout-go">🚪 Ir al Menú</button>
+        </div>
+    </div>
 
     <script src="game.js"></script>
 </body>
