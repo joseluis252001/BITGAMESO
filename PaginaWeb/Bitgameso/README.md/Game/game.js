@@ -252,27 +252,7 @@ const effectIcons = {
     misc:         '../assets/coins/Coins-2-Bag-128.png',
 };
 
-// --- MASCOTAS ---
-const petList = [
-    { id:'Bear-100',             label:'Oso'              },
-    { id:'Bird-128',             label:'Pájaro'           },
-    { id:'Bunny-Pink-128',       label:'Conejito'         },
-    { id:'Cat-Beige-128',        label:'Gato Beige'       },
-    { id:'Cat-Blue-128',         label:'Gato Azul'        },
-    { id:'Cat-Pink-128',         label:'Gato Rosa'        },
-    { id:'Cat-Tiger-128',        label:'Gato Tigre'       },
-    { id:'Cat-Tiger-Beige-128',  label:'Tigre Beige'      },
-    { id:'Cat-Tiger-Rose-128',   label:'Tigre Rosa'       },
-    { id:'Cat-White-128',        label:'Gato Blanco'      },
-    { id:'Chicken-White-128',    label:'Pollito'          },
-    { id:'Chicken-Yellow-128',   label:'Pollito Amarillo' },
-    { id:'Cow-128',              label:'Vaca'             },
-    { id:'Frog-128',             label:'Rana'             },
-    { id:'Penguin-128',          label:'Pingüino'         },
-    { id:'Penguin-Pink-128',     label:'Pingüino Rosa'    },
-    { id:'Shark-128',            label:'Tiburón'          },
-    { id:'Sheep-128',            label:'Oveja'            },
-];
+// petList movido a pets.js como PET_DEFS/PET_ORDER
 
 // ============================================================
 //  UTILIDADES
@@ -877,8 +857,7 @@ const renderPetHealth = () => {
         else if (s>0)   refs.petMessage.textContent = '¡Tengo mucha hambre! 😢';
         else            refs.petMessage.textContent = '...';
     }
-    const btn = document.getElementById('btn-cambiar-mascota');
-    if (btn) btn.style.display = state.saludMascota===100?'block':'none';
+    // El botón de mascotas siempre está visible (gestionado por pets.js)
 };
 
 const changePetHealth = (delta) => {
@@ -888,29 +867,9 @@ const changePetHealth = (delta) => {
 };
 
 // ============================================================
-//  MASCOTA SELECTOR
+//  MASCOTA SELECTOR — gestionado por pets.js
 // ============================================================
-window.openPetSelector = () => {
-    const grid = document.getElementById('pet-grid');
-    if (!grid) return;
-    grid.innerHTML = petList.map(p=>`
-        <div class="pet-option ${p.id===state.currentPet?'pet-selected':''}" onclick="selectPet('${p.id}','${p.label}')">
-            <div class="pet-preview" style="background-image:url('../assets/pets/${p.id}.png')"></div>
-            <span>${p.label}</span>
-        </div>`).join('');
-    document.getElementById('modal-mascota').style.display = 'flex';
-};
-
-window.closePetSelector = () => { document.getElementById('modal-mascota').style.display = 'none'; };
-
-window.selectPet = (id, label) => {
-    state.currentPet = id;
-    renderPet();
-    closePetSelector();
-    showToast(`🐾 ¡Ahora tienes un ${label}!`);
-    logEvent('mascota', `Cambiaste tu mascota a ${label}`, '');
-    saveGame();
-};
+// openPetSelector, closePetSelector, selectPet están en pets.js
 
 const renderPet = () => {
     const s = document.getElementById('pet-character');

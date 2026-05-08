@@ -1,8 +1,30 @@
 // ============================================================
-//  BITGAMESO — pets.js
-//  Sistema completo de mascotas con habilidades, desbloqueo,
-//  barras de vida independientes y efectos pasivos
+//  BITGAMESO — pets.js  (cargado ANTES de game.js)
+//  Getters seguros para variables de game.js
 // ============================================================
+// Local speed constants (mirrors game.js)
+const PETS_PETS_SPEED_NORMAL = 3000;
+const PETS_PETS_SPEED_FAST   = 1000;
+
+const petSpeed  = (mult) => {
+    // Convierte multiplicador a ms de intervalo
+    if (mult >= 4)   return 750;
+    if (mult >= 3)   return 1000;
+    if (mult >= 2)   return 1500;
+    if (mult >= 1.5) return 2000;
+    return 3000;
+};
+
+const _getStartMarket  = () => typeof startMarket  === 'function' ? startMarket  : ()=>{};
+const _getShowToast    = () => typeof showToast    === 'function' ? showToast    : ()=>{};
+const _getFmt          = () => typeof fmt          === 'function' ? fmt          : (v)=>v.toFixed(2);
+const _getSaveGame     = () => typeof saveGame     === 'function' ? saveGame     : ()=>{};
+const _getChangePH     = () => typeof changePetHealth === 'function' ? changePetHealth : ()=>{};
+const _getCheckGO      = () => typeof checkGameOver  === 'function' ? checkGameOver  : ()=>{};
+const _getRenderMarket = () => typeof renderMarket   === 'function' ? renderMarket   : ()=>{};
+const _getLogEvent     = () => typeof logEvent       === 'function' ? logEvent       : ()=>{};
+const _getUpdateUI     = () => typeof updateUI       === 'function' ? updateUI       : ()=>{};
+
 
 // ============================================================
 //  DEFINICIÓN DE MASCOTAS
@@ -280,12 +302,12 @@ const startPassivesForPet = (petId) => {
     if (!def) return;
 
     // Velocidad de mercado
-    const speed = def.marketSpeed <= 1 ? SPEED_NORMAL
+    const speed = def.marketSpeed <= 1 ? PETS_SPEED_NORMAL
                 : def.marketSpeed === 1.5 ? 2000
                 : def.marketSpeed === 2   ? 1500
                 : def.marketSpeed === 3   ? 1000
                 : 750; // x4
-    startMarket(speed);
+    _getStartMarket()(speed);
 
     switch(def.passive) {
         case 'bird':
@@ -293,22 +315,22 @@ const startPassivesForPet = (petId) => {
                 if (!birdPaused) {
                     state.monedas += 1;
                     if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                    saveGame();
+                    _getSaveGame()();
                 }
             }, 2000);
             break;
 
         case 'cat_beige':
-            petHungerTimer = setInterval(() => { changePetHealth(-1);  checkGameOver(); }, 20000); break;
+            petHungerTimer = setInterval(() => { _getChangePH()(-1);  _getCheckGO()(); }, 20000); break;
         case 'cat_blue':
-            petHungerTimer = setInterval(() => { changePetHealth(-5);  checkGameOver(); }, 20000); break;
+            petHungerTimer = setInterval(() => { _getChangePH()(-5);  _getCheckGO()(); }, 20000); break;
         case 'cat_pink':
-            petHungerTimer = setInterval(() => { changePetHealth(-7);  checkGameOver(); }, 25000); break;
+            petHungerTimer = setInterval(() => { _getChangePH()(-7);  _getCheckGO()(); }, 25000); break;
         case 'cat_tiger':
-            petHungerTimer = setInterval(() => { changePetHealth(-9);  checkGameOver(); }, 30000); break;
+            petHungerTimer = setInterval(() => { _getChangePH()(-9);  _getCheckGO()(); }, 30000); break;
 
         case 'cow':
-            petHungerTimer = setInterval(() => { changePetHealth(-11); checkGameOver(); }, 30000); break;
+            petHungerTimer = setInterval(() => { _getChangePH()(-11); _getCheckGO()(); }, 30000); break;
 
         case 'penguin':
         case 'penguin_pink': {
@@ -316,22 +338,22 @@ const startPassivesForPet = (petId) => {
             passiveTimers.coins = setInterval(() => {
                 state.monedas += amount;
                 if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                showToast(`🐧 +🪙${amount} del Pingüino!`);
-                saveGame();
+                _getShowToast()(`🐧 +🪙${amount} del Pingüino!`);
+                _getSaveGame()();
             }, 120000);
-            petHungerTimer = setInterval(() => { changePetHealth(-12); checkGameOver(); }, 50000);
+            petHungerTimer = setInterval(() => { _getChangePH()(-12); _getCheckGO()(); }, 50000);
             break;
         }
 
         case 'shark':
-            petHungerTimer = setInterval(() => { changePetHealth(-15); checkGameOver(); }, 120000); break;
+            petHungerTimer = setInterval(() => { _getChangePH()(-15); _getCheckGO()(); }, 120000); break;
 
         case 'sheep':
             passiveTimers.coins = setInterval(() => {
                 state.monedas += 1700;
                 if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                showToast('🐑 +🪙1700 de la Oveja!');
-                saveGame();
+                _getShowToast()('🐑 +🪙1700 de la Oveja!');
+                _getSaveGame()();
             }, 30000);
             break;
 
@@ -352,7 +374,7 @@ const resetNonProteinInflation = () => {
             state.foodInflation.delete(foodId);
         }
     });
-    showToast('🔄 Inflación de frutas/verduras/dulces/misc reseteada!');
+    _getShowToast()('🔄 Inflación de frutas/verduras/dulces/misc reseteada!');
 };
 
 // ============================================================
@@ -445,7 +467,7 @@ const applyPetSellModifiers = (pos, cur, baseProfit) => {
             if (baseProfit < 0) {
                 const penalty = Math.abs(pos.buyPrice);
                 payout -= penalty;
-                extraMsg += ` | 🐻 Penalización -🪙${fmt(penalty)}`;
+                extraMsg += ` | 🐻 Penalización -🪙${_getFmt()(penalty)}`;
             }
             break;
 
@@ -459,7 +481,7 @@ const applyPetSellModifiers = (pos, cur, baseProfit) => {
         case 'chicken_yellow':
             if (Math.random() < 0.5) {
                 payout += pos.buyPrice;
-                extraMsg += ` | 🐥 Bonus +🪙${fmt(pos.buyPrice)}`;
+                extraMsg += ` | 🐥 Bonus +🪙${_getFmt()(pos.buyPrice)}`;
             }
             break;
 
@@ -533,12 +555,12 @@ const activateSheepPrediction = (excludeSymbol) => {
     const target = assets[Math.floor(Math.random() * assets.length)];
     target._future = parseFloat((Math.random() * 10 - 5).toFixed(2));
     state.market.set(target.symbol, target);
-    showToast(`🐑 Predicción: ${target.symbol} ${target._future >= 0 ? '▲' : '▼'} ${Math.abs(target._future)}% por 35s`);
-    renderMarket();
+    _getShowToast()(`🐑 Predicción: ${target.symbol} ${target._future >= 0 ? '▲' : '▼'} ${Math.abs(target._future)}% por 35s`);
+    _getRenderMarket()();
     setTimeout(() => {
         const a = state.market.get(target.symbol);
         if (a) { const { _future, ...clean } = a; state.market.set(target.symbol, clean); }
-        renderMarket();
+        _getRenderMarket()();
     }, 35000);
 };
 
@@ -558,8 +580,8 @@ const applyPenguinBuyPenalty = (asset) => {
         const newHealth = Math.max(0, state.saludMascota - (state.saludMascota * factor));
         state.saludMascota = Math.round(newHealth);
         renderPetHealth();
-        showToast(`🐧 Compraste en rojo! Salud -${Math.round(factor*100)}% de su valor actual`);
-        checkGameOver();
+        _getShowToast()(`🐧 Compraste en rojo! Salud -${Math.round(factor*100)}% de su valor actual`);
+        _getCheckGO()();
     }
 };
 
@@ -569,7 +591,7 @@ const checkSheepPenalty = (profit) => {
     if (PET_DEFS[state.currentPet]?.passive !== 'sheep') return;
     if (profit < 0 && !sheepPriceTripled) {
         sheepPriceTripled = true;
-        showToast('🐑 ¡Perdiste dinero! Los precios de la tienda se triplicaron 😱');
+        _getShowToast()('🐑 ¡Perdiste dinero! Los precios de la tienda se triplicaron 😱');
     }
 };
 
@@ -579,21 +601,21 @@ const checkSheepPenalty = (profit) => {
 
 // Conejo: Turbo x4
 window.activateBunnyTurbo = () => {
-    if (bunnyTurboCooldown) { showToast('⏱️ Turbo en cooldown, espera 3 minutos'); return; }
-    if (bunnyTurboActive)   { showToast('⚡ ¡Turbo ya activo!'); return; }
+    if (bunnyTurboCooldown) { _getShowToast()('⏱️ Turbo en cooldown, espera 3 minutos'); return; }
+    if (bunnyTurboActive)   { _getShowToast()('⚡ ¡Turbo ya activo!'); return; }
     bunnyTurboActive = true;
-    startMarket(750);
-    showToast('🐰 ¡TURBO x4 activado por 30s!');
+    _getStartMarket()(750);
+    _getShowToast()('🐰 ¡TURBO x4 activado por 30s!');
     setTimeout(() => {
         bunnyTurboActive = false;
-        startMarket(SPEED_NORMAL);
-        showToast('🐰 Turbo terminado.');
+        _getStartMarket()(PETS_SPEED_NORMAL);
+        _getShowToast()('🐰 Turbo terminado.');
         bunnyTurboCooldown = true;
         renderPetAbilityButton();
         setTimeout(() => {
             bunnyTurboCooldown = false;
             renderPetAbilityButton();
-            showToast('🐰 ¡Turbo disponible de nuevo!');
+            _getShowToast()('🐰 ¡Turbo disponible de nuevo!');
         }, 180000); // 3 min
     }, 30000);
     renderPetAbilityButton();
@@ -601,11 +623,11 @@ window.activateBunnyTurbo = () => {
 
 // Rana: Predicción perfecta del sector
 window.activateFrogPrediction = () => {
-    if (frogCooldown) { showToast('⏱️ Habilidad de Rana en cooldown (1 min)'); return; }
+    if (frogCooldown) { _getShowToast()('⏱️ Habilidad de Rana en cooldown (1 min)'); return; }
     const counts = countBySector();
     let targetSector = null;
     counts.forEach((c, type) => { if (c >= 3) targetSector = type; });
-    if (!targetSector) { showToast('🐸 Necesitas 3+ acciones del mismo sector'); return; }
+    if (!targetSector) { _getShowToast()('🐸 Necesitas 3+ acciones del mismo sector'); return; }
 
     // Predicción perfecta: mostrar futuro real de ese sector
     state.market.forEach((a, sym) => {
@@ -614,8 +636,8 @@ window.activateFrogPrediction = () => {
             state.market.set(sym, { ...a, _future: pred });
         }
     });
-    renderMarket();
-    showToast(`🐸 ¡Predicción perfecta del sector ${targetSector} por 30s!`);
+    _getRenderMarket()();
+    _getShowToast()(`🐸 ¡Predicción perfecta del sector ${targetSector} por 30s!`);
     frogCooldown = true;
     renderPetAbilityButton();
     setTimeout(() => {
@@ -625,13 +647,13 @@ window.activateFrogPrediction = () => {
                 state.market.set(sym, clean);
             }
         });
-        renderMarket();
-        showToast('🐸 Predicción de Rana terminada.');
+        _getRenderMarket()();
+        _getShowToast()('🐸 Predicción de Rana terminada.');
     }, 30000);
     setTimeout(() => {
         frogCooldown = false;
         renderPetAbilityButton();
-        showToast('🐸 ¡Habilidad de Rana disponible!');
+        _getShowToast()('🐸 ¡Habilidad de Rana disponible!');
     }, 60000);
 };
 
@@ -722,16 +744,16 @@ const canUnlockPet = (id) => {
 };
 
 window.unlockPet = (id) => {
-    if (!canUnlockPet(id)) { showToast('❌ No puedes desbloquear esta mascota aún'); return; }
+    if (!canUnlockPet(id)) { _getShowToast()('❌ No puedes desbloquear esta mascota aún'); return; }
     const def  = PET_DEFS[id];
     const data = state.petData.get(id) || { health: 0, unlocked: false };
     state.monedas -= def.cost;
     data.unlocked = true;
     data.health   = 50; // empieza con 50% de salud
     state.petData.set(id, data);
-    showToast(`🎉 ¡Desbloqueaste ${def.label}!`);
-    logEvent('mascota', `Desbloqueaste ${def.label}`, `Costo: 🪙${def.cost.toLocaleString()}`);
-    updateUI();
+    _getShowToast()(`🎉 ¡Desbloqueaste ${def.label}!`);
+    _getLogEvent()('mascota', `Desbloqueaste ${def.label}`, `Costo: 🪙${def.cost.toLocaleString()}`);
+    _getUpdateUI()();
     openPetSelector();
 };
 
@@ -747,9 +769,9 @@ window.selectPet = (id, label) => {
     startPassivesForPet(id);
     closePetSelector();
     renderPetAbilityButton();
-    showToast(`🐾 ¡Ahora juegas con ${label}!`);
-    logEvent('mascota', `Cambiaste a ${label}`, '');
-    saveGame();
+    _getShowToast()(`🐾 ¡Ahora juegas con ${label}!`);
+    _getLogEvent()('mascota', `Cambiaste a ${label}`, '');
+    _getSaveGame()();
 };
 
 window.closePetSelector = () => {
