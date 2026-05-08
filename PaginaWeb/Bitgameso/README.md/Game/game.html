@@ -15,6 +15,19 @@
             <img src="../assets/logo/Coin-128.png" alt="Logo" class="mini-logo">
             <h1>BITGAMESO</h1>
         </div>
+
+        <!-- Botones centrales del header -->
+        <div class="header-center">
+            <button class="btn-header" id="btn-tutorial" onclick="openTutorial()">
+                <img src="../assets/arrows/Question-Mark-128.png" alt="Tutorial" class="btn-header-icon">
+                Tutorial
+            </button>
+            <button class="btn-header" id="btn-historial" onclick="openHistorial()">
+                <img src="../assets/settings/Clipboard-128.png" alt="Historial" class="btn-header-icon">
+                Historial
+            </button>
+        </div>
+
         <div class="header-right">
             <div class="profile-trigger" onclick="toggleSettingsMenu(event)">
                 <div class="avatar-wrapper">
@@ -122,8 +135,10 @@
             <div id="pet-hearts" class="pet-hearts"></div>
             <p class="pet-health-label"><span id="pet-health-value">75</span>% salud</p>
             <p id="pet-message">¡Todo bajo control!</p>
-            <button id="btn-cambiar-mascota" class="btn-change-pet" onclick="openPetSelector()" style="display:none;">
-                🎉 ¡Cambiar Mascota!
+            <!-- Habilidad activa de la mascota -->
+            <div id="pet-ability-area" class="pet-ability-area"></div>
+            <button id="btn-cambiar-mascota" class="btn-change-pet" onclick="openPetSelector()">
+                🐾 Mascotas
             </button>
         </aside>
     </main>
@@ -305,6 +320,31 @@
         </div>
     </div>
 
+
+    <!-- ====== MODAL: TUTORIAL (próximamente) ====== -->
+    <div id="modal-tutorial" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <h3>❓ Tutorial</h3>
+            <p class="modal-subtitle">¡Próximamente! El tutorial estará disponible pronto.</p>
+            <div style="font-size:3rem; margin: 20px 0;">🚧</div>
+            <button onclick="closeTutorial()" class="btn-modal-close">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- ====== MODAL: HISTORIAL ====== -->
+    <div id="modal-historial" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-wide">
+            <h3>📋 Historial de Partida</h3>
+            <p class="modal-subtitle">Todo lo que ha pasado en tu sesión de juego</p>
+            <div id="historial-list" class="historial-list"></div>
+            <div class="historial-footer">
+                <button onclick="clearHistorial()" class="btn-historial-clear">🗑️ Limpiar historial</button>
+                <button onclick="closeHistorial()" class="btn-modal-close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="pets.js"></script>
     <script src="game.js"></script>
 </body>
 </html>

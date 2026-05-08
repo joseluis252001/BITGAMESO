@@ -22,6 +22,7 @@ const state = {
         futureVision: 0,
     },
     selectedFood: null,
+    petData: null,   // Map<petId, {health, unlocked}> — gestionado por pets.js
 };
 
 const refs = {};
@@ -302,6 +303,12 @@ const getSaveKey = () => {
 
 const saveGame = () => {
     try {
+        // Sincronizar salud actual al petData antes de guardar
+        if (state.petData && state.petData.has(state.currentPet)) {
+            const d = state.petData.get(state.currentPet);
+            d.health = state.saludMascota;
+            state.petData.set(state.currentPet, d);
+        }
         localStorage.setItem(getSaveKey(), JSON.stringify({
             monedas:       state.monedas,
             saludMascota:  state.saludMascota,
@@ -311,6 +318,7 @@ const saveGame = () => {
             foodInflation: Array.from(state.foodInflation.entries()),
             sectorBonus:   Array.from(state.sectorBonus.entries()),
             effectsTime:   { ...state.effectsTime },
+            petData:       state.petData ? Array.from(state.petData.entries()) : [],
         }));
     } catch(e) { console.warn('Error guardando',e); }
 };
@@ -327,6 +335,17 @@ const loadGame = () => {
         state.inventory     = new Map(d.inventory     || []);
         state.foodInflation = new Map(d.foodInflation || []);
         state.sectorBonus   = new Map(d.sectorBonus   || []);
+        // Restaurar petData
+        if (d.petData && d.petData.length) {
+            state.petData = new Map(d.petData);
+        }
+        // Sincronizar saludMascota desde petData de la mascota activa
+        if (state.petData && state.petData.has(state.currentPet)) {
+            const activeData = state.petData.get(state.currentPet);
+            if (typeof activeData.health === 'number') {
+                state.saludMascota = activeData.health;
+            }
+        }
         // Restaurar efectos activos — solo los que aún tienen tiempo
         if (d.effectsTime) {
             state.effectsTime.marketFast   = Math.max(0, d.effectsTime.marketFast   || 0);
@@ -338,15 +357,14 @@ const loadGame = () => {
 
 // Reactivar efectos que quedaron pendientes tras recargar
 const reactivateEffects = () => {
-    if (state.effectsTime.marketFast > 0)   startMarket(SPEED_FAST);
     if (state.effectsTime.futureVision > 0) {
-        // Regenerar predicciones para la visión activa
         state.market.forEach((a, sym) => {
             const pred = parseFloat((Math.random() * 10 - 5).toFixed(2));
             state.market.set(sym, { ...a, _future: pred });
         });
     }
     renderEffectBadges();
+    // La velocidad real la gestiona startPassivesForPet — no sobreescribir aquí
 };
 
 const clearSave = () => localStorage.removeItem(getSaveKey());
@@ -525,10 +543,15 @@ window.buy = (symbol) => {
     if (state.portfolio.has(symbol)) { showToast('⚠️ Ya tienes este activo.'); return; }
     const a = state.market.get(symbol);
     if (!a) return;
-    if (state.monedas >= a.price) {
-        state.monedas -= a.price;
-        state.portfolio.set(symbol, { symbol:a.symbol, name:a.name, buyPrice:a.price, type:a.type });
-        showToast(`✅ Compraste ${a.symbol} por ${fmt(a.price)}`);
+    const actualPrice = typeof applyPetBuyModifiers === 'function' ? applyPetBuyModifiers(a.price) : a.price;
+    if (state.monedas >= actualPrice) {
+        state.monedas -= actualPrice;
+        state.portfolio.set(symbol, { symbol:a.symbol, name:a.name, buyPrice:actualPrice, type:a.type });
+        if (typeof applyPenguinBuyPenalty === 'function') applyPenguinBuyPenalty(a);
+        if (typeof birdPaused !== 'undefined') { birdPaused = true; setTimeout(()=>{ birdPaused = false; }, 1000); }
+        const discountMsg = actualPrice < a.price ? ` (descuento: ${fmt(a.price - actualPrice)})` : '';
+        showToast(`✅ Compraste ${a.symbol} por ${fmt(actualPrice)}${discountMsg}`);
+        logEvent('compra', `Compraste ${a.symbol} — ${a.name}`, `Precio: ${fmt(actualPrice)} | Sector: ${a.type}`);
         updateUI();
         checkSectorBonus();
     } else {
@@ -544,23 +567,41 @@ window.sellFromPortfolio = (symbol) => {
     const cur = state.market.get(symbol);
     if (!pos || !cur) return;
     const baseProfit = cur.price - pos.buyPrice;
-    const profit = isEffectActive('doubleProfit') ? baseProfit * 2 : baseProfit;
-    const sectorBonusAmt = applySectorBonus(pos.type || '', baseProfit, pos.buyPrice);
-    const payout = pos.buyPrice + profit + sectorBonusAmt;
+    const dpProfit   = isEffectActive('doubleProfit') ? baseProfit * 2 : baseProfit;
+
+    // Pet modifiers
+    let payout = pos.buyPrice + dpProfit;
+    let petMsg = '';
+    if (typeof applyPetSellModifiers === 'function') {
+        const pm = applyPetSellModifiers(pos, cur, dpProfit);
+        payout = pm.payout;
+        petMsg = pm.extraMsg;
+    } else {
+        const sectorBonusAmt = applySectorBonus(pos.type || '', dpProfit, pos.buyPrice);
+        payout += sectorBonusAmt;
+        if (sectorBonusAmt > 0) petMsg = ` +🏆${fmt(sectorBonusAmt)}`;
+    }
+
     state.monedas += payout;
     state.portfolio.delete(symbol);
-    const x2tag  = isEffectActive('doubleProfit') ? ' (x2)' : '';
-    const bonTag = sectorBonusAmt > 0 ? ` +🏆${fmt(sectorBonusAmt)} bono` : '';
-    if (profit > 0) {
-        const gain = Math.min(Math.round((profit/pos.buyPrice)*20),20);
+    if (typeof birdPaused !== 'undefined') { birdPaused = true; setTimeout(()=>{ birdPaused = false; }, 1000); }
+    if (typeof checkSheepPenalty === 'function') checkSheepPenalty(payout - pos.buyPrice);
+    if (typeof syncPetHealthToData === 'function') syncPetHealthToData();
+
+    const x2tag = isEffectActive('doubleProfit') ? ' (x2)' : '';
+    const realProfit = payout - pos.buyPrice;
+    if (realProfit > 0) {
+        const gain = Math.min(Math.round((realProfit/pos.buyPrice)*20),20);
         changePetHealth(gain);
-        showToast(`🎉 Vendiste ${symbol}! Ganancia: ${fmt(profit)}${x2tag}${bonTag} +${gain}❤️`);
-    } else if (profit < 0) {
-        const loss = Math.min(Math.round((Math.abs(profit)/pos.buyPrice)*20),20);
+        showToast(`🎉 Vendiste ${symbol}! +${fmt(realProfit)}${x2tag}${petMsg} +${gain}❤️`);
+        logEvent('venta', `Vendiste ${symbol} con GANANCIA`, `+${fmt(realProfit)}${x2tag}${petMsg}`);
+    } else if (realProfit < 0) {
+        const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
         changePetHealth(-loss);
-        showToast(`📉 Vendiste ${symbol}. Pérdida: ${fmt(Math.abs(profit))}${x2tag}${bonTag} -${loss}❤️`);
+        showToast(`📉 Vendiste ${symbol}. ${fmt(Math.abs(realProfit))}${x2tag}${petMsg} -${loss}❤️`);
+        logEvent('venta', `Vendiste ${symbol} con PÉRDIDA`, `${fmt(Math.abs(realProfit))}${x2tag}${petMsg}`);
     } else {
-        showToast(`➡️ Vendiste ${symbol} sin cambio.${bonTag}`);
+        showToast(`➡️ Vendiste ${symbol}${petMsg}`);
     }
     updateUI();
     checkGameOver();
@@ -597,6 +638,7 @@ window.doDeposit = (amount, costPct) => {
     changePetHealth(-costPct);
     closeDeposit();
     showToast(`💳 Depositaste 🪙${amount.toLocaleString()} (-${costPct}% ❤️)`);
+    logEvent('deposito', `Depositaste 🪙${amount.toLocaleString()}`, `Costo: -${costPct}% de salud de mascota`);
     updateUI();
     checkGameOver();
 };
@@ -610,7 +652,11 @@ window.openFoodShop = () => {
     grid.innerHTML = foodDatabase.map(f => {
         const basePrice  = Math.round(foodPrice(f));
         const timesBought = state.foodInflation.get(f.id) || 0;
-        const price = Math.round(basePrice * Math.pow(2, timesBought));
+        const inflRate    = (f.cat === 'proteina' && typeof getProteinInflationRate === 'function')
+                            ? getProteinInflationRate() : 2;
+        const priceBeforePet = Math.round(basePrice * Math.pow(inflRate, timesBought));
+        const price = typeof getPetFoodPrice === 'function'
+                      ? getPetFoodPrice(f, priceBeforePet) : priceBeforePet;
         const canBuy = state.monedas >= price;
         const inflTag = timesBought > 0
             ? `<span class="food-inflation">🔥 x${Math.pow(2,timesBought)} inflación</span>` : '';
@@ -647,6 +693,7 @@ window.buyFood = (foodId, price) => {
 
     const nextPrice = Math.round(price * 2);
     showToast(`🛒 Compraste ${food.name} por 🪙${price} | Próximo precio: 🪙${nextPrice}`);
+    logEvent('comida', `Compraste ${food.name}`, `Precio: 🪙${price} | Efecto: ${catLabel[food.cat]}`);
     updateUI();
     closeFoodShop();
 };
@@ -692,22 +739,29 @@ const useFoodOnPet = () => {
         case 'verdura':
             changePetHealth(item.health);
             showToast(`🥕 Diste ${item.name} a tu mascota! +${item.health}❤️`);
+            logEvent('mascota', `Diste ${item.name} a tu mascota`, `Salud +${item.health}❤️`);
             break;
         case 'fruta':
             changePetHealth(item.health || 2);
-            addEffect('marketFast', item.effectDuration);
+            const multFruta = typeof getEffectDurationMultiplier === 'function' ? getEffectDurationMultiplier('fruta') : 1;
+            addEffect('marketFast', item.effectDuration * multFruta);
             showToast(`🍎 ${item.name}! +${item.effectDuration}s al Mercado Rápido ⚡ (total: ${state.effectsTime.marketFast}s)`);
+            logEvent('efecto', `${item.name} activó Mercado Rápido`, `+${item.effectDuration}s | Total: ${state.effectsTime.marketFast}s`);
             break;
         case 'proteina':
             changePetHealth(item.health);
-            addEffect('doubleProfit', item.effectDuration);
+            const multProt = typeof getEffectDurationMultiplier === 'function' ? getEffectDurationMultiplier('proteina') : 1;
+            addEffect('doubleProfit', item.effectDuration * multProt);
             showToast(`🥩 ${item.name}! +${item.effectDuration}s a Ganancias x2 💰 (total: ${state.effectsTime.doubleProfit}s)`);
+            logEvent('efecto', `${item.name} activó Ganancias x2`, `+${item.effectDuration}s | Total: ${state.effectsTime.doubleProfit}s`);
             break;
         case 'dulce':
             changePetHealth(item.health);
-            addEffect('futureVision', item.effectDuration);
+            const multDulce = typeof getEffectDurationMultiplier === 'function' ? getEffectDurationMultiplier('dulce') : 1;
+            addEffect('futureVision', item.effectDuration * multDulce);
             activateFutureVision();
             showToast(`🍬 ${item.name}! +${item.effectDuration}s a Visión del Futuro 🔮 (total: ${state.effectsTime.futureVision}s)`);
+            logEvent('efecto', `${item.name} activó Visión del Futuro`, `+${item.effectDuration}s | Total: ${state.effectsTime.futureVision}s`);
             break;
         case 'misc':
             changePetHealth(item.health);
@@ -745,6 +799,7 @@ const sellSelectedFood = () => {
     consumeItem(foodId);
     state.selectedFood = null;
     showToast(saleMsg);
+    logEvent('comida', `Vendiste ${item.name}`, `Recibiste 🪙${salePrice}`);
     updateUI();
 };
 
@@ -829,6 +884,7 @@ const renderPetHealth = () => {
 const changePetHealth = (delta) => {
     state.saludMascota = Math.max(0, Math.min(100, state.saludMascota+delta));
     renderPetHealth();
+    if (typeof syncPetHealthToData === 'function') syncPetHealthToData();
 };
 
 // ============================================================
@@ -852,6 +908,7 @@ window.selectPet = (id, label) => {
     renderPet();
     closePetSelector();
     showToast(`🐾 ¡Ahora tienes un ${label}!`);
+    logEvent('mascota', `Cambiaste tu mascota a ${label}`, '');
     saveGame();
 };
 
@@ -942,6 +999,7 @@ const checkGameOver = () => {
 };
 
 const triggerGameOver = (reason) => {
+    logEvent('gameover', '💀 GAME OVER', reason);
     clearSave();
     const m=document.getElementById('modal-gameover');
     const r=document.getElementById('gameover-reason');
@@ -955,6 +1013,12 @@ window.resetGame = () => {
     state.foodInflation.clear(); state.sectorBonus.clear();
     state.effectsTime = { marketFast:0, doubleProfit:0, futureVision:0 };
     state.selectedFood = null;
+    state.currentPet = 'Bunny-Pink-128';
+    state.petData = null;
+    if (typeof initPetData === 'function') initPetData();
+    if (typeof sheepPriceTripled !== 'undefined') sheepPriceTripled = false;
+    if (typeof bunnyTurboCooldown !== 'undefined') { bunnyTurboCooldown = false; bunnyTurboActive = false; }
+    if (typeof frogCooldown !== 'undefined') frogCooldown = false;
     clearSave();
     document.getElementById('modal-gameover').style.display='none';
     startMarket(SPEED_NORMAL);
@@ -1135,6 +1199,7 @@ const checkSectorBonus = () => {
         if (count >= BONUS_THRESHOLD && !state.sectorBonus.get(type)) {
             state.sectorBonus.set(type, true);
             showToast(`🏆 ¡BONO DESBLOQUEADO! Tienes 3+ acciones de ${type}. Tus ganancias en este sector suben un 3% 🎉`);
+            logEvent('bonus', `Bono de sector ${type} desbloqueado`, `+3% en ganancias del sector ${type}`);
             // Forzar mensaje de mascota celebrando
             const msg = document.getElementById('pet-message');
             if (msg) {
@@ -1236,6 +1301,7 @@ const triggerMarketEventWarning = () => {
         ? `⚠️ ${evt.sector} — evento de CAÍDA en ${warningTime}s!`
         : `📢 ${evt.sector} — evento de SUBIDA en ${warningTime}s!`
     );
+    logEvent('evento', `⚠️ Alerta: evento ${evt.type === 'crash' ? 'CAÍDA' : 'SUBIDA'} en ${evt.sector}`, `Se aplicará en ${warningTime}s`);
 
     // Resaltar sector en el mercado como advertencia
     highlightSector(evt.sector, evt.type, warningTime * 1000);
@@ -1273,6 +1339,7 @@ const applyMarketEvent = (evt) => {
         ? `💥 ${evt.sector} cayó un ${pct}%!`
         : `🚀 ${evt.sector} subió un ${pct}%!`
     );
+    logEvent('evento', `${evt.type === 'crash' ? '💥 CRASH' : '🚀 BOOM'} en sector ${evt.sector}`, `${evt.type === 'crash' ? 'Cayó' : 'Subió'} un ${pct}%`);
 
     // Flash visual del sector
     highlightSector(evt.sector, evt.type, 4000);
@@ -1419,9 +1486,126 @@ window.closeMarketInfo = () => {
     document.getElementById('modal-market-info').style.display = 'none';
 };
 
+
+// ============================================================
+//  SISTEMA DE HISTORIAL
+// ============================================================
+
+const HISTORIAL_KEY = () => {
+    const u = localStorage.getItem('bitgameso_sesion_activa') || 'invitado';
+    return `bitgameso_historial_${u}`;
+};
+
+const logEvent = (tipo, mensaje, extra = '') => {
+    const historial = JSON.parse(localStorage.getItem(HISTORIAL_KEY()) || '[]');
+    const entrada = {
+        tipo,       // 'compra' | 'venta' | 'comida' | 'deposito' | 'efecto' | 'gameover' | 'bonus' | 'evento'
+        mensaje,
+        extra,
+        hora: new Date().toLocaleTimeString(),
+        fecha: new Date().toLocaleDateString(),
+        monedas: parseFloat(state.monedas).toFixed(2),
+    };
+    historial.unshift(entrada); // más reciente primero
+    // Máximo 200 entradas
+    if (historial.length > 200) historial.length = 200;
+    localStorage.setItem(HISTORIAL_KEY(), JSON.stringify(historial));
+};
+
+const iconByTipo = {
+    compra:   '📈',
+    venta:    '📉',
+    comida:   '🍎',
+    deposito: '💳',
+    efecto:   '✨',
+    gameover: '💀',
+    bonus:    '🏆',
+    evento:   '⚡',
+    mascota:  '🐾',
+    sistema:  '⚙️',
+};
+
+const colorByTipo = {
+    compra:   '#27ae60',
+    venta:    '#e74c3c',
+    comida:   '#ff9800',
+    deposito: '#3498db',
+    efecto:   '#9b59b6',
+    gameover: '#c0392b',
+    bonus:    '#f1c40f',
+    evento:   '#e67e22',
+    mascota:  '#e91e63',
+    sistema:  '#95a5a6',
+};
+
+window.openHistorial = () => {
+    renderHistorialList();
+    document.getElementById('modal-historial').style.display = 'flex';
+};
+
+window.closeHistorial = () => {
+    document.getElementById('modal-historial').style.display = 'none';
+};
+
+window.clearHistorial = () => {
+    if (!confirm('¿Seguro que quieres limpiar todo el historial?')) return;
+    localStorage.removeItem(HISTORIAL_KEY());
+    renderHistorialList();
+    showToast('🗑️ Historial limpiado');
+};
+
+const renderHistorialList = () => {
+    const container = document.getElementById('historial-list');
+    if (!container) return;
+    const historial = JSON.parse(localStorage.getItem(HISTORIAL_KEY()) || '[]');
+
+    if (historial.length === 0) {
+        container.innerHTML = `<div class="historial-empty">
+            <span style="font-size:2rem">📋</span>
+            <p>Aún no hay actividad registrada.<br>¡Empieza a invertir!</p>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = historial.map((e, i) => {
+        const icon  = iconByTipo[e.tipo]  || '•';
+        const color = colorByTipo[e.tipo] || '#666';
+        const isGameOver = e.tipo === 'gameover';
+        return `
+        <div class="historial-item ${isGameOver ? 'historial-gameover' : ''}">
+            <div class="hi-icon" style="background:${color}20; color:${color}">${icon}</div>
+            <div class="hi-body">
+                <span class="hi-msg">${e.mensaje}</span>
+                ${e.extra ? `<span class="hi-extra">${e.extra}</span>` : ''}
+            </div>
+            <div class="hi-meta">
+                <span class="hi-hora">${e.hora}</span>
+                <span class="hi-monedas">🪙 ${e.monedas}</span>
+            </div>
+        </div>`;
+    }).join('');
+};
+
+// Tutorial (próximamente)
+window.openTutorial  = () => { document.getElementById('modal-tutorial').style.display = 'flex'; };
+window.closeTutorial = () => { document.getElementById('modal-tutorial').style.display = 'none'; };
+
 // ============================================================
 //  INIT
 // ============================================================
+
+// Guardar automáticamente al cerrar o cambiar de pestaña
+window.addEventListener('beforeunload', () => {
+    if (typeof saveCurPetHealth === 'function') saveCurPetHealth();
+    saveGame();
+});
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        if (typeof saveCurPetHealth === 'function') saveCurPetHealth();
+        saveGame();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     // Verificar que hay una sesión activa
     const sesionActiva = localStorage.getItem('bitgameso_sesion_activa');
@@ -1445,6 +1629,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Actualizar monedas en pantalla inmediatamente tras cargar
     if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
+    if (typeof initPetData === 'function') initPetData();
 
     // Botones nav
     document.getElementById('btn-depositar')?.addEventListener('click', openDeposit);
@@ -1459,6 +1644,7 @@ document.addEventListener('DOMContentLoaded', () => {
     buildFilterTabs();
     fetchMarket();
     reactivateEffects();
+    if (typeof startPassivesForPet === 'function') startPassivesForPet(state.currentPet);
     startMarket(state.effectsTime.marketFast > 0 ? SPEED_FAST : SPEED_NORMAL);
     startEffectTick();
     startPetTips();

@@ -718,3 +718,259 @@ body {
 .info-card.espacio .info-why { color:#48c774 !important; }
 .info-card.meme      { background:#fff0e0; border-color:#f0987a; }
 .info-card.defi      { background:#e8ffe8; border-color:#82e0aa; }
+
+/* ============================================================
+   HEADER CENTER — Botones Tutorial e Historial
+   ============================================================ */
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 2px solid var(--primary);
+    background: var(--pink-light);
+    color: var(--primary-dk);
+    font-weight: 700;
+    font-size: .82rem;
+    cursor: pointer;
+    transition: .2s;
+    font-family: 'Poppins', sans-serif;
+    white-space: nowrap;
+}
+
+.btn-header:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(203,166,247,0.4);
+}
+
+.btn-header-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+/* ============================================================
+   MODAL: HISTORIAL
+   ============================================================ */
+.historial-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 420px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+    padding-right: 4px;
+}
+
+.historial-item {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #fafafa;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    transition: .15s;
+}
+
+.historial-item:hover { background: #f5f0ff; }
+
+.historial-gameover {
+    background: #fff0f0 !important;
+    border-color: #f5c6cb !important;
+}
+
+.hi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.hi-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.hi-msg {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hi-extra {
+    font-size: 10px;
+    color: #aaa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hi-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.hi-hora    { font-size: 10px; color: #bbb; }
+.hi-monedas { font-size: 10px; color: var(--primary-dk); font-weight: 700; }
+
+.historial-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 30px;
+    color: #bbb;
+    text-align: center;
+    font-size: 13px;
+}
+
+.historial-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-historial-clear {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 2px solid var(--danger);
+    background: white;
+    color: var(--danger);
+    font-weight: 700;
+    font-size: .8rem;
+    cursor: pointer;
+    transition: .2s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-historial-clear:hover {
+    background: var(--danger);
+    color: white;
+}
+
+/* ============================================================
+   SISTEMA DE MASCOTAS — DESBLOQUEO Y HABILIDADES
+   ============================================================ */
+
+/* Grid de mascotas mejorado */
+.pet-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-height: 440px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    padding-right: 4px;
+}
+
+.pet-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 8px;
+    border-radius: 14px;
+    border: 2px solid #eee;
+    font-size: 10px;
+    transition: .15s;
+    background: white;
+}
+
+.pet-option:hover    { border-color: var(--primary); background: #fdf7ff; }
+.pet-selected        { border-color: var(--primary) !important; background: #f0e7ff !important; }
+.pet-locked          { opacity: .55; filter: grayscale(60%); }
+
+.pet-label { font-weight: 700; font-size: 11px; text-align: center; }
+
+/* Corazones en la grid de mascotas */
+.pet-grid-hearts { display: flex; gap: 2px; justify-content: center; }
+.pet-grid-heart  { width: 14px; height: 14px; object-fit: contain; }
+
+/* Badges */
+.pet-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 8px;
+    border-radius: 10px; text-align: center;
+}
+.pet-badge.active { background: #d1f5d3; color: #1e6c34; }
+.pet-badge.locked { background: #f0f0f0; color: #aaa; }
+
+/* Botones en grid de mascotas */
+.btn-pet-select {
+    padding: 5px 12px; border-radius: 10px;
+    background: var(--primary); color: white;
+    border: none; font-weight: 700; font-size: 10px;
+    cursor: pointer; transition: .15s;
+    font-family: 'Poppins', sans-serif;
+}
+.btn-pet-select:hover { opacity: .85; }
+
+.btn-pet-unlock {
+    padding: 5px 10px; border-radius: 10px;
+    background: #ffd700; color: #333;
+    border: none; font-weight: 700; font-size: 10px;
+    cursor: pointer; transition: .15s;
+    font-family: 'Poppins', sans-serif;
+}
+.btn-pet-unlock:hover { opacity: .85; transform: scale(1.05); }
+
+/* Área de habilidad activa en la tarjeta de mascota */
+.pet-ability-area { width: 100%; margin-bottom: 8px; }
+
+.btn-pet-ability {
+    width: 100%; padding: 9px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white; border: none; border-radius: 12px;
+    font-weight: 700; font-size: 12px;
+    cursor: pointer; transition: .2s;
+    font-family: 'Poppins', sans-serif;
+    animation: pulse-ability 2s infinite;
+}
+.btn-pet-ability:hover { opacity: .9; transform: scale(1.02); }
+
+.ability-cooldown {
+    background: linear-gradient(135deg, #bbb, #999) !important;
+    animation: none !important;
+    cursor: not-allowed !important;
+}
+
+@keyframes pulse-ability {
+    0%,100% { box-shadow: 0 0 0 0 rgba(102,126,234,0.4); }
+    50%      { box-shadow: 0 0 0 8px rgba(102,126,234,0); }
+}
+
+/* Botón de mascotas siempre visible */
+.btn-change-pet {
+    width: 100%; padding: 10px;
+    background: var(--pink-light);
+    color: var(--primary-dk);
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    font-weight: 700; font-size: 12px;
+    cursor: pointer; transition: .2s;
+    font-family: 'Poppins', sans-serif;
+}
+.btn-change-pet:hover { background: var(--primary); color: white; }
