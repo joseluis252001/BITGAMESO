@@ -10,7 +10,6 @@
 <body>
 
     <!-- ====== HEADER ====== -->
-     
     <header class="game-header">
         <div class="header-left">
             <img src="../assets/logo/Coin-128.png" alt="Logo" class="mini-logo">
@@ -342,6 +341,25 @@
                 <button onclick="clearHistorial()" class="btn-historial-clear">🗑️ Limpiar historial</button>
                 <button onclick="closeHistorial()" class="btn-modal-close">Cerrar</button>
             </div>
+        </div>
+    </div>
+
+
+    <!-- ====== MODAL: INFO DE MASCOTA ====== -->
+    <div id="modal-pet-info" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-pet-info-box">
+            <div class="pet-info-header">
+                <img id="pet-info-img" src="" alt="Mascota" class="pet-info-hero-img">
+                <div class="pet-info-titles">
+                    <h3 id="pet-info-title">Mascota</h3>
+                    <span id="pet-info-cost" class="pet-info-cost"></span>
+                </div>
+            </div>
+            <p id="pet-info-desc" class="pet-info-desc"></p>
+            <div class="pet-info-divider"></div>
+            <p class="pet-info-section-title">⚡ Habilidades y efectos:</p>
+            <div id="pet-info-list" class="pet-info-list"></div>
+            <button onclick="closePetInfo()" class="btn-modal-close" style="margin-top:16px;">Cerrar</button>
         </div>
     </div>
 

@@ -974,3 +974,171 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 .btn-change-pet:hover { background: var(--primary); color: white; }
+
+/* ============================================================
+   MODAL INFO DE MASCOTA
+   ============================================================ */
+.modal-pet-info-box {
+    max-width: 420px;
+    text-align: left;
+}
+
+.pet-info-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.pet-info-hero-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    background: var(--pink-light);
+    border-radius: 16px;
+    border: 2px solid var(--primary);
+    padding: 6px;
+    flex-shrink: 0;
+}
+
+.pet-info-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pet-info-titles h3 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.4rem;
+    margin: 0;
+    color: var(--text);
+}
+
+.pet-info-cost {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-dk);
+    background: var(--pink-light);
+    padding: 3px 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.pet-info-desc {
+    font-size: 11px;
+    color: #888;
+    margin: 0 0 10px;
+    font-style: italic;
+}
+
+.pet-info-divider {
+    border-top: 2px dashed #eee;
+    margin: 10px 0;
+}
+
+.pet-info-section-title {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text);
+    margin: 0 0 8px;
+}
+
+.pet-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.pet-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text);
+    background: #fafafa;
+    border-radius: 10px;
+    padding: 8px 10px;
+    border: 1px solid #eee;
+}
+
+.pet-info-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+/* Botón info en grid de mascotas */
+.pet-card-header {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.btn-pet-info {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: white;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: .15s;
+    z-index: 2;
+}
+
+.btn-pet-info:hover {
+    background: var(--primary);
+    transform: scale(1.1);
+}
+
+.btn-pet-info:hover .pet-info-icon {
+    filter: brightness(10);
+}
+
+.pet-info-icon {
+    width: 13px;
+    height: 13px;
+    object-fit: contain;
+}
+
+/* Botón info en tarjeta activa */
+.btn-pet-info-active {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 7px 12px;
+    margin-top: 6px;
+    border-radius: 10px;
+    border: 2px solid #eee;
+    background: white;
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .15s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-pet-info-active:hover {
+    border-color: var(--primary);
+    background: var(--pink-light);
+    color: var(--primary-dk);
+}
+
+.pet-info-icon-sm {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}

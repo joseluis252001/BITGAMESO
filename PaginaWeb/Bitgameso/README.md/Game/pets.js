@@ -683,12 +683,63 @@ const renderPetAbilityButton = () => {
         default:
             html = '';
     }
+    // Add info button for active pet
+    const infoDef = PET_DEFS[state.currentPet];
+    if (infoDef) {
+        html += `<button class="btn-pet-info-active" onclick="openPetInfo('${state.currentPet}')">
+            <img src="../assets/arrows/Exclamation-Mark-128.png" alt="Info" class="pet-info-icon-sm">
+            Ver habilidades de ${infoDef.label}
+        </button>`;
+    }
+
     container.innerHTML = html;
 };
 
 // ============================================================
 //  SISTEMA DE DESBLOQUEO
 // ============================================================
+
+// ============================================================
+//  MODAL INFO DE MASCOTA
+// ============================================================
+window.openPetInfo = (petId) => {
+    const def = PET_DEFS[petId];
+    if (!def) return;
+
+    const modal = document.getElementById('modal-pet-info');
+    const title = document.getElementById('pet-info-title');
+    const img   = document.getElementById('pet-info-img');
+    const list  = document.getElementById('pet-info-list');
+    const desc  = document.getElementById('pet-info-desc');
+
+    if (!modal) return;
+
+    title.textContent = def.label;
+    img.src = `../assets/pets/${petId}.png`;
+    desc.textContent = def.desc;
+
+    list.innerHTML = (def.passiveDesc || []).map(line => `
+        <div class="pet-info-item">
+            <span class="pet-info-dot"></span>
+            <span>${line}</span>
+        </div>`).join('');
+
+    // Cost info
+    const costEl = document.getElementById('pet-info-cost');
+    if (costEl) {
+        costEl.textContent = def.cost === 0
+            ? '🎁 Gratis'
+            : `🔓 Desbloqueo: 🪙${def.cost.toLocaleString()}`;
+    }
+
+    modal.style.display = 'flex';
+};
+
+window.closePetInfo = () => {
+    const modal = document.getElementById('modal-pet-info');
+    if (modal) modal.style.display = 'none';
+};
+
 window.openPetSelector = () => {
     initPetData();
     const grid = document.getElementById('pet-grid');
@@ -722,7 +773,12 @@ window.openPetSelector = () => {
 
         return `
         <div class="pet-option ${isActive?'pet-selected':''} ${isUnlocked?'':'pet-locked'}">
-            <div class="pet-preview" style="background-image:url('../assets/pets/${id}.png')"></div>
+            <div class="pet-card-header">
+                <div class="pet-preview" style="background-image:url('../assets/pets/${id}.png')"></div>
+                <button class="btn-pet-info" onclick="event.stopPropagation(); openPetInfo('${id}')" title="Ver habilidades">
+                    <img src="../assets/arrows/Exclamation-Mark-128.png" alt="Info" class="pet-info-icon">
+                </button>
+            </div>
             <span class="pet-label">${def.label}</span>
             <div class="pet-grid-hearts">${heartHtml}</div>
             ${btnHtml}
