@@ -3,7 +3,7 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const WEB_ROOT = path.join(__dirname, 'README.md');
+const WEB_ROOT = path.join(__dirname, 'src');
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
