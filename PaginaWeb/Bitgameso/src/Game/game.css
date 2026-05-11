@@ -1182,3 +1182,114 @@ body {
     height: 16px;
     object-fit: contain;
 }
+
+/* ============================================================
+   RESPONSIVE — MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+
+    body { padding-top: 200px; }
+
+    /* Header compacto en móvil */
+    .game-header {
+        height: auto;
+        padding: 8px 1rem;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .header-left h1 { font-size: 1.2rem; }
+    .mini-logo { width: 28px; height: 28px; }
+
+    .header-center { gap: 6px; }
+    .btn-header { padding: 5px 10px; font-size: .72rem; }
+    .btn-header-icon { width: 15px; height: 15px; }
+
+    /* Nav en móvil */
+    .game-nav {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 6px 1rem;
+        gap: 6px;
+    }
+
+    .nav-actions { flex-wrap: wrap; gap: 4px; }
+    .nav-actions button { padding: 4px 10px; font-size: .72rem; }
+
+    /* Inventario en móvil */
+    .inventory-section {
+        top: 140px;
+        height: auto;
+        padding: 6px 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* Dashboard: todo en columna en móvil */
+    .dashboard-grid {
+        padding: 12px 1rem 1rem;
+        gap: 12px;
+    }
+
+    /* En móvil: cartera y mascota apiladas verticalmente */
+    .bottom-row {
+        grid-template-columns: 1fr;
+    }
+
+    /* Cartera en móvil: scroll horizontal */
+    .portfolio-aside,
+    .pet-aside {
+        height: auto;
+        min-height: 200px;
+    }
+
+    .portfolio-list {
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: 220px;
+    }
+
+    .portfolio-item {
+        min-width: 180px;
+        max-width: 180px;
+    }
+
+    /* Mascota centrada en móvil */
+    .pet-aside { text-align: center; }
+
+    /* Mercado en móvil */
+    .market-header { display: none; } /* ocultar cabecera de columnas */
+
+    .asset-row {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 4px;
+        padding: 10px 8px;
+    }
+
+    .asset-info  { grid-column: 1; }
+    .asset-type  { grid-column: 2; text-align: right; }
+    .asset-price { grid-column: 1; }
+    .asset-change{ grid-column: 2; text-align: right; }
+    .market-btns { grid-column: 1 / -1; justify-content: stretch; }
+    .market-btns .btn-action { width: 100%; }
+
+    /* Filtros en móvil */
+    .market-filters { gap: 4px; }
+    .filter-tab { padding: 3px 8px; font-size: 10px; }
+
+    /* Modales en móvil */
+    .modal-box { padding: 20px 16px; }
+    .food-shop-grid { grid-template-columns: repeat(3, 1fr); }
+    .info-grid { grid-template-columns: 1fr; }
+    .pet-grid { grid-template-columns: repeat(3, 1fr); }
+
+    /* Score container */
+    .score-container { font-size: .8rem; }
+}
+
+@media (max-width: 480px) {
+    .food-shop-grid { grid-template-columns: repeat(2, 1fr); }
+    .pet-grid { grid-template-columns: repeat(2, 1fr); }
+    .btn-header span { display: none; } /* solo iconos en pantallas muy pequeñas */
+}
