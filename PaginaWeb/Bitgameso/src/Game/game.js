@@ -445,6 +445,18 @@ let marketTimer = null;
 const SPEED_NORMAL = 3000;
 const SPEED_FAST   = 1000;
 
+// Auto-healing market loop — usa requestAnimationFrame + setTimeout como fallback
+// Nunca se detiene aunque setInterval falle
+let _marketRunning = false;
+let _marketSpeed   = 3000;
+let _marketTimeout = null;
+
+const _marketLoop = () => {
+    if (!_marketRunning) return;
+    fetchMarket();
+    _marketTimeout = setTimeout(_marketLoop, _marketSpeed);
+};
+
 const fetchMarket = () => {
     window._lastMarketUpdate = Date.now();
     assetDatabase.forEach(a => {
@@ -465,8 +477,20 @@ const fetchMarket = () => {
 };
 
 const startMarket = (speed = SPEED_NORMAL) => {
-    if (marketTimer) clearInterval(marketTimer);
-    marketTimer = setInterval(fetchMarket, speed);
+    // Parar loop anterior
+    _marketRunning = false;
+    if (_marketTimeout) clearTimeout(_marketTimeout);
+    if (marketTimer)    clearInterval(marketTimer);
+    
+    // Guardar velocidad
+    _marketSpeed   = speed || SPEED_NORMAL;
+    _marketRunning = true;
+    
+    // Iniciar loop auto-curativo con setTimeout (más confiable que setInterval en móvil)
+    _marketTimeout = setTimeout(_marketLoop, _marketSpeed);
+    
+    // También mantener setInterval como respaldo
+    marketTimer = setInterval(fetchMarket, _marketSpeed);
 };
 
 // ============================================================
