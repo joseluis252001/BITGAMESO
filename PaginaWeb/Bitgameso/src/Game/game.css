@@ -19,7 +19,7 @@
 
 body {
     margin: 0;
-    padding-top: 155px;
+    padding-top: 180px; /* header(70) + nav(55) + inv(55) */
     background: var(--bg);
     font-family: 'Poppins', sans-serif;
     color: var(--text);
@@ -191,10 +191,31 @@ body {
    DASHBOARD GRID
    ============================================================ */
 .dashboard-grid {
-    display:grid;
-    grid-template-columns:1.6fr 0.9fr 0.8fr;
-    gap:20px; padding:20px 2rem 2rem;
-    align-items:start;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px 2rem 2rem;
+    align-items: start;
+}
+
+/* Fila 1: Cartera (ancha) + Mascota (estrecha) — misma altura */
+.bottom-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    align-items: stretch; /* misma altura */
+}
+
+/* Cartera y mascota con altura fija igual */
+.portfolio-aside,
+.pet-aside {
+    height: 380px;
+    overflow: hidden;
+}
+
+/* Fila 2: Mercado ocupa todo el ancho */
+.market-main {
+    grid-column: 1 / -1;
 }
 
 .card {
@@ -277,11 +298,30 @@ body {
 /* ============================================================
    CARTERA
    ============================================================ */
-.portfolio-list { display:flex; flex-direction:column; gap:10px; }
+.portfolio-list {
+    display: flex;
+    flex-direction: row;  /* horizontal */
+    gap: 12px;
+    overflow-x: auto;    /* scroll horizontal */
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    height: calc(100% - 60px); /* llena el espacio disponible */
+    align-items: flex-start;
+}
+
+/* Cada item de cartera tiene ancho fijo */
+.portfolio-item {
+    min-width: 200px;
+    max-width: 200px;
+    flex-shrink: 0;
+}
 
 .portfolio-item {
     background:#fafafa; border-radius:12px; padding:12px;
     border:1px solid #eee; display:flex; flex-direction:column; gap:6px;
+    min-width: 200px;
+    max-width: 200px;
+    flex-shrink: 0;
 }
 .pi-header { display:flex; justify-content:space-between; align-items:center; }
 .pi-header strong { font-size:14px; color:var(--text); }

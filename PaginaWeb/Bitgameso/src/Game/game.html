@@ -91,25 +91,8 @@
     <!-- ====== DASHBOARD ====== -->
     <main class="dashboard-grid">
 
-        <!-- MERCADO GLOBAL -->
-        <section class="market-main card">
-            <div class="section-header">
-                <h2>
-                    Mercado Global
-                    <button class="btn-market-info" onclick="openMarketInfo()" title="¿Qué es cada sector?">
-                        <img src="../assets/arrows/Arrow-Down-128.png" alt="Info sectores" class="market-info-icon">
-                    </button>
-                </h2>
-                <p id="market-updated" style="font-size:10px;color:#aaa;">Sincronizando...</p>
-            </div>
-            <div id="market-filters" class="market-filters"></div>
-            <div class="market-header">
-                <span>Activo</span><span>Tipo</span><span>Precio</span><span>24h Var.</span>
-                <span style="text-align:center;">Operar</span>
-            </div>
-            <div id="lista-activos" class="market-list"></div>
-        </section>
-
+        <!-- FILA INFERIOR: Cartera + Mascota -->
+        <div class="bottom-row">
         <!-- CARTERA -->
         <aside class="portfolio-aside card">
             <h2>
@@ -141,6 +124,26 @@
                 🐾 Mascotas
             </button>
         </aside>
+
+        <!-- MERCADO GLOBAL -->
+        <section class="market-main card">
+            <div class="section-header">
+                <h2>
+                    Mercado Global
+                    <button class="btn-market-info" onclick="openMarketInfo()" title="¿Qué es cada sector?">
+                        <img src="../assets/arrows/Arrow-Down-128.png" alt="Info sectores" class="market-info-icon">
+                    </button>
+                </h2>
+                <p id="market-updated" style="font-size:10px;color:#aaa;">Sincronizando...</p>
+            </div>
+            <div id="market-filters" class="market-filters"></div>
+            <div class="market-header">
+                <span>Activo</span><span>Tipo</span><span>Precio</span><span>24h Var.</span>
+                <span style="text-align:center;">Operar</span>
+            </div>
+            <div id="lista-activos" class="market-list"></div>
+        </section>
+
     </main>
 
     <!-- ====== MODAL: DEPOSITAR ====== -->
