@@ -3,8 +3,8 @@
 //  Getters seguros para variables de game.js
 // ============================================================
 // Local speed constants (mirrors game.js)
-const PETS_PETS_SPEED_NORMAL = 3000;
-const PETS_PETS_SPEED_FAST   = 1000;
+const PETS_SPEED_NORMAL = 3000;
+const PETS_SPEED_FAST   = 1000;
 
 const petSpeed  = (mult) => {
     // Convierte multiplicador a ms de intervalo
@@ -302,15 +302,22 @@ const startPassivesForPet = (petId) => {
     clearPassiveTimers();
     const def = PET_DEFS[petId];
 
-    // ALWAYS start market — use SPEED_NORMAL as fallback if no def
-    const speed = !def ? PETS_SPEED_NORMAL
-                : def.marketSpeed <= 1    ? PETS_SPEED_NORMAL
-                : def.marketSpeed === 1.5 ? 2000
-                : def.marketSpeed === 2   ? 1500
-                : def.marketSpeed === 3   ? 1000
-                : 750; // x4
+    // ALWAYS start market — bulletproof fallback chain
+    let speed = 3000; // default
+    if (def) {
+        if      (def.marketSpeed >= 4)   speed = 750;
+        else if (def.marketSpeed >= 3)   speed = 1000;
+        else if (def.marketSpeed >= 2)   speed = 1500;
+        else if (def.marketSpeed >= 1.5) speed = 2000;
+        else                             speed = 3000;
+    }
 
-    _getStartMarket()(speed);
+    // Call startMarket directly — guaranteed to work
+    if (typeof startMarket === 'function') {
+        startMarket(speed);
+    } else {
+        console.warn('startMarket not available yet');
+    }
 
     if (!def) return;
 
@@ -609,11 +616,11 @@ window.activateBunnyTurbo = () => {
     if (bunnyTurboCooldown) { _getShowToast()('⏱️ Turbo en cooldown, espera 3 minutos'); return; }
     if (bunnyTurboActive)   { _getShowToast()('⚡ ¡Turbo ya activo!'); return; }
     bunnyTurboActive = true;
-    _getStartMarket()(750);
+    if(typeof startMarket==="function") startMarket(750);;
     _getShowToast()('🐰 ¡TURBO x4 activado por 30s!');
     setTimeout(() => {
         bunnyTurboActive = false;
-        _getStartMarket()(PETS_SPEED_NORMAL);
+        if(typeof startMarket==="function") startMarket(3000);;
         _getShowToast()('🐰 Turbo terminado.');
         bunnyTurboCooldown = true;
         renderPetAbilityButton();
