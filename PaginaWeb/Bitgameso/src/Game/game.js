@@ -356,7 +356,7 @@ const clearSave = () => localStorage.removeItem(getSaveKey());
 let effectTickInterval = null;
 
 const startEffectTick = () => {
-    if (effectTickInterval) return;
+    if (effectTickInterval) { clearInterval(effectTickInterval); effectTickInterval = null; }
     effectTickInterval = setInterval(() => {
         let changed = false;
         ['marketFast','doubleProfit','futureVision'].forEach(key => {
@@ -446,6 +446,7 @@ const SPEED_NORMAL = 3000;
 const SPEED_FAST   = 1000;
 
 const fetchMarket = () => {
+    window._lastMarketUpdate = Date.now();
     assetDatabase.forEach(a => {
         const old  = state.market.get(a.symbol)?.price || a.basePrice;
         const vol  = 0.025;
@@ -1553,17 +1554,66 @@ window.closeTutorial = () => { document.getElementById('modal-tutorial').style.d
 //  INIT
 // ============================================================
 
-// Guardar automáticamente al cerrar o cambiar de pestaña
+// ============================================================
+//  MOBILE: reiniciar timers al volver al primer plano
+// ============================================================
+let lastTickTime = Date.now();
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        // Guardar antes de ir a segundo plano
+        if (typeof saveCurPetHealth === 'function') saveCurPetHealth();
+        saveGame();
+        lastTickTime = Date.now();
+    } else {
+        // Volvió al primer plano — reiniciar todos los timers
+        const elapsed = Date.now() - lastTickTime;
+        console.log(`Volvió al primer plano tras ${elapsed}ms — reiniciando timers`);
+
+        // Restar tiempo transcurrido de los efectos activos
+        if (elapsed > 0) {
+            const elapsedSecs = Math.floor(elapsed / 1000);
+            ['marketFast','doubleProfit','futureVision'].forEach(k => {
+                if (state.effectsTime[k] > 0) {
+                    state.effectsTime[k] = Math.max(0, state.effectsTime[k] - elapsedSecs);
+                }
+            });
+        }
+
+        // Reiniciar market timer
+        if (typeof startPassivesForPet === 'function') {
+            startPassivesForPet(state.currentPet);
+        } else {
+            startMarket(SPEED_NORMAL);
+        }
+
+        // Reiniciar effect tick
+        if (typeof startEffectTick === 'function') startEffectTick();
+
+        // Forzar fetch inmediato para que los precios se actualicen
+        fetchMarket();
+        renderEffectBadges();
+    }
+});
+
 window.addEventListener('beforeunload', () => {
     if (typeof saveCurPetHealth === 'function') saveCurPetHealth();
     saveGame();
 });
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-        if (typeof saveCurPetHealth === 'function') saveCurPetHealth();
-        saveGame();
+
+// Heartbeat: si el mercado lleva más de 10s sin actualizarse, reiniciarlo
+setInterval(() => {
+    const sinceLastUpdate = Date.now() - (window._lastMarketUpdate || 0);
+    if (sinceLastUpdate > 10000 && document.visibilityState === 'visible') {
+        console.warn('Mercado congelado detectado — reiniciando...');
+        if (typeof startPassivesForPet === 'function') {
+            startPassivesForPet(state.currentPet);
+        } else {
+            startMarket(SPEED_NORMAL);
+        }
+        fetchMarket();
     }
-});
+}, 10000);
 
 document.addEventListener('DOMContentLoaded', () => {
     // Verificar que hay una sesión activa
