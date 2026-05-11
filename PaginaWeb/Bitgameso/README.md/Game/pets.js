@@ -291,23 +291,28 @@ let frogCooldown  = false;
 let petHungerTimer = null;
 
 const clearPassiveTimers = () => {
+    // Only clear pet-specific timers (coins, bird), NOT the market timer
     Object.values(passiveTimers).forEach(t => clearInterval(t));
     passiveTimers = {};
     if (petHungerTimer) { clearInterval(petHungerTimer); petHungerTimer = null; }
+    // NOTE: marketTimer is managed exclusively by game.js startMarket()
 };
 
 const startPassivesForPet = (petId) => {
     clearPassiveTimers();
     const def = PET_DEFS[petId];
-    if (!def) return;
 
-    // Velocidad de mercado
-    const speed = def.marketSpeed <= 1 ? PETS_SPEED_NORMAL
+    // ALWAYS start market — use SPEED_NORMAL as fallback if no def
+    const speed = !def ? PETS_SPEED_NORMAL
+                : def.marketSpeed <= 1    ? PETS_SPEED_NORMAL
                 : def.marketSpeed === 1.5 ? 2000
                 : def.marketSpeed === 2   ? 1500
                 : def.marketSpeed === 3   ? 1000
                 : 750; // x4
+
     _getStartMarket()(speed);
+
+    if (!def) return;
 
     switch(def.passive) {
         case 'bird':
