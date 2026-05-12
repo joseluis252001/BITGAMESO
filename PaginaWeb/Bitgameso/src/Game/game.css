@@ -1291,10 +1291,10 @@ body {
     border: 3px solid var(--primary);
     box-shadow: 0 8px 32px rgba(203,166,247,0.4);
     width: 360px;
-    max-width: 90vw;
+    max-width: calc(100vw - 32px);
     padding: 0;
     overflow: hidden;
-    transition: top .3s ease, left .3s ease;
+    transition: top .25s ease, left .25s ease;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -1424,8 +1424,8 @@ body {
     }
 }
 
-/* Flecha animada del tutorial */
-@keyframes tut-bounce {
-    0%   { transform: rotate(90deg) translateX(0); }
-    100% { transform: rotate(90deg) translateX(8px); }
+/* Flecha animada del tutorial — rebota hacia arriba */
+@keyframes tut-bounce-up {
+    0%   { transform: translateY(0px); }
+    100% { transform: translateY(-8px); }
 }

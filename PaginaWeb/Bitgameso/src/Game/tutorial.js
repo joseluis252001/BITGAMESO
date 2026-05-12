@@ -293,29 +293,22 @@ const highlightElement = (el, step) => {
     arrow.id = 'tutorial-arrow';
     const arrowSize = 48;
 
-    // Decidir posición de la flecha (arriba o abajo del elemento)
-    const wH = window.innerHeight;
-    const spaceBelow = wH - rect.bottom;
-    const arrowTop = spaceBelow > 80
-        ? rect.bottom + pad + 4          // flecha apunta hacia arriba (debajo del elemento)
-        : rect.top - pad - arrowSize - 4; // flecha apunta hacia abajo (arriba del elemento)
-
+    // Flecha siempre debajo del elemento apuntando hacia arriba
     const arrowLeft = rect.left + rect.width/2 - arrowSize/2;
-    const pointingUp = spaceBelow > 80;
+    const arrowTop  = rect.bottom + pad + 4;
 
     arrow.style.cssText = `
         position: fixed;
-        top:  ${arrowTop}px;
-        left: ${Math.max(10, arrowLeft)}px;
+        top:  ${Math.min(arrowTop, window.innerHeight - arrowSize - 10)}px;
+        left: ${Math.max(10, Math.min(arrowLeft, window.innerWidth - arrowSize - 10))}px;
         width: ${arrowSize}px;
         height: ${arrowSize}px;
         z-index: 9991;
         pointer-events: none;
-        animation: tut-bounce 0.7s infinite alternate;
-        transform: ${pointingUp ? 'rotate(90deg)' : 'rotate(-90deg)'};
+        animation: tut-bounce-up 0.7s infinite alternate;
         filter: drop-shadow(0 0 6px #CBA6F7);
     `;
-    arrow.innerHTML = `<img src="../assets/arrows/Arrow-Complete-Right-128.png" style="width:100%;height:100%;object-fit:contain;">`;
+    arrow.innerHTML = `<img src="../assets/arrows/Arrow-Complete-Up-128.png" style="width:100%;height:100%;object-fit:contain;">`;
     document.body.appendChild(arrow);
 
     // Posicionar burbuja
@@ -325,21 +318,24 @@ const highlightElement = (el, step) => {
 const positionBubble = (rect) => {
     const bubble = document.getElementById('tutorial-bubble');
     if (!bubble) return;
-    const bH = bubble.offsetHeight || 220;
-    const wH = window.innerHeight;
-    const wW = window.innerWidth;
+    const bW  = bubble.offsetWidth  || 360;
+    const bH  = bubble.offsetHeight || 220;
+    const wH  = window.innerHeight;
+    const wW  = window.innerWidth;
+    const pad = 16;
 
-    // Intentar poner burbuja abajo del elemento, sino arriba
-    let top = rect.bottom + 20;
-    if (top + bH > wH - 20) top = rect.top - bH - 20;
-    if (top < 10) top = 10;
+    // Centrar horizontalmente respecto al elemento, nunca salirse de pantalla
+    let left = rect.left + rect.width/2 - bW/2;
+    left = Math.max(pad, Math.min(left, wW - bW - pad));
 
-    let left = rect.left;
-    if (left + 380 > wW) left = wW - 390;
-    if (left < 10) left = 10;
+    // Poner debajo del elemento + flecha; si no cabe, arriba
+    let top = rect.bottom + 60; // espacio para la flecha
+    if (top + bH > wH - pad) top = rect.top - bH - 60;
+    if (top < pad) top = pad;
 
-    bubble.style.top  = `${top}px`;
-    bubble.style.left = `${left}px`;
+    bubble.style.top       = `${top}px`;
+    bubble.style.left      = `${left}px`;
+    bubble.style.transform = 'none';
 };
 
 const removeHighlight = () => {
