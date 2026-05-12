@@ -34,215 +34,215 @@ const PET_DEFS = {
         id: 'Bear-100', label: 'Oso', cost: 0, order: 0,
         marketSpeed: 2,
         passive: 'bear',
-        desc: '🐻 Velocidad x2 | Dulces -10% | Penalización en ventas negativas',
+        desc: ' Velocidad x2 | Dulces -10% | Penalización en ventas negativas',
         passiveDesc: [
-            '⚡ Mercado x2 permanente',
-            '🍬 Dulces con 10% descuento',
-            '⚠️ Ventas negativas penalizan proporcionalmente'
+            ' Mercado x2 permanente',
+            ' Dulces con 10% descuento',
+            ' Ventas negativas penalizan proporcionalmente'
         ]
     },
     'Bird-128': {
         id: 'Bird-128', label: 'Pájaro', cost: 0, order: 1,
         marketSpeed: 3,
         passive: 'bird',
-        desc: '🐦 Velocidad x3 | +1 moneda/2s | Comida x4 precio | Pausa al operar',
+        desc: ' Velocidad x3 | +1 moneda/2s | Comida x4 precio | Pausa al operar',
         passiveDesc: [
-            '⚡ Mercado x3 permanente',
-            '🪙 +1 moneda cada 2 segundos',
-            '🍎 Toda la comida cuesta x4',
-            '⏸️ La moneda se pausa al comprar/vender'
+            ' Mercado x3 permanente',
+            ' +1 moneda cada 2 segundos',
+            ' Toda la comida cuesta x4',
+            ' La moneda se pausa al comprar/vender'
         ]
     },
     'Bunny-Pink-128': {
         id: 'Bunny-Pink-128', label: 'Conejito', cost: 0, order: 2,
         marketSpeed: 1,
         passive: 'bunny',
-        desc: '🐰 Habilidad: Turbo x4 por 30s (cooldown 3 min)',
+        desc: ' Habilidad: Turbo x4 por 30s (cooldown 3 min)',
         passiveDesc: [
-            '🚀 Botón Turbo: mercado x4 por 30s',
-            '⏱️ Cooldown de 3 minutos'
+            ' Botón Turbo: mercado x4 por 30s',
+            ' Cooldown de 3 minutos'
         ]
     },
     'Cat-Beige-128': {
         id: 'Cat-Beige-128', label: 'Gato Beige', cost: 100, order: 3,
         marketSpeed: 2,
         passive: 'cat_beige',
-        desc: '🐱 Velocidad x2 | Dulces/Pescado duran x4 | -1% salud/20s',
+        desc: ' Velocidad x2 | Dulces/Pescado duran x4 | -1% salud/20s',
         passiveDesc: [
-            '⚡ Mercado x2 permanente',
-            '⏳ Dulces y Pescado duran 4x más',
-            '💔 -1% salud cada 20 segundos'
+            ' Mercado x2 permanente',
+            ' Dulces y Pescado duran 4x más',
+            ' -1% salud cada 20 segundos'
         ]
     },
     'Cat-Blue-128': {
         id: 'Cat-Blue-128', label: 'Gato Azul', cost: 100, order: 4,
         marketSpeed: 2,
         passive: 'cat_blue',
-        desc: '🐱 Velocidad x2 | Dulces/Pescado duran x5 | -5% salud/20s',
+        desc: ' Velocidad x2 | Dulces/Pescado duran x5 | -5% salud/20s',
         passiveDesc: [
-            '⚡ Mercado x2 permanente',
-            '⏳ Dulces y Pescado duran 5x más',
-            '💔 -5% salud cada 20 segundos'
+            ' Mercado x2 permanente',
+            ' Dulces y Pescado duran 5x más',
+            ' -5% salud cada 20 segundos'
         ]
     },
     'Cat-Pink-128': {
         id: 'Cat-Pink-128', label: 'Gato Rosa', cost: 100, order: 5,
         marketSpeed: 2,
         passive: 'cat_pink',
-        desc: '🐱 Velocidad x2 | Dulces/Pescado duran x6 | -7% salud/25s',
+        desc: ' Velocidad x2 | Dulces/Pescado duran x6 | -7% salud/25s',
         passiveDesc: [
-            '⚡ Mercado x2 permanente',
-            '⏳ Dulces y Pescado duran 6x más',
-            '💔 -7% salud cada 25 segundos'
+            ' Mercado x2 permanente',
+            ' Dulces y Pescado duran 6x más',
+            ' -7% salud cada 25 segundos'
         ]
     },
     'Cat-Tiger-128': {
         id: 'Cat-Tiger-128', label: 'Gato Tigre', cost: 1000, order: 6,
         marketSpeed: 2,
         passive: 'cat_tiger',
-        desc: '🐯 Velocidad x2 | Dulces/Pescado duran x7 | -9% salud/30s',
+        desc: ' Velocidad x2 | Dulces/Pescado duran x7 | -9% salud/30s',
         passiveDesc: [
-            '⚡ Mercado x2 permanente',
-            '⏳ Dulces y Pescado duran 7x más',
-            '💔 -9% salud cada 30 segundos'
+            ' Mercado x2 permanente',
+            ' Dulces y Pescado duran 7x más',
+            ' -9% salud cada 30 segundos'
         ]
     },
     'Cat-Tiger-Beige-128': {
         id: 'Cat-Tiger-Beige-128', label: 'Tigre Beige', cost: 1000, order: 7,
         marketSpeed: 3,
         passive: 'tiger_beige',
-        desc: '🐯 Velocidad x3 | Proteínas duran x15 | Sin inflación en proteínas',
+        desc: ' Velocidad x3 | Proteínas duran x15 | Sin inflación en proteínas',
         passiveDesc: [
-            '⚡ Mercado x3 permanente',
-            '⏳ Carne/Huevo/Pescado duran 15x más',
-            '🔥 Sin inflación en proteínas'
+            ' Mercado x3 permanente',
+            ' Carne/Huevo/Pescado duran 15x más',
+            ' Sin inflación en proteínas'
         ]
     },
     'Cat-Tiger-Rose-128': {
         id: 'Cat-Tiger-Rose-128', label: 'Tigre Rosa', cost: 1000, order: 8,
         marketSpeed: 3,
         passive: 'tiger_rose',
-        desc: '🐯 Velocidad x3 | Proteínas x25 duración | Dulces sin inflación',
+        desc: ' Velocidad x3 | Proteínas x25 duración | Dulces sin inflación',
         passiveDesc: [
-            '⚡ Mercado x3 permanente',
-            '⏳ Proteínas duran 25x más',
-            '🍬 Dulces sin inflación',
-            '🔥 Sin inflación en proteínas'
+            ' Mercado x3 permanente',
+            ' Proteínas duran 25x más',
+            ' Dulces sin inflación',
+            ' Sin inflación en proteínas'
         ]
     },
     'Cat-White-128': {
         id: 'Cat-White-128', label: 'Gato Blanco', cost: 10000, order: 9,
         marketSpeed: 2,
         passive: 'cat_white',
-        desc: '🐱 Velocidad x2 | Bono sector +12% | Pescado/Dulces x20 duración sin inflación',
+        desc: ' Velocidad x2 | Bono sector +12% | Pescado/Dulces x20 duración sin inflación',
         passiveDesc: [
-            '⚡ Mercado x2 permanente',
-            '🏆 Bono de sector = +12% (incluye el 3%)',
-            '⏳ Pescado y Dulces duran 20x más',
-            '🔥 Pescado y Dulces sin inflación'
+            ' Mercado x2 permanente',
+            ' Bono de sector = +12% (incluye el 3%)',
+            ' Pescado y Dulces duran 20x más',
+            ' Pescado y Dulces sin inflación'
         ]
     },
     'Chicken-White-128': {
         id: 'Chicken-White-128', label: 'Pollito', cost: 10000, order: 10,
         marketSpeed: 1.5,
         passive: 'chicken_white',
-        desc: '🐔 Velocidad x1.5 | Resetea inflación (excepto proteínas) | Proteínas x100% precio +250% inflación',
+        desc: ' Velocidad x1.5 | Resetea inflación (excepto proteínas) | Proteínas x100% precio +250% inflación',
         passiveDesc: [
-            '⚡ Mercado x1.5 permanente',
-            '🔄 Resetea inflación de frutas/verduras/dulces/misc',
-            '🥩 Proteínas cuestan x2 y su inflación suma +250%'
+            ' Mercado x1.5 permanente',
+            ' Resetea inflación de frutas/verduras/dulces/misc',
+            ' Proteínas cuestan x2 y su inflación suma +250%'
         ]
     },
     'Chicken-Yellow-128': {
         id: 'Chicken-Yellow-128', label: 'Pollito Amarillo', cost: 10000, order: 11,
         marketSpeed: 1.5,
         passive: 'chicken_yellow',
-        desc: '🐥 Velocidad x1.5 | Reset inflación | Proteínas x150% +450% inflación | 50% bonus al vender',
+        desc: ' Velocidad x1.5 | Reset inflación | Proteínas x150% +450% inflación | 50% bonus al vender',
         passiveDesc: [
-            '⚡ Mercado x1.5 permanente',
-            '🔄 Resetea inflación de frutas/verduras/dulces/misc',
-            '🥩 Proteínas cuestan x2.5 y su inflación +450%',
-            '💰 50% de probabilidad de ganar lo que pagaste al vender'
+            ' Mercado x1.5 permanente',
+            ' Resetea inflación de frutas/verduras/dulces/misc',
+            ' Proteínas cuestan x2.5 y su inflación +450%',
+            ' 50% de probabilidad de ganar lo que pagaste al vender'
         ]
     },
     'Cow-128': {
         id: 'Cow-128', label: 'Vaca', cost: 100000, order: 12,
         marketSpeed: 1,
         passive: 'cow',
-        desc: '🐄 Compras -50% | Ventas x150% ganancia | -11% salud/30s',
+        desc: ' Compras -50% | Ventas x150% ganancia | -11% salud/30s',
         passiveDesc: [
-            '💰 Todas las compras del mercado cuestan -50%',
-            '📈 Ganancias en ventas x150%',
-            '💔 -11% salud cada 30 segundos'
+            ' Todas las compras del mercado cuestan -50%',
+            ' Ganancias en ventas x150%',
+            ' -11% salud cada 30 segundos'
         ]
     },
     'Frog-128': {
         id: 'Frog-128', label: 'Rana', cost: 100000, order: 13,
         marketSpeed: 1,
         passive: 'frog',
-        desc: '🐸 Con 3+ acciones del mismo sector: predicción 100% por 30s (cooldown 1min)',
+        desc: ' Con 3+ acciones del mismo sector: predicción 100% por 30s (cooldown 1min)',
         passiveDesc: [
-            '🔮 Habilidad: predicción perfecta 30s',
-            '⏱️ Requiere 3+ acciones del mismo sector',
-            '⏱️ Cooldown 1 minuto'
+            ' Habilidad: predicción perfecta 30s',
+            ' Requiere 3+ acciones del mismo sector',
+            ' Cooldown 1 minuto'
         ]
     },
     'Penguin-128': {
         id: 'Penguin-128', label: 'Pingüino', cost: 100000, order: 14,
         marketSpeed: 1,
         passive: 'penguin',
-        desc: '🐧 Pescado gratis | +50% ganancia ventas | +3% interés | 35% repetir acción | +1000/2min | Hambre',
+        desc: ' Pescado gratis | +50% ganancia ventas | +3% interés | 35% repetir acción | +1000/2min | Hambre',
         passiveDesc: [
-            '🐟 Pescado 100% gratis',
-            '💰 +50% ganancia en cada venta',
-            '📊 +3% interés adicional',
-            '🔄 35% de repetir acción al vender',
-            '🪙 +1000 monedas cada 2 minutos',
-            '💔 Compra en rojo = salud -30% | -12% salud/50s'
+            ' Pescado 100% gratis',
+            ' +50% ganancia en cada venta',
+            ' +3% interés adicional',
+            ' 35% de repetir acción al vender',
+            ' +1000 monedas cada 2 minutos',
+            ' Compra en rojo = salud -30% | -12% salud/50s'
         ]
     },
     'Penguin-Pink-128': {
         id: 'Penguin-Pink-128', label: 'Pingüino Rosa', cost: 1000000, order: 15,
         marketSpeed: 1,
         passive: 'penguin_pink',
-        desc: '🐧 Pescado gratis | +70% ganancia | +8% interés | 75% repetir acción | +1500/2min | Hambre',
+        desc: ' Pescado gratis | +70% ganancia | +8% interés | 75% repetir acción | +1500/2min | Hambre',
         passiveDesc: [
-            '🐟 Pescado 100% gratis',
-            '💰 +70% ganancia en cada venta',
-            '📊 +8% interés adicional',
-            '🔄 75% de repetir acción al vender',
-            '🪙 +1500 monedas cada 2 minutos',
-            '💔 Compra en rojo = salud -40% | -12% salud/50s'
+            ' Pescado 100% gratis',
+            ' +70% ganancia en cada venta',
+            ' +8% interés adicional',
+            ' 75% de repetir acción al vender',
+            ' +1500 monedas cada 2 minutos',
+            ' Compra en rojo = salud -40% | -12% salud/50s'
         ]
     },
     'Shark-128': {
         id: 'Shark-128', label: 'Tiburón', cost: 1000000, order: 16,
         marketSpeed: 2,
         passive: 'shark',
-        desc: '🦈 Velocidad x2 | Reset inflación | Ventas x8 | 3+ mismo sector = +15% bono +30% extra | -15%/2min',
+        desc: ' Velocidad x2 | Reset inflación | Ventas x8 | 3+ mismo sector = +15% bono +30% extra | -15%/2min',
         passiveDesc: [
-            '⚡ Mercado x2 permanente',
-            '🔄 Resetea toda la inflación de comida',
-            '📈 Ventas multiplicadas x8',
-            '🏆 Con 3+ del mismo sector: +15% bono adicional',
-            '💰 Con 3+ del mismo sector: +30% de lo pagado',
-            '💔 -15% salud cada 2 minutos'
+            ' Mercado x2 permanente',
+            ' Resetea toda la inflación de comida',
+            ' Ventas multiplicadas x8',
+            ' Con 3+ del mismo sector: +15% bono adicional',
+            ' Con 3+ del mismo sector: +30% de lo pagado',
+            ' -15% salud cada 2 minutos'
         ]
     },
     'Sheep-128': {
         id: 'Sheep-128', label: 'Oveja', cost: 1000000, order: 17,
         marketSpeed: 2,
         passive: 'sheep',
-        desc: '🐑 Velocidad x2 | Tienda gratis (sin inflación) | +1700/30s | Al vender: +25% ganancia, 50% repetir, 100% predicción 35s, 25% +2500',
+        desc: ' Velocidad x2 | Tienda gratis (sin inflación) | +1700/30s | Al vender: +25% ganancia, 50% repetir, 100% predicción 35s, 25% +2500',
         passiveDesc: [
-            '⚡ Mercado x2 permanente',
-            '🛒 Tienda gratis si no hay inflación',
-            '⚠️ Si pierdes dinero, tienda se triplica',
-            '🪙 +1700 monedas cada 30 segundos',
-            '📈 Al vender: +25% ganancia',
-            '🔄 50% repetir acción',
-            '🔮 100% predicción de una acción por 35s',
-            '💰 25% de ganar 2500 monedas extra'
+            ' Mercado x2 permanente',
+            ' Tienda gratis si no hay inflación',
+            ' Si pierdes dinero, tienda se triplica',
+            ' +1700 monedas cada 30 segundos',
+            ' Al vender: +25% ganancia',
+            ' 50% repetir acción',
+            ' 100% predicción de una acción por 35s',
+            ' 25% de ganar 2500 monedas extra'
         ]
     },
 };
@@ -361,7 +361,7 @@ const startPassivesForPet = (petId) => {
             passiveTimers.coins = setInterval(() => {
                 state.monedas += amount;
                 if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                _getShowToast()(`🐧 +🪙${amount} del Pingüino!`);
+                _getShowToast()(` +${amount} del Pingüino!`);
                 _getSaveGame()();
             }, 120000);
             petHungerTimer = setInterval(() => { _getChangePH()(-12); _getCheckGO()(); }, 50000);
@@ -375,7 +375,7 @@ const startPassivesForPet = (petId) => {
             passiveTimers.coins = setInterval(() => {
                 state.monedas += 1700;
                 if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                _getShowToast()('🐑 +🪙1700 de la Oveja!');
+                _getShowToast()(' +1700 de la Oveja!');
                 _getSaveGame()();
             }, 30000);
             break;
@@ -397,7 +397,7 @@ const resetNonProteinInflation = () => {
             state.foodInflation.delete(foodId);
         }
     });
-    _getShowToast()('🔄 Inflación de frutas/verduras/dulces/misc reseteada!');
+    _getShowToast()(' Inflación de frutas/verduras/dulces/misc reseteada!');
 };
 
 // ============================================================
@@ -490,45 +490,45 @@ const applyPetSellModifiers = (pos, cur, baseProfit) => {
             if (baseProfit < 0) {
                 const penalty = Math.abs(pos.buyPrice);
                 payout -= penalty;
-                extraMsg += ` | 🐻 Penalización -🪙${_getFmt()(penalty)}`;
+                extraMsg += ` |  Penalización -${_getFmt()(penalty)}`;
             }
             break;
 
         case 'cow':
             if (baseProfit > 0) {
                 payout = pos.buyPrice + baseProfit * 1.5;
-                extraMsg += ' | 🐄 Ganancia x150%';
+                extraMsg += ' |  Ganancia x150%';
             }
             break;
 
         case 'chicken_yellow':
             if (Math.random() < 0.5) {
                 payout += pos.buyPrice;
-                extraMsg += ` | 🐥 Bonus +🪙${_getFmt()(pos.buyPrice)}`;
+                extraMsg += ` |  Bonus +${_getFmt()(pos.buyPrice)}`;
             }
             break;
 
         case 'penguin':
             payout = pos.buyPrice + baseProfit * 1.5 + pos.buyPrice * 0.03;
-            extraMsg += ' | 🐧 +50% +3%';
+            extraMsg += ' |  +50% +3%';
             if (Math.random() < 0.35) {
                 state.portfolio.set(pos.symbol, { ...pos });
-                extraMsg += ' | 🔄 ¡Acción repetida!';
+                extraMsg += ' |  ¡Acción repetida!';
             }
             break;
 
         case 'penguin_pink':
             payout = pos.buyPrice + baseProfit * 1.7 + pos.buyPrice * 0.08;
-            extraMsg += ' | 🐧 +70% +8%';
+            extraMsg += ' |  +70% +8%';
             if (Math.random() < 0.75) {
                 state.portfolio.set(pos.symbol, { ...pos });
-                extraMsg += ' | 🔄 ¡Acción repetida!';
+                extraMsg += ' |  ¡Acción repetida!';
             }
             break;
 
         case 'shark': {
             payout = pos.buyPrice * 8;
-            extraMsg += ' | 🦈 x8';
+            extraMsg += ' |  x8';
             // Check sector bonus
             const counts = countBySector();
             if ((counts.get(pos.type) || 0) >= 3) {
@@ -544,7 +544,7 @@ const applyPetSellModifiers = (pos, cur, baseProfit) => {
             if (state.sectorBonus.get(pos.type)) {
                 const bonusAmt = pos.buyPrice * 0.12;
                 payout += bonusAmt;
-                extraMsg += ` | 🐱 Bono sector +12%`;
+                extraMsg += ` |  Bono sector +12%`;
             }
             break;
         }
@@ -552,15 +552,15 @@ const applyPetSellModifiers = (pos, cur, baseProfit) => {
         case 'sheep': {
             const gain25 = pos.buyPrice * 0.25;
             payout += gain25;
-            extraMsg += ` | 🐑 +25%`;
+            extraMsg += ` |  +25%`;
             if (Math.random() < 0.50) {
                 state.portfolio.set(pos.symbol, { ...pos });
-                extraMsg += ' | 🔄 Repetida!';
+                extraMsg += ' |  Repetida!';
             }
             // 25% de 2500 extra
             if (Math.random() < 0.25) {
                 state.monedas += 2500;
-                extraMsg += ' | 💰 +2500 bonus!';
+                extraMsg += ' |  +2500 bonus!';
             }
             // 100% predicción de una acción por 35s
             activateSheepPrediction(pos.symbol);
@@ -578,7 +578,7 @@ const activateSheepPrediction = (excludeSymbol) => {
     const target = assets[Math.floor(Math.random() * assets.length)];
     target._future = parseFloat((Math.random() * 10 - 5).toFixed(2));
     state.market.set(target.symbol, target);
-    _getShowToast()(`🐑 Predicción: ${target.symbol} ${target._future >= 0 ? '▲' : '▼'} ${Math.abs(target._future)}% por 35s`);
+    _getShowToast()(` Predicción: ${target.symbol} ${target._future >= 0 ? '▲' : '▼'} ${Math.abs(target._future)}% por 35s`);
     _getRenderMarket()();
     setTimeout(() => {
         const a = state.market.get(target.symbol);
@@ -603,7 +603,7 @@ const applyPenguinBuyPenalty = (asset) => {
         const newHealth = Math.max(0, state.saludMascota - (state.saludMascota * factor));
         state.saludMascota = Math.round(newHealth);
         renderPetHealth();
-        _getShowToast()(`🐧 Compraste en rojo! Salud -${Math.round(factor*100)}% de su valor actual`);
+        _getShowToast()(` Compraste en rojo! Salud -${Math.round(factor*100)}% de su valor actual`);
         _getCheckGO()();
     }
 };
@@ -614,7 +614,7 @@ const checkSheepPenalty = (profit) => {
     if (PET_DEFS[state.currentPet]?.passive !== 'sheep') return;
     if (profit < 0 && !sheepPriceTripled) {
         sheepPriceTripled = true;
-        _getShowToast()('🐑 ¡Perdiste dinero! Los precios de la tienda se triplicaron 😱');
+        _getShowToast()(' ¡Perdiste dinero! Los precios de la tienda se triplicaron ');
     }
 };
 
@@ -624,21 +624,21 @@ const checkSheepPenalty = (profit) => {
 
 // Conejo: Turbo x4
 window.activateBunnyTurbo = () => {
-    if (bunnyTurboCooldown) { _getShowToast()('⏱️ Turbo en cooldown, espera 3 minutos'); return; }
-    if (bunnyTurboActive)   { _getShowToast()('⚡ ¡Turbo ya activo!'); return; }
+    if (bunnyTurboCooldown) { _getShowToast()(' Turbo en cooldown, espera 3 minutos'); return; }
+    if (bunnyTurboActive)   { _getShowToast()(' ¡Turbo ya activo!'); return; }
     bunnyTurboActive = true;
     if(typeof startMarket==="function") startMarket(750);;
-    _getShowToast()('🐰 ¡TURBO x4 activado por 30s!');
+    _getShowToast()(' ¡TURBO x4 activado por 30s!');
     setTimeout(() => {
         bunnyTurboActive = false;
         if(typeof startMarket==="function") startMarket(3000);;
-        _getShowToast()('🐰 Turbo terminado.');
+        _getShowToast()(' Turbo terminado.');
         bunnyTurboCooldown = true;
         renderPetAbilityButton();
         setTimeout(() => {
             bunnyTurboCooldown = false;
             renderPetAbilityButton();
-            _getShowToast()('🐰 ¡Turbo disponible de nuevo!');
+            _getShowToast()(' ¡Turbo disponible de nuevo!');
         }, 180000); // 3 min
     }, 30000);
     renderPetAbilityButton();
@@ -646,11 +646,11 @@ window.activateBunnyTurbo = () => {
 
 // Rana: Predicción perfecta del sector
 window.activateFrogPrediction = () => {
-    if (frogCooldown) { _getShowToast()('⏱️ Habilidad de Rana en cooldown (1 min)'); return; }
+    if (frogCooldown) { _getShowToast()(' Habilidad de Rana en cooldown (1 min)'); return; }
     const counts = countBySector();
     let targetSector = null;
     counts.forEach((c, type) => { if (c >= 3) targetSector = type; });
-    if (!targetSector) { _getShowToast()('🐸 Necesitas 3+ acciones del mismo sector'); return; }
+    if (!targetSector) { _getShowToast()(' Necesitas 3+ acciones del mismo sector'); return; }
 
     // Predicción perfecta: mostrar futuro real de ese sector
     state.market.forEach((a, sym) => {
@@ -660,7 +660,7 @@ window.activateFrogPrediction = () => {
         }
     });
     _getRenderMarket()();
-    _getShowToast()(`🐸 ¡Predicción perfecta del sector ${targetSector} por 30s!`);
+    _getShowToast()(` ¡Predicción perfecta del sector ${targetSector} por 30s!`);
     frogCooldown = true;
     renderPetAbilityButton();
     setTimeout(() => {
@@ -671,12 +671,12 @@ window.activateFrogPrediction = () => {
             }
         });
         _getRenderMarket()();
-        _getShowToast()('🐸 Predicción de Rana terminada.');
+        _getShowToast()(' Predicción de Rana terminada.');
     }, 30000);
     setTimeout(() => {
         frogCooldown = false;
         renderPetAbilityButton();
-        _getShowToast()('🐸 ¡Habilidad de Rana disponible!');
+        _getShowToast()(' ¡Habilidad de Rana disponible!');
     }, 60000);
 };
 
@@ -694,13 +694,13 @@ const renderPetAbilityButton = () => {
         case 'bunny':
             html = `<button class="btn-pet-ability ${bunnyTurboCooldown?'ability-cooldown':''}"
                         onclick="activateBunnyTurbo()" ${bunnyTurboCooldown?'disabled':''}>
-                        🚀 Turbo x4 ${bunnyTurboCooldown?'(cooldown 3min)':'(30s)'}
+                         Turbo x4 ${bunnyTurboCooldown?'(cooldown 3min)':'(30s)'}
                     </button>`;
             break;
         case 'frog':
             html = `<button class="btn-pet-ability ${frogCooldown?'ability-cooldown':''}"
                         onclick="activateFrogPrediction()" ${frogCooldown?'disabled':''}>
-                        🔮 Predicción ${frogCooldown?'(cooldown 1min)':'(30s)'}
+                         Predicción ${frogCooldown?'(cooldown 1min)':'(30s)'}
                     </button>`;
             break;
         default:
@@ -751,8 +751,8 @@ window.openPetInfo = (petId) => {
     const costEl = document.getElementById('pet-info-cost');
     if (costEl) {
         costEl.textContent = def.cost === 0
-            ? '🎁 Gratis'
-            : `🔓 Desbloqueo: 🪙${def.cost.toLocaleString()}`;
+            ? ' Gratis'
+            : ` Desbloqueo: ${def.cost.toLocaleString()}`;
     }
 
     modal.style.display = 'flex';
@@ -778,15 +778,15 @@ window.openPetSelector = () => {
 
         let btnHtml = '';
         if (isActive) {
-            btnHtml = `<span class="pet-badge active">✅ Activa</span>`;
+            btnHtml = `<span class="pet-badge active"> Activa</span>`;
         } else if (isUnlocked) {
             btnHtml = `<button class="btn-pet-select" onclick="selectPet('${id}','${def.label}')">Seleccionar</button>`;
         } else if (canUnlock) {
             btnHtml = `<button class="btn-pet-unlock" onclick="unlockPet('${id}')">
-                🔓 ${cost === 0 ? 'Gratis' : `🪙${cost.toLocaleString()}`}
+                 ${cost === 0 ? 'Gratis' : `${cost.toLocaleString()}`}
             </button>`;
         } else {
-            btnHtml = `<span class="pet-badge locked">🔒 Bloqueado</span>`;
+            btnHtml = `<span class="pet-badge locked"> Bloqueado</span>`;
         }
 
         const hearts = getHeartConfig(Math.round(data.health));
@@ -823,15 +823,15 @@ const canUnlockPet = (id) => {
 };
 
 window.unlockPet = (id) => {
-    if (!canUnlockPet(id)) { _getShowToast()('❌ No puedes desbloquear esta mascota aún'); return; }
+    if (!canUnlockPet(id)) { _getShowToast()(' No puedes desbloquear esta mascota aún'); return; }
     const def  = PET_DEFS[id];
     const data = state.petData.get(id) || { health: 0, unlocked: false };
     state.monedas -= def.cost;
     data.unlocked = true;
     data.health   = 50; // empieza con 50% de salud
     state.petData.set(id, data);
-    _getShowToast()(`🎉 ¡Desbloqueaste ${def.label}!`);
-    _getLogEvent()('mascota', `Desbloqueaste ${def.label}`, `Costo: 🪙${def.cost.toLocaleString()}`);
+    _getShowToast()(` ¡Desbloqueaste ${def.label}!`);
+    _getLogEvent()('mascota', `Desbloqueaste ${def.label}`, `Costo: ${def.cost.toLocaleString()}`);
     _getUpdateUI()();
     openPetSelector();
 };

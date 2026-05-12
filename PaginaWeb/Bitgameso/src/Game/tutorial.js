@@ -25,34 +25,34 @@ const TUTORIAL_STEPS = [
     // PASO 0 — Bienvenida
     {
         target:   null,
-        mascot:   '¡Hola! 👋 Soy tu mascota y te voy a enseñar cómo funciona BITGAMESO. ¡Es muy fácil! Presiona "Siguiente" para empezar.',
+        mascot:   '¡Hola!  Soy tu mascota y te voy a enseñar cómo funciona BITGAMESO. ¡Es muy fácil! Presiona "Siguiente" para empezar.',
         waitFor:  'next',
     },
     // PASO 1 — Mostrar monedas
     {
         target:   '.score-container',
-        mascot:   '💰 Aquí están tus monedas. Con ellas puedes invertir en el mercado y comprar comida para mí. ¡Cuídalas!',
+        mascot:   ' Aquí están tus monedas. Con ellas puedes invertir en el mercado y comprar comida para mí. ¡Cuídalas!',
         waitFor:  'next',
         scrollTo: true,
     },
     // PASO 2 — Mostrar botones nav
     {
         target:   '.nav-actions',
-        mascot:   '🛒 Estos son tus botones principales. "Comprar" es para comprar comida, "Vender" y "Enviar" son para usar los ítems de tu inventario.',
+        mascot:   ' Estos son tus botones principales. "Comprar" es para comprar comida, "Vender" y "Enviar" son para usar los ítems de tu inventario.',
         waitFor:  'next',
         scrollTo: true,
     },
     // PASO 3 — Mostrar inventario
     {
         target:   '.inventory-section',
-        mascot:   '🎒 Aquí está tu inventario. La comida que compres aparecerá aquí. Haz click en un ítem para seleccionarlo y luego usa "Vender" o "Enviar".',
+        mascot:   ' Aquí está tu inventario. La comida que compres aparecerá aquí. Haz click en un ítem para seleccionarlo y luego usa "Vender" o "Enviar".',
         waitFor:  'next',
         scrollTo: true,
     },
     // PASO 4 — Mostrar cartera
     {
         target:   '.portfolio-aside',
-        mascot:   '💼 Esta es tu Cartera. Aquí verás todas las acciones del mercado que compres. ¡Cada inversión aparecerá aquí!',
+        mascot:   ' Esta es tu Cartera. Aquí verás todas las acciones del mercado que compres. ¡Cada inversión aparecerá aquí!',
         waitFor:  'next',
         scrollTo: true,
     },
@@ -60,7 +60,7 @@ const TUTORIAL_STEPS = [
     {
         target:   '.pet-aside',
         arrowDir: 'left',
-        mascot:   '🐾 ¡Y aquí estoy yo, tu mascota! Mi salud depende de tus decisiones. Si vendes con ganancias, me alegro. Si pierdes mucho, me pongo triste. ¡Cuídame!',
+        mascot:   ' ¡Y aquí estoy yo, tu mascota! Mi salud depende de tus decisiones. Si vendes con ganancias, me alegro. Si pierdes mucho, me pongo triste. ¡Cuídame!',
         waitFor:  'next',
         scrollTo: true,
     },
@@ -68,42 +68,42 @@ const TUTORIAL_STEPS = [
     {
         target:   '.market-main',
         arrowDir: 'down',
-        mascot:   '📈 Este es el Mercado Global. Los precios cambian solos cada pocos segundos. ¡Tu objetivo es comprar barato y vender caro!',
+        mascot:   ' Este es el Mercado Global. Los precios cambian solos cada pocos segundos. ¡Tu objetivo es comprar barato y vender caro!',
         waitFor:  'next',
         scrollTo: true,
     },
     // PASO 7 — Indicar que compre una acción específica
     {
         target:   '.market-list',
-        mascot:   '🎯 ¡Momento de invertir! Voy a resaltar una acción para que la compres. ¡Presiona el botón COMPRAR de esa acción!',
+        mascot:   ' ¡Momento de invertir! Voy a resaltar una acción para que la compres. ¡Presiona el botón COMPRAR de esa acción!',
         waitFor:  'buy_tutorial',
         scrollTo: true,
     },
     // PASO 8 — Mostrar que está en cartera
     {
         target:   '.portfolio-aside',
-        mascot:   '🎉 ¡Excelente! Ya tienes tu primera inversión en la Cartera. Mira cómo muestra el precio de compra y el precio actual.',
+        mascot:   ' ¡Excelente! Ya tienes tu primera inversión en la Cartera. Mira cómo muestra el precio de compra y el precio actual.',
         waitFor:  'next',
         scrollTo: true,
     },
     // PASO 9 — Esperar momento bueno para vender
     {
         target:   '.portfolio-aside',
-        mascot:   '⏳ Ahora espera a que tu inversión esté en VERDE (ganancia). Cuando el número sea positivo, ¡es el momento de vender! Si está en rojo, mejor espera.',
+        mascot:   ' Ahora espera a que tu inversión esté en VERDE (ganancia). Cuando el número sea positivo, ¡es el momento de vender! Si está en rojo, mejor espera.',
         waitFor:  'sell_tutorial',
         scrollTo: true,
     },
     // PASO 10 — Abrir tienda
     {
         target:   '#btn-comprar',
-        mascot:   '🥕 ¡Bien vendido! Ahora aprendamos a comprarme comida. Presiona el botón "Comprar" para abrir la tienda.',
+        mascot:   ' ¡Bien vendido! Ahora aprendamos a comprarme comida. Presiona el botón "Comprar" para abrir la tienda.',
         waitFor:  'click_target',
         scrollTo: true,
     },
     // PASO 11 — Seleccionar verdura específica en tienda
     {
         target:   '.food-shop-grid',
-        mascot:   '🥦 ¡Busca una VERDURA y cómprala! Las verduras (zanahoria, maíz, papa, tomate...) me dan salud directamente. ¡Están marcadas en verde!',
+        mascot:   ' ¡Busca una VERDURA y cómprala! Las verduras (zanahoria, maíz, papa, tomate...) me dan salud directamente. ¡Están marcadas en verde!',
         waitFor:  'buy_food_tutorial',
         scrollTo: false,
         highlightVeg: true,
@@ -111,21 +111,21 @@ const TUTORIAL_STEPS = [
     // PASO 12 — Mostrar inventario con el ítem
     {
         target:   '.inventory-section',
-        mascot:   '🎒 ¡Perfecto! La verdura ya está en tu inventario. Haz click en ella para seleccionarla — verás que se resalta con un borde morado.',
+        mascot:   ' ¡Perfecto! La verdura ya está en tu inventario. Haz click en ella para seleccionarla — verás que se resalta con un borde morado.',
         waitFor:  'select_food_tutorial',
         scrollTo: true,
     },
     // PASO 13 — Explicar Enviar vs Vender
     {
         target:   '.nav-actions',
-        mascot:   '💡 Tienes dos opciones: "Vender" te da la mitad del precio en monedas, o "Enviar" me da la comida y recupero salud. ¡Presiona ENVIAR para alimentarme!',
+        mascot:   ' Tienes dos opciones: "Vender" te da la mitad del precio en monedas, o "Enviar" me da la comida y recupero salud. ¡Presiona ENVIAR para alimentarme!',
         waitFor:  'use_food_tutorial',
         scrollTo: true,
     },
     // PASO 14 — Mostrar mascota mejorada + explicar poderes de comida
     {
         target:   '.pet-aside',
-        mascot:   '😊 ¡Mi salud subió! Pero hay más: 🍎 Las FRUTAS aceleran el mercado. 🥩 La CARNE/PESCADO duplica ganancias y pérdidas. 🍬 Los DULCES te muestran el futuro del mercado. ¡Cada comida tiene un poder especial!',
+        mascot:   ' ¡Mi salud subió! Pero hay más:  Las FRUTAS aceleran el mercado.  La CARNE/PESCADO duplica ganancias y pérdidas.  Los DULCES te muestran el futuro del mercado. ¡Cada comida tiene un poder especial!',
         waitFor:  'next',
         scrollTo: true,
         arrowDir: 'left',
@@ -133,7 +133,7 @@ const TUTORIAL_STEPS = [
     // PASO 14b — Explicar botones de mascota
     {
         target:   '.pet-ability-area',
-        mascot:   '🚀 ¡Mira estos botones! "Turbo x4" es la habilidad especial del Conejito — acelera el mercado x4 por 30 segundos. Cada mascota tiene su propio botón de habilidad aquí.',
+        mascot:   ' ¡Mira estos botones! "Turbo x4" es la habilidad especial del Conejito — acelera el mercado x4 por 30 segundos. Cada mascota tiene su propio botón de habilidad aquí.',
         waitFor:  'next',
         scrollTo: true,
         arrowDir: 'up',
@@ -141,7 +141,7 @@ const TUTORIAL_STEPS = [
     // PASO 14c — Explicar Ver habilidades
     {
         target:   '.btn-pet-info-active',
-        mascot:   '❓ "Ver habilidades" te muestra todos los poderes de tu mascota actual: velocidad del mercado, bonificaciones en ventas, efectos de comida y más. ¡Úsalo antes de invertir!',
+        mascot:   ' "Ver habilidades" te muestra todos los poderes de tu mascota actual: velocidad del mercado, bonificaciones en ventas, efectos de comida y más. ¡Úsalo antes de invertir!',
         waitFor:  'next',
         scrollTo: true,
         arrowDir: 'up',
@@ -157,7 +157,7 @@ const TUTORIAL_STEPS = [
     // PASO 15 — Final
     {
         target:   null,
-        mascot:   '🏆 ¡Tutorial completado! Como recompensa, ¡te doy 1000 monedas extra! Recuerda: invierte en el mercado, cuídame con comida y ¡buena suerte! 🚀',
+        mascot:   ' ¡Tutorial completado! Como recompensa, ¡te doy 1000 monedas extra! Recuerda: invierte en el mercado, cuídame con comida y ¡buena suerte! 🚀',
         waitFor:  'finish',
     },
 ];
@@ -190,7 +190,7 @@ const finishTutorial = () => {
     }
     closeTutorial();
     if (typeof showToast === 'function')
-        showToast(tutorialFirstRun ? '🎉 ¡Tutorial completado! +🪙1000 de regalo' : '🎓 ¡Repasaste el tutorial!');
+        showToast(tutorialFirstRun ? '🎉 ¡Tutorial completado! +1000 de regalo' : '🎓 ¡Repasaste el tutorial!');
 };
 
 // ============================================================
@@ -526,9 +526,9 @@ const setupSellTutorial = () => {
             const textEl = document.getElementById('tut-text');
             if (textEl) {
                 if (cur.price >= pos.buyPrice) {
-                    textEl.textContent = '✅ ¡Está en verde! Es buen momento para vender. ¡Presiona VENDER en tu cartera!';
+                    textEl.textContent = ' ¡Está en verde! Es buen momento para vender. ¡Presiona VENDER en tu cartera!';
                 } else {
-                    textEl.textContent = '🔴 Aún está en rojo, espera un poco más antes de vender...';
+                    textEl.textContent = ' Aún está en rojo, espera un poco más antes de vender...';
                 }
             }
         }
@@ -615,13 +615,13 @@ const setupUseFoodTutorial = () => {
             if (btnVender) btnVender.removeEventListener('click', venderHandler);
 
             if (sentFood || state.saludMascota >= prevHealth) {
-                // ✅ Envió correctamente (salud igual o mayor, o botón enviar fue presionado)
+                //  Envió correctamente (salud igual o mayor, o botón enviar fue presionado)
                 setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
             } else {
                 // ❌ Vendió la comida
                 waitingForAction = true;
                 const textEl = document.getElementById('tut-text');
-                if (textEl) textEl.textContent = '😅 ¡Ups! Vendiste la comida en vez de enviarla. Compra otra verdura y usa el botón "Enviar". ¡Inténtalo de nuevo!';
+                if (textEl) textEl.textContent = ' ¡Ups! Vendiste la comida en vez de enviarla. Compra otra verdura y usa el botón "Enviar". ¡Inténtalo de nuevo!';
                 setTimeout(() => {
                     const stepIdx = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'click_target' && s.target === '#btn-comprar');
                     tutorialStep = stepIdx >= 0 ? stepIdx : tutorialStep - 3;
@@ -658,5 +658,5 @@ document.addEventListener('DOMContentLoaded', () => {
     const oldModal = document.getElementById('modal-tutorial');
     if (oldModal) oldModal.style.display = 'none';
 
-    console.log('BITGAMESO Tutorial: sistema cargado correctamente ✅');
+    console.log('BITGAMESO Tutorial: sistema cargado correctamente ');
 });
