@@ -504,3 +504,32 @@ const setupUseFoodTutorial = () => {
         }
     }, 400);
 };
+
+
+// ============================================================
+//  GARANTIZAR QUE tutorial.js GANA sobre cualquier otra versión
+//  Se ejecuta al final de la carga para sobreescribir funciones viejas
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Sobreescribir cualquier función vieja de tutorial
+    window.openTutorial = () => {
+        tutorialFirstRun = !localStorage.getItem(TUTORIAL_DONE_KEY());
+        tutorialActive   = true;
+        tutorialStep     = 0;
+        tutorialSelectedAction = null;
+        createTutorialUI();
+        renderTutorialStep();
+    };
+
+    window.closeTutorial = () => {
+        tutorialActive = false;
+        removeTutorialUI();
+        removeHighlight();
+    };
+
+    // Ocultar modal viejo si existe
+    const oldModal = document.getElementById('modal-tutorial');
+    if (oldModal) oldModal.style.display = 'none';
+
+    console.log('BITGAMESO Tutorial: sistema cargado correctamente ✅');
+});
