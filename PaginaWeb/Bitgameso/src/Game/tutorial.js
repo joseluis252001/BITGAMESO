@@ -93,40 +93,50 @@ const TUTORIAL_STEPS = [
         waitFor:  'sell_tutorial',
         scrollTo: true,
     },
-    // PASO 10 — Comprar verdura
+    // PASO 10 — Abrir tienda
     {
         target:   '#btn-comprar',
         mascot:   '🥕 ¡Bien vendido! Ahora aprendamos a comprarme comida. Presiona el botón "Comprar" para abrir la tienda.',
         waitFor:  'click_target',
         scrollTo: true,
     },
-    // PASO 11 — Seleccionar verdura en tienda
+    // PASO 11 — Seleccionar verdura específica en tienda
     {
         target:   '.food-shop-grid',
-        mascot:   '🥦 En la tienda verás diferentes alimentos. Las VERDURAS me dan salud directamente. ¡Compra una verdura!',
+        mascot:   '🥦 ¡Busca una VERDURA y cómprala! Las verduras (zanahoria, maíz, papa, tomate...) me dan salud directamente. ¡Están marcadas en verde!',
         waitFor:  'buy_food_tutorial',
         scrollTo: false,
+        highlightVeg: true,
     },
     // PASO 12 — Mostrar inventario con el ítem
     {
         target:   '.inventory-section',
-        mascot:   '🎒 ¡Perfecto! La verdura ya está en tu inventario. Haz click en ella para seleccionarla.',
+        mascot:   '🎒 ¡Perfecto! La verdura ya está en tu inventario. Haz click en ella para seleccionarla — verás que se resalta con un borde morado.',
         waitFor:  'select_food_tutorial',
         scrollTo: true,
     },
-    // PASO 13 — Mostrar opciones vender/enviar
+    // PASO 13 — Explicar Enviar vs Vender
     {
         target:   '.nav-actions',
-        mascot:   '💡 Con el ítem seleccionado tienes dos opciones: "Vender" para recuperar la mitad del precio, o "Enviar" para dármela a mí y recuperar mi salud. ¡Prueba Enviar!',
+        mascot:   '💡 Tienes dos opciones: "Vender" te da la mitad del precio en monedas, o "Enviar" me da la comida y recupero salud. ¡Presiona ENVIAR para alimentarme!',
         waitFor:  'use_food_tutorial',
         scrollTo: true,
     },
-    // PASO 14 — Mostrar mascota mejorada
+    // PASO 14 — Mostrar mascota mejorada + explicar poderes de comida
     {
         target:   '.pet-aside',
-        mascot:   '😊 ¡Mira! Mi salud subió gracias a la verdura que me diste. ¡Así es como me cuidas! Entre más me alimentes, más feliz estaré.',
+        mascot:   '😊 ¡Mi salud subió! Pero hay más: 🍎 Las FRUTAS aceleran el mercado. 🥩 La CARNE/PESCADO duplica ganancias y pérdidas. 🍬 Los DULCES te muestran el futuro del mercado. ¡Cada comida tiene un poder especial!',
         waitFor:  'next',
         scrollTo: true,
+        arrowDir: 'left',
+    },
+    // PASO 14b — Explicar habilidades de mascotas
+    {
+        target:   '#btn-cambiar-mascota',
+        mascot:   '🐾 ¡Cada mascota tiene habilidades únicas para invertir! El Conejo tiene Turbo x4, la Rana predice el mercado, el Tiburón multiplica tus ventas x8... Presiona "Mascotas" para ver todas las opciones y desbloquearlas.',
+        waitFor:  'next',
+        scrollTo: true,
+        arrowDir: 'up',
     },
     // PASO 15 — Final
     {
@@ -498,14 +508,27 @@ const setupClickTarget = (selector) => {
     el.addEventListener('click', handler);
 };
 
-// Esperar que compre comida tipo verdura
+// Esperar que compre comida — resaltar verduras en tienda
 const setupBuyFoodTutorial = () => {
+    // Resaltar items de verdura en la tienda
+    setTimeout(() => {
+        const vegItems = document.querySelectorAll('.food-item.veg');
+        vegItems.forEach(item => {
+            item.style.boxShadow = '0 0 0 3px #CBA6F7, 0 0 15px rgba(203,166,247,0.6)';
+            item.style.transform = 'scale(1.05)';
+        });
+    }, 300);
+
     const prevInv = state.inventory.size;
     const check = setInterval(() => {
         if (!tutorialActive) { clearInterval(check); return; }
         if (state.inventory.size > prevInv) {
             clearInterval(check);
-            // Cerrar tienda si sigue abierta
+            // Quitar resaltado
+            document.querySelectorAll('.food-item.veg').forEach(item => {
+                item.style.boxShadow = '';
+                item.style.transform = '';
+            });
             if (typeof closeFoodShop === 'function') closeFoodShop();
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
         }
@@ -523,14 +546,35 @@ const setupSelectFoodTutorial = () => {
     }, 400);
 };
 
-// Esperar que envíe comida a la mascota
+// Esperar que envíe comida a la mascota (si vende, pedir que compre otra)
 const setupUseFoodTutorial = () => {
     const prevHealth = state.saludMascota;
+    const prevInv    = new Map(state.inventory);
+
     const check = setInterval(() => {
         if (!tutorialActive) { clearInterval(check); return; }
-        if (state.saludMascota > prevHealth || !state.selectedFood) {
+
+        // Salud subió = envió comida correctamente ✅
+        if (state.saludMascota > prevHealth) {
             clearInterval(check);
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
+            return;
+        }
+
+        // Inventario cambió pero salud no subió = vendió la comida ❌
+        const invChanged = state.inventory.size < prevInv.size ||
+            (state.selectedFood === null && state.inventory.size <= prevInv.size);
+
+        if (invChanged && state.saludMascota <= prevHealth && state.inventory.size === 0) {
+            clearInterval(check);
+            // Mostrar mensaje y volver al paso de comprar
+            const textEl = document.getElementById('tut-text');
+            if (textEl) textEl.textContent = '😅 ¡Ups! Vendiste la comida en vez de enviarla. Vuelve a comprar una verdura y esta vez usa el botón "Enviar". ¡Yo te espero!';
+            // Regresar al paso de abrir tienda después de 3s
+            setTimeout(() => {
+                tutorialStep = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'click_target' && s.target === '#btn-comprar');
+                renderTutorialStep();
+            }, 3000);
         }
     }, 400);
 };
