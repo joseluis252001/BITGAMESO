@@ -385,13 +385,19 @@ const removeHighlight = () => {
 //  TYPEWRITER EFFECT
 // ============================================================
 const typewriterEffect = (el, text) => {
+    if (!el || !text) return;
     el.textContent = '';
+    // Split by grapheme clusters to handle emojis correctly
+    const chars = [...text]; // spread handles emoji correctly
     let i = 0;
     const interval = setInterval(() => {
-        el.textContent += text[i];
-        i++;
-        if (i >= text.length) clearInterval(interval);
-    }, 25);
+        if (i < chars.length) {
+            el.textContent += chars[i];
+            i++;
+        } else {
+            clearInterval(interval);
+        }
+    }, 20);
 };
 
 // ============================================================
@@ -548,35 +554,38 @@ const setupSelectFoodTutorial = () => {
 
 // Esperar que envíe comida a la mascota (si vende, pedir que compre otra)
 const setupUseFoodTutorial = () => {
-    const prevHealth = state.saludMascota;
-    const prevInv    = new Map(state.inventory);
+    const prevHealth  = state.saludMascota;
+    const prevInvSize = state.inventory.size;
+    let   waitingForAction = false;
 
     const check = setInterval(() => {
         if (!tutorialActive) { clearInterval(check); return; }
+        if (waitingForAction) return;
+
+        const currentHealth  = state.saludMascota;
+        const currentInvSize = state.inventory.size;
 
         // Salud subió = envió comida correctamente ✅
-        if (state.saludMascota > prevHealth) {
+        if (currentHealth > prevHealth) {
             clearInterval(check);
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
             return;
         }
 
-        // Inventario cambió pero salud no subió = vendió la comida ❌
-        const invChanged = state.inventory.size < prevInv.size ||
-            (state.selectedFood === null && state.inventory.size <= prevInv.size);
-
-        if (invChanged && state.saludMascota <= prevHealth && state.inventory.size === 0) {
+        // Inventario se redujo pero salud NO subió = vendió la comida ❌
+        if (currentInvSize < prevInvSize && currentHealth <= prevHealth) {
             clearInterval(check);
-            // Mostrar mensaje y volver al paso de comprar
+            waitingForAction = true;
             const textEl = document.getElementById('tut-text');
-            if (textEl) textEl.textContent = '😅 ¡Ups! Vendiste la comida en vez de enviarla. Vuelve a comprar una verdura y esta vez usa el botón "Enviar". ¡Yo te espero!';
-            // Regresar al paso de abrir tienda después de 3s
+            if (textEl) textEl.textContent = '😅 ¡Ups! Vendiste la comida en vez de enviarla. Compra otra verdura y usa el botón "Enviar". ¡Inténtalo de nuevo!';
             setTimeout(() => {
-                tutorialStep = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'click_target' && s.target === '#btn-comprar');
+                // Volver al paso de abrir tienda
+                const stepIdx = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'click_target' && s.target === '#btn-comprar');
+                tutorialStep = stepIdx >= 0 ? stepIdx : tutorialStep - 3;
                 renderTutorialStep();
             }, 3000);
         }
-    }, 400);
+    }, 500);
 };
 
 
