@@ -235,11 +235,11 @@ const foodDatabase = [
 ];
 
 const catLabel = {
-    fruta:    '⚡ Mercado rápido',
-    verdura:  '❤️ +Salud',
-    proteina: '💰 Ganancias/Pérdidas x2',
-    dulce:    '🔮 Ver futuro del mercado',
-    misc:     '💎 Reventa 0.5x–4x',
+    fruta:    'Mercado rápido',
+    verdura:  '+Salud',
+    proteina: 'Ganancias/Pérdidas x2',
+    dulce:    'Ver futuro del mercado',
+    misc:     'Reventa 0.5x–4x',
 };
 const catClass = { fruta:'fruit', verdura:'veg', proteina:'protein', dulce:'candy', misc:'misc' };
 
@@ -666,14 +666,14 @@ window.openFoodShop = () => {
         const inflTag = timesBought > 0
             ? `<span class="food-inflation">🔥 x${Math.pow(2,timesBought)} inflación</span>` : '';
 
-        // Iconos por categoría — solo los que funcionan
+        // Iconos por categoría
         const catIcons = {
             veg:      '<img src="../assets/Hearts/Heart-Red-128.png" class="food-eff-icon">',
-            fruit:    '',
+            fruit:    '',   // sin ícono de efecto
             protein:  '<img src="../assets/coins/Coins-3-128.png" class="food-eff-icon">',
             dulce:    '<img src="../assets/settings/Radial-Shine.png" class="food-eff-icon">',
             candy:    '<img src="../assets/settings/Radial-Shine.png" class="food-eff-icon">',
-            misc:     '',
+            misc:     '',   // sin ícono de efecto
         };
         const effIcon = catIcons[f.cat] || '';
 
