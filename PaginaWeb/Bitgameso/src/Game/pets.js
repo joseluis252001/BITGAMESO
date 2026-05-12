@@ -267,12 +267,21 @@ const initPetData = () => {
     if (!state.petData) state.petData = new Map();
     PET_ORDER.forEach((id, i) => {
         if (!state.petData.has(id)) {
-            // Primeros 3 (gratis) arrancan con 50% de vida, el resto con 0
+            // Mascota nueva — asignar valores por defecto
+            // 'everUsed' marca si el jugador ya interactuó con ella
             const defaultHealth = i < 3 ? 50 : 0;
             state.petData.set(id, {
                 health:   defaultHealth,
                 unlocked: i < 3,
+                everUsed: false,  // nunca ha sido usada
             });
+        } else {
+            // Mascota existente — solo corregir a 50% si NUNCA fue usada
+            const existing = state.petData.get(id);
+            if (i < 3 && existing.health === 0 && existing.everUsed !== true) {
+                existing.health = 50;
+                state.petData.set(id, existing);
+            }
         }
     });
     // Asegurar que el conejo siempre esté desbloqueado con al menos 50%
@@ -833,7 +842,12 @@ window.selectPet = (id, label) => {
     state.currentPet = id;
     // Restaurar salud de la nueva mascota
     const data = state.petData.get(id);
-    if (data) state.saludMascota = data.health;
+    if (data) {
+        state.saludMascota = data.health;
+        // Marcar como usada para que si llega a 0% no se resetee
+        data.everUsed = true;
+        state.petData.set(id, data);
+    }
     renderPet();
     renderPetHealth();
     startPassivesForPet(id);
