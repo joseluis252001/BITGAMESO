@@ -130,10 +130,26 @@ const TUTORIAL_STEPS = [
         scrollTo: true,
         arrowDir: 'left',
     },
-    // PASO 14b — Explicar habilidades de mascotas
+    // PASO 14b — Explicar botones de mascota
+    {
+        target:   '.pet-ability-area',
+        mascot:   '🚀 ¡Mira estos botones! "Turbo x4" es la habilidad especial del Conejito — acelera el mercado x4 por 30 segundos. Cada mascota tiene su propio botón de habilidad aquí.',
+        waitFor:  'next',
+        scrollTo: true,
+        arrowDir: 'up',
+    },
+    // PASO 14c — Explicar Ver habilidades
+    {
+        target:   '.btn-pet-info-active',
+        mascot:   '❓ "Ver habilidades" te muestra todos los poderes de tu mascota actual: velocidad del mercado, bonificaciones en ventas, efectos de comida y más. ¡Úsalo antes de invertir!',
+        waitFor:  'next',
+        scrollTo: true,
+        arrowDir: 'up',
+    },
+    // PASO 14d — Explicar botón Mascotas
     {
         target:   '#btn-cambiar-mascota',
-        mascot:   '🐾 ¡Cada mascota tiene habilidades únicas para invertir! El Conejo tiene Turbo x4, la Rana predice el mercado, el Tiburón multiplica tus ventas x8... Presiona "Mascotas" para ver todas las opciones y desbloquearlas.',
+        mascot:   '🐾 "Mascotas" abre el menú donde puedes ver todas las mascotas disponibles, desbloquear nuevas y cambiar entre ellas. ¡Cada una tiene habilidades únicas para ayudarte a invertir mejor!',
         waitFor:  'next',
         scrollTo: true,
         arrowDir: 'up',
@@ -234,6 +250,7 @@ const renderTutorialStep = () => {
     // Texto de la mascota con efecto typewriter
     const textEl = document.getElementById('tut-text');
     if (textEl) typewriterEffect(textEl, step.mascot);
+    // Nota: botones se muestran solo cuando el texto termina (ver typewriterEffect)
 
     // Contador de pasos
     const counter = document.getElementById('tut-step-counter');
@@ -384,20 +401,32 @@ const removeHighlight = () => {
 // ============================================================
 //  TYPEWRITER EFFECT
 // ============================================================
-const typewriterEffect = (el, text) => {
-    if (!el || !text) return;
+const typewriterEffect = (el, text, onDone) => {
+    if (!el || !text) { if (onDone) onDone(); return; }
     el.textContent = '';
-    // Split by grapheme clusters to handle emojis correctly
-    const chars = [...text]; // spread handles emoji correctly
+    const chars = [...text];
     let i = 0;
+
+    // Hide next/finish buttons while typing
+    const btnNext   = document.getElementById('tut-btn-next');
+    const btnFinish = document.getElementById('tut-btn-finish');
+    if (btnNext)   btnNext.style.opacity   = '0.3';
+    if (btnNext)   btnNext.style.pointerEvents = 'none';
+    if (btnFinish) btnFinish.style.opacity = '0.3';
+    if (btnFinish) btnFinish.style.pointerEvents = 'none';
+
     const interval = setInterval(() => {
         if (i < chars.length) {
             el.textContent += chars[i];
             i++;
         } else {
             clearInterval(interval);
+            // Show buttons now that text is done
+            if (btnNext)   { btnNext.style.opacity = '1'; btnNext.style.pointerEvents = 'auto'; }
+            if (btnFinish) { btnFinish.style.opacity = '1'; btnFinish.style.pointerEvents = 'auto'; }
+            if (onDone) onDone();
         }
-    }, 20);
+    }, 22);
 };
 
 // ============================================================
