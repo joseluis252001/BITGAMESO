@@ -267,16 +267,18 @@ const initPetData = () => {
     if (!state.petData) state.petData = new Map();
     PET_ORDER.forEach((id, i) => {
         if (!state.petData.has(id)) {
+            // Primeros 3 (gratis) arrancan con 50% de vida, el resto con 0
+            const defaultHealth = i < 3 ? 50 : 0;
             state.petData.set(id, {
-                health:   id === 'Bunny-Pink-128' ? 75 : 0,
-                unlocked: i < 3, // primeros 3 gratis
+                health:   defaultHealth,
+                unlocked: i < 3,
             });
         }
     });
-    // Asegurar que el conejo siempre esté desbloqueado
-    const bunny = state.petData.get('Bunny-Pink-128') || { health: 75, unlocked: true };
+    // Asegurar que el conejo siempre esté desbloqueado con al menos 50%
+    const bunny = state.petData.get('Bunny-Pink-128') || { health: 50, unlocked: true };
     bunny.unlocked = true;
-    if (!bunny.health) bunny.health = 75;
+    if (!bunny.health || bunny.health < 1) bunny.health = 50;
     state.petData.set('Bunny-Pink-128', bunny);
 };
 
