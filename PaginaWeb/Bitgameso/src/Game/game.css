@@ -1441,3 +1441,29 @@ body {
     0%   { transform: translateX(0px); }
     100% { transform: translateX(8px); }
 }
+
+/* ============================================================
+   ICONOS PERSONALIZADOS — NAV Y HEADER
+   ============================================================ */
+.chevron-img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    opacity: 0.6;
+}
+.profile-trigger:hover .chevron-img { filter: brightness(10); opacity: 1; }
+
+.btn-nav-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+.inv-icon-img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    vertical-align: middle;
+}

@@ -34,10 +34,9 @@
                     <img src="../assets/avatares/Avatar-Boy-2-128.png" id="current-avatar-header" class="user-avatar-img" alt="Perfil">
                 </div>
                 <span id="nombre-usuario">joseluis</span>
-                <span class="chevron">▾</span>
+                <img src="../assets/arrows/Arrow-Down-128.png" class="chevron-img" alt="▾">
             </div>
             <div id="settings-dropdown-menu" class="settings-dropdown" style="display:none;">
-                <p class="dropdown-title">✨ Cambiar Avatar</p>
                 <div class="avatar-options">
                     <img src="../assets/avatares/Avatar-Boy-1-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 1">
                     <img src="../assets/avatares/Avatar-Boy-2-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 2">
@@ -56,7 +55,9 @@
                     <img src="../assets/avatares/Avatar-Girl-8-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 8">
                 </div>
                 <hr class="dropdown-divider">
-                <button onclick="handleLogout()" class="btn-logout">🚪 Cerrar Sesión</button>
+                <button onclick="handleLogout()" class="btn-logout">
+                    <img src="../assets/arrows/X-Error-128.png" style="width:16px;vertical-align:middle;margin-right:6px;">Cerrar Sesión
+                </button>
             </div>
         </div>
     </header>
@@ -72,16 +73,16 @@
             <div id="active-effects" class="active-effects"></div>
         </div>
         <div class="nav-actions">
-            <button id="btn-depositar">💳 Depositar</button>
-            <button id="btn-comprar">🛒 Comprar</button>
-            <button id="btn-vender">📦 Vender</button>
-            <button id="btn-enviar">🐾 Enviar</button>
+            <button id="btn-depositar"><img src="../assets/coins/Coins-2-Bag-128.png" class="btn-nav-icon"> Depositar</button>
+            <button id="btn-comprar"><img src="../assets/settings/Shop-Balloons-128.png" class="btn-nav-icon"> Comprar</button>
+            <button id="btn-vender"><img src="../assets/arrows/Package-128.png" class="btn-nav-icon"> Vender</button>
+            <button id="btn-enviar"><img src="../assets/arrows/Mail-Open-256.png" class="btn-nav-icon"> Enviar</button>
         </div>
     </nav>
 
     <!-- ====== INVENTARIO BAR ====== -->
     <div class="inventory-section">
-        <span class="inv-title">🎒 Inventario:</span>
+        <span class="inv-title"><img src="../assets/arrows/Backpack-128.png" class="inv-icon-img" alt="Inventario"> Inventario:</span>
         <div id="inventory-bar" class="inventory-bar">
             <span class="inv-empty">Sin ítems</span>
         </div>

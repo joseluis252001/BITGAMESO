@@ -908,7 +908,7 @@ const renderInventory = () => {
     const el = document.getElementById('inventory-bar');
     if (!el) return;
     if (state.inventory.size === 0) {
-        el.innerHTML = `<span class="inv-empty">Sin ítems — compra comida con 🛒 Comprar</span>`;
+        el.innerHTML = `<span class="inv-empty">Sin ítems — compra comida con Comprar</span>`;
         updateSelectedLabel();
         return;
     }
