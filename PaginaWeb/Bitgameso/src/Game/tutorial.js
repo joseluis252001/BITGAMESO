@@ -149,7 +149,7 @@ const TUTORIAL_STEPS = [
     // PASO 14d — Explicar botón Mascotas
     {
         target:   '#btn-cambiar-mascota',
-        mascot:   '🐾 "Mascotas" abre el menú donde puedes ver todas las mascotas disponibles, desbloquear nuevas y cambiar entre ellas. ¡Cada una tiene habilidades únicas para ayudarte a invertir mejor!',
+        mascot:   ' "Mascotas" abre el menú donde puedes ver todas las mascotas disponibles, desbloquear nuevas y cambiar entre ellas. ¡Cada una tiene habilidades únicas para ayudarte a invertir mejor!',
         waitFor:  'next',
         scrollTo: true,
         arrowDir: 'up',
@@ -157,7 +157,7 @@ const TUTORIAL_STEPS = [
     // PASO 15 — Final
     {
         target:   null,
-        mascot:   ' ¡Tutorial completado! Como recompensa, ¡te doy 1000 monedas extra! Recuerda: invierte en el mercado, cuídame con comida y ¡buena suerte! 🚀',
+        mascot:   ' ¡Tutorial completado! Como recompensa, ¡te doy 1000 monedas extra! Recuerda: invierte en el mercado, cuídame con comida y ¡buena suerte! ',
         waitFor:  'finish',
     },
 ];
@@ -190,7 +190,7 @@ const finishTutorial = () => {
     }
     closeTutorial();
     if (typeof showToast === 'function')
-        showToast(tutorialFirstRun ? '🎉 ¡Tutorial completado! +1000 de regalo' : '🎓 ¡Repasaste el tutorial!');
+        showToast(tutorialFirstRun ? ' ¡Tutorial completado! +1000 de regalo' : ' ¡Repasaste el tutorial!');
 };
 
 // ============================================================
@@ -225,7 +225,7 @@ const createTutorialUI = () => {
             <span id="tut-step-counter" class="tut-counter"></span>
             <div class="tut-buttons">
                 <button id="tut-btn-next" class="tut-btn-primary" onclick="tutorialNext()" style="display:none;">Siguiente →</button>
-                <button id="tut-btn-finish" class="tut-btn-finish" onclick="finishTutorial()" style="display:none;">🏆 ¡Terminar!</button>
+                <button id="tut-btn-finish" class="tut-btn-finish" onclick="finishTutorial()" style="display:none;"> ¡Terminar!</button>
             </div>
         </div>
     `;
@@ -618,7 +618,7 @@ const setupUseFoodTutorial = () => {
                 //  Envió correctamente (salud igual o mayor, o botón enviar fue presionado)
                 setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
             } else {
-                // ❌ Vendió la comida
+                // Vendió la comida
                 waitingForAction = true;
                 const textEl = document.getElementById('tut-text');
                 if (textEl) textEl.textContent = ' ¡Ups! Vendiste la comida en vez de enviarla. Compra otra verdura y usa el botón "Enviar". ¡Inténtalo de nuevo!';

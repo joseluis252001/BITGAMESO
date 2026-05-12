@@ -737,9 +737,9 @@ const updateSelectedLabel = () => {
 // ============================================================
 const useFoodOnPet = () => {
     const foodId = state.selectedFood;
-    if (!foodId) { showToast('🎒 Selecciona un ítem del inventario primero'); return; }
+    if (!foodId) { showToast(' Selecciona un ítem del inventario primero'); return; }
     const item = state.inventory.get(foodId);
-    if (!item || item.qty <= 0) { showToast('❌ No tienes ese ítem'); return; }
+    if (!item || item.qty <= 0) { showToast(' No tienes ese ítem'); return; }
 
     switch(item.cat) {
         case 'verdura':
@@ -961,7 +961,7 @@ const renderPortfolio = () => {
             <div class="pi-profit ${profit>=0?'up':'down'}">
                 ${profit>=0?'▲':'▼'} ${fmt(Math.abs(profit))} (${Math.abs(pct)}%)
                 ${isEffectActive('doubleProfit')?'<span class="x2-tag">x2</span>':''}
-                ${state.sectorBonus.get(pos.type||'')?'<span class="bonus-tag">🏆 +3%</span>':''}
+                ${state.sectorBonus.get(pos.type||'')?'<span class="bonus-tag"> +3%</span>':''}
             </div>
             <button class="btn-action btn-sell" onclick="sellFromPortfolio('${symbol}')">Vender</button>
         </div>`;
@@ -1222,31 +1222,31 @@ const applySectorBonus = (type, baseProfit, buyPrice) => {
 
 const marketEvents = [
     // CAÍDAS
-    { sector:'IA',        type:'crash', magnitude:[0.10,0.30], warningMsg:' ¡ALERTA! Escándalo en el sector IA… ¡todas sus acciones podrían desplomarse pronto!', eventMsg:'💥 ¡CRASH de IA! Todas las acciones de Inteligencia Artificial han caído drásticamente.' },
-    { sector:'Bluechip',  type:'crash', magnitude:[0.10,0.25], warningMsg:' ¡ALERTA! Las grandes empresas Bluechip están en problemas… ¡una caída se acerca!', eventMsg:'💥 ¡CRASH Bluechip! Las acciones de las grandes empresas han colapsado.' },
-    { sector:'Digital',   type:'crash', magnitude:[0.15,0.35], warningMsg:' ¡ALERTA! Las criptomonedas están en pánico… ¡vienen caídas masivas en Digital!', eventMsg:'💥 ¡CRYPTO CRASH! Todas las monedas digitales se han desplomado.' },
-    { sector:'Gaming',    type:'crash', magnitude:[0.10,0.30], warningMsg:' ¡ALERTA! El sector Gaming está en crisis… ¡los precios van a caer pronto!', eventMsg:'💥 ¡GAMING CRASH! Los activos de Gaming han sufrido una caída brutal.' },
-    { sector:'NFT',       type:'crash', magnitude:[0.15,0.30], warningMsg:' ¡ALERTA! ¡Los NFT pronto caerán! ¡Todas sus acciones en peligro!', eventMsg:'💥 ¡NFT CRASH! El mercado de NFT se ha hundido por completo.' },
-    { sector:'Metaverso', type:'crash', magnitude:[0.10,0.25], warningMsg:' ¡ALERTA! El Metaverso está siendo abandonado… ¡viene una caída brutal!', eventMsg:'💥 ¡METAVERSO CRASH! Las acciones del Metaverso han caído estrepitosamente.' },
-    { sector:'Fintech',   type:'crash', magnitude:[0.10,0.20], warningMsg:' ¡ALERTA! Regulaciones nuevas amenazan al Fintech… ¡una crisis se avecina!', eventMsg:'💥 ¡FINTECH CRASH! El sector Fintech ha colapsado por nuevas regulaciones.' },
-    { sector:'Energía',   type:'crash', magnitude:[0.10,0.25], warningMsg:' ¡ALERTA! Crisis energética global… ¡las acciones de Energía van a caer!', eventMsg:'💥 ¡ENERGÍA CRASH! El sector energético ha sufrido una caída masiva.' },
-    { sector:'Biotech',   type:'crash', magnitude:[0.10,0.25], warningMsg:' ¡ALERTA! Un ensayo clínico falló… ¡el sector Biotech va a desplomarse!', eventMsg:'💥 ¡BIOTECH CRASH! Las farmacéuticas y biotechs han caído en picado.' },
-    { sector:'Espacio',   type:'crash', magnitude:[0.10,0.30], warningMsg:' ¡ALERTA! Una misión espacial fracasó… ¡el sector Espacio va a caer pronto!', eventMsg:'💥 ¡ESPACIO CRASH! Los activos espaciales han sufrido una caída enorme.' },
-    { sector:'Meme',      type:'crash', magnitude:[0.20,0.40], warningMsg:' ¡ALERTA! ¡Los meme coins van a morir! ¡Vende antes de que sea tarde!', eventMsg:'💥 ¡MEME CRASH! Los meme coins han colapsado completamente. El meme ha muerto.' },
-    { sector:'DeFi',      type:'crash', magnitude:[0.15,0.30], warningMsg:' ¡ALERTA! Un exploit masivo en DeFi… ¡todas sus acciones van a caer!', eventMsg:'💥 ¡DeFi CRASH! El sector descentralizado ha sido hackeado. Precios en caída libre.' },
+    { sector:'IA',        type:'crash', magnitude:[0.10,0.30], warningMsg:' ¡ALERTA! Escándalo en el sector IA… ¡todas sus acciones podrían desplomarse pronto!', eventMsg:' ¡CRASH de IA! Todas las acciones de Inteligencia Artificial han caído drásticamente.' },
+    { sector:'Bluechip',  type:'crash', magnitude:[0.10,0.25], warningMsg:' ¡ALERTA! Las grandes empresas Bluechip están en problemas… ¡una caída se acerca!', eventMsg:' ¡CRASH Bluechip! Las acciones de las grandes empresas han colapsado.' },
+    { sector:'Digital',   type:'crash', magnitude:[0.15,0.35], warningMsg:' ¡ALERTA! Las criptomonedas están en pánico… ¡vienen caídas masivas en Digital!', eventMsg:' ¡CRYPTO CRASH! Todas las monedas digitales se han desplomado.' },
+    { sector:'Gaming',    type:'crash', magnitude:[0.10,0.30], warningMsg:' ¡ALERTA! El sector Gaming está en crisis… ¡los precios van a caer pronto!', eventMsg:' ¡GAMING CRASH! Los activos de Gaming han sufrido una caída brutal.' },
+    { sector:'NFT',       type:'crash', magnitude:[0.15,0.30], warningMsg:' ¡ALERTA! ¡Los NFT pronto caerán! ¡Todas sus acciones en peligro!', eventMsg:' ¡NFT CRASH! El mercado de NFT se ha hundido por completo.' },
+    { sector:'Metaverso', type:'crash', magnitude:[0.10,0.25], warningMsg:' ¡ALERTA! El Metaverso está siendo abandonado… ¡viene una caída brutal!', eventMsg:' ¡METAVERSO CRASH! Las acciones del Metaverso han caído estrepitosamente.' },
+    { sector:'Fintech',   type:'crash', magnitude:[0.10,0.20], warningMsg:' ¡ALERTA! Regulaciones nuevas amenazan al Fintech… ¡una crisis se avecina!', eventMsg:' ¡FINTECH CRASH! El sector Fintech ha colapsado por nuevas regulaciones.' },
+    { sector:'Energía',   type:'crash', magnitude:[0.10,0.25], warningMsg:' ¡ALERTA! Crisis energética global… ¡las acciones de Energía van a caer!', eventMsg:' ¡ENERGÍA CRASH! El sector energético ha sufrido una caída masiva.' },
+    { sector:'Biotech',   type:'crash', magnitude:[0.10,0.25], warningMsg:' ¡ALERTA! Un ensayo clínico falló… ¡el sector Biotech va a desplomarse!', eventMsg:' ¡BIOTECH CRASH! Las farmacéuticas y biotechs han caído en picado.' },
+    { sector:'Espacio',   type:'crash', magnitude:[0.10,0.30], warningMsg:' ¡ALERTA! Una misión espacial fracasó… ¡el sector Espacio va a caer pronto!', eventMsg:' ¡ESPACIO CRASH! Los activos espaciales han sufrido una caída enorme.' },
+    { sector:'Meme',      type:'crash', magnitude:[0.20,0.40], warningMsg:' ¡ALERTA! ¡Los meme coins van a morir! ¡Vende antes de que sea tarde!', eventMsg:' ¡MEME CRASH! Los meme coins han colapsado completamente. El meme ha muerto.' },
+    { sector:'DeFi',      type:'crash', magnitude:[0.15,0.30], warningMsg:' ¡ALERTA! Un exploit masivo en DeFi… ¡todas sus acciones van a caer!', eventMsg:' ¡DeFi CRASH! El sector descentralizado ha sido hackeado. Precios en caída libre.' },
     // SUBIDAS
-    { sector:'IA',        type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! Un breakthrough de IA revolucionario está por anunciarse… ¡las acciones de IA subirán!', eventMsg:'🚀 ¡IA BOOM! Una revolución en inteligencia artificial ha disparado todas sus acciones.' },
-    { sector:'Bluechip',  type:'boom',  magnitude:[0.10,0.30], warningMsg:' ¡NOTICIA! Las grandes empresas reportan ganancias récord… ¡las Bluechip van a subir!', eventMsg:'🚀 ¡BLUECHIP BOOM! Las grandes empresas han batido récords históricos de ganancias.' },
-    { sector:'Digital',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Un país ha adoptado las criptomonedas como moneda oficial! ¡Digital va a explotar!', eventMsg:'🚀 ¡CRYPTO BOOM! Adopción masiva de criptomonedas. ¡Todos los activos digitales se disparan!' },
-    { sector:'Gaming',    type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! El juego más esperado del año llega mañana… ¡el sector Gaming va a dispararse!', eventMsg:'🚀 ¡GAMING BOOM! El lanzamiento del año ha generado ganancias masivas en Gaming.' },
-    { sector:'NFT',       type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Una celebridad mundial acaba de comprar NFTs! ¡Todas las acciones subirán pronto!', eventMsg:'🚀 ¡NFT BOOM! El interés masivo en NFTs ha disparado todos sus precios.' },
-    { sector:'Metaverso', type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! Una mega empresa invierte billones en el Metaverso… ¡viene una subida enorme!', eventMsg:'🚀 ¡METAVERSO BOOM! Inversión histórica en el Metaverso ha disparado todos sus activos.' },
-    { sector:'Fintech',   type:'boom',  magnitude:[0.10,0.30], warningMsg:' ¡NOTICIA! Nueva regulación favorece al Fintech… ¡sus acciones van a subir pronto!', eventMsg:'🚀 ¡FINTECH BOOM! Cambios regulatorios han impulsado enormemente al sector Fintech.' },
-    { sector:'Energía',   type:'boom',  magnitude:[0.15,0.35], warningMsg:' ¡NOTICIA! Nuevo acuerdo climático global… ¡el sector Energía va a beneficiarse mucho!', eventMsg:'🚀 ¡ENERGÍA BOOM! El acuerdo climático global ha disparado todos los activos de Energía.' },
-    { sector:'Biotech',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Se ha encontrado la cura de una enfermedad! ¡El sector Biotech va a explotar!', eventMsg:'🚀 ¡BIOTECH BOOM! Un descubrimiento médico histórico ha disparado todas las biotechs.' },
-    { sector:'Espacio',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Se ha confirmado vida en otro planeta! ¡El sector Espacio va a la luna!', eventMsg:'🚀 ¡ESPACIO BOOM! El descubrimiento del siglo ha disparado todos los activos espaciales.' },
-    { sector:'Meme',      type:'boom',  magnitude:[0.30,0.80], warningMsg:' ¡NOTICIA! ¡Un famoso ha tuiteado sobre los meme coins! ¡Van a explotar completamente!', eventMsg:'🚀 ¡MEME BOOM! ¡Un tweet viral ha multiplicado los precios de todos los meme coins!' },
-    { sector:'DeFi',      type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! Un protocolo DeFi ha generado retornos históricos… ¡todo el sector subirá!', eventMsg:'🚀 ¡DeFi BOOM! Rendimientos históricos en DeFi han atraído inversión masiva al sector.' },
+    { sector:'IA',        type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! Un breakthrough de IA revolucionario está por anunciarse… ¡las acciones de IA subirán!', eventMsg:' ¡IA BOOM! Una revolución en inteligencia artificial ha disparado todas sus acciones.' },
+    { sector:'Bluechip',  type:'boom',  magnitude:[0.10,0.30], warningMsg:' ¡NOTICIA! Las grandes empresas reportan ganancias récord… ¡las Bluechip van a subir!', eventMsg:' ¡BLUECHIP BOOM! Las grandes empresas han batido récords históricos de ganancias.' },
+    { sector:'Digital',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Un país ha adoptado las criptomonedas como moneda oficial! ¡Digital va a explotar!', eventMsg:' ¡CRYPTO BOOM! Adopción masiva de criptomonedas. ¡Todos los activos digitales se disparan!' },
+    { sector:'Gaming',    type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! El juego más esperado del año llega mañana… ¡el sector Gaming va a dispararse!', eventMsg:' ¡GAMING BOOM! El lanzamiento del año ha generado ganancias masivas en Gaming.' },
+    { sector:'NFT',       type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Una celebridad mundial acaba de comprar NFTs! ¡Todas las acciones subirán pronto!', eventMsg:' ¡NFT BOOM! El interés masivo en NFTs ha disparado todos sus precios.' },
+    { sector:'Metaverso', type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! Una mega empresa invierte billones en el Metaverso… ¡viene una subida enorme!', eventMsg:' ¡METAVERSO BOOM! Inversión histórica en el Metaverso ha disparado todos sus activos.' },
+    { sector:'Fintech',   type:'boom',  magnitude:[0.10,0.30], warningMsg:' ¡NOTICIA! Nueva regulación favorece al Fintech… ¡sus acciones van a subir pronto!', eventMsg:' ¡FINTECH BOOM! Cambios regulatorios han impulsado enormemente al sector Fintech.' },
+    { sector:'Energía',   type:'boom',  magnitude:[0.15,0.35], warningMsg:' ¡NOTICIA! Nuevo acuerdo climático global… ¡el sector Energía va a beneficiarse mucho!', eventMsg:' ¡ENERGÍA BOOM! El acuerdo climático global ha disparado todos los activos de Energía.' },
+    { sector:'Biotech',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Se ha encontrado la cura de una enfermedad! ¡El sector Biotech va a explotar!', eventMsg:' ¡BIOTECH BOOM! Un descubrimiento médico histórico ha disparado todas las biotechs.' },
+    { sector:'Espacio',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Se ha confirmado vida en otro planeta! ¡El sector Espacio va a la luna!', eventMsg:' ¡ESPACIO BOOM! El descubrimiento del siglo ha disparado todos los activos espaciales.' },
+    { sector:'Meme',      type:'boom',  magnitude:[0.30,0.80], warningMsg:' ¡NOTICIA! ¡Un famoso ha tuiteado sobre los meme coins! ¡Van a explotar completamente!', eventMsg:' ¡MEME BOOM! ¡Un tweet viral ha multiplicado los precios de todos los meme coins!' },
+    { sector:'DeFi',      type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! Un protocolo DeFi ha generado retornos históricos… ¡todo el sector subirá!', eventMsg:' ¡DeFi BOOM! Rendimientos históricos en DeFi han atraído inversión masiva al sector.' },
 ];
 
 // Evento activo actualmente (si lo hay)
