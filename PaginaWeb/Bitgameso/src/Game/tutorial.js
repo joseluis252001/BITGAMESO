@@ -59,6 +59,7 @@ const TUTORIAL_STEPS = [
     // PASO 5 — Mostrar mascota
     {
         target:   '.pet-aside',
+        arrowDir: 'left',
         mascot:   '🐾 ¡Y aquí estoy yo, tu mascota! Mi salud depende de tus decisiones. Si vendes con ganancias, me alegro. Si pierdes mucho, me pongo triste. ¡Cuídame!',
         waitFor:  'next',
         scrollTo: true,
@@ -66,6 +67,7 @@ const TUTORIAL_STEPS = [
     // PASO 6 — Mostrar mercado
     {
         target:   '.market-main',
+        arrowDir: 'down',
         mascot:   '📈 Este es el Mercado Global. Los precios cambian solos cada pocos segundos. ¡Tu objetivo es comprar barato y vender caro!',
         waitFor:  'next',
         scrollTo: true,
@@ -288,34 +290,50 @@ const highlightElement = (el, step) => {
     `;
     document.body.appendChild(box);
 
-    // Flecha apuntando al elemento
+    // Dirección de flecha según paso
+    const dir = step.arrowDir || 'up';
+    const arrowMap = {
+        'up':    { img: 'Arrow-Complete-Up-128.png',    anim: 'tut-bounce-up' },
+        'down':  { img: 'Arrow-Complete-Down-128.png',  anim: 'tut-bounce-down' },
+        'left':  { img: 'Arrow-Complete-Left-128.png',  anim: 'tut-bounce-left' },
+        'right': { img: 'Arrow-Complete-Right-128.png', anim: 'tut-bounce-right' },
+    };
+    const arrowCfg = arrowMap[dir] || arrowMap['up'];
+    const arrowSize = 48;
     const arrow = document.createElement('div');
     arrow.id = 'tutorial-arrow';
-    const arrowSize = 48;
 
-    // Flecha siempre debajo del elemento apuntando hacia arriba
-    const arrowLeft = rect.left + rect.width/2 - arrowSize/2;
-    const arrowTop  = rect.bottom + pad + 4;
+    // Posición de la flecha según dirección
+    let arrowTop, arrowLeft, arrowAnim = arrowCfg.anim;
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top  + rect.height/2;
+    if (dir === 'up')    { arrowTop = rect.bottom + pad + 4; arrowLeft = cx - arrowSize/2; }
+    if (dir === 'down')  { arrowTop = rect.top - arrowSize - pad - 4; arrowLeft = cx - arrowSize/2; }
+    if (dir === 'left')  { arrowTop = cy - arrowSize/2; arrowLeft = rect.right + pad + 4; }
+    if (dir === 'right') { arrowTop = cy - arrowSize/2; arrowLeft = rect.left - arrowSize - pad - 4; }
+
+    arrowTop  = Math.max(10, Math.min(arrowTop,  window.innerHeight - arrowSize - 10));
+    arrowLeft = Math.max(10, Math.min(arrowLeft, window.innerWidth  - arrowSize - 10));
 
     arrow.style.cssText = `
         position: fixed;
-        top:  ${Math.min(arrowTop, window.innerHeight - arrowSize - 10)}px;
-        left: ${Math.max(10, Math.min(arrowLeft, window.innerWidth - arrowSize - 10))}px;
+        top:  ${arrowTop}px;
+        left: ${arrowLeft}px;
         width: ${arrowSize}px;
         height: ${arrowSize}px;
         z-index: 9991;
         pointer-events: none;
-        animation: tut-bounce-up 0.7s infinite alternate;
+        animation: ${arrowAnim} 0.7s infinite alternate;
         filter: drop-shadow(0 0 6px #CBA6F7);
     `;
-    arrow.innerHTML = `<img src="../assets/arrows/Arrow-Complete-Up-128.png" style="width:100%;height:100%;object-fit:contain;">`;
+    arrow.innerHTML = `<img src="../assets/arrows/${arrowCfg.img}" style="width:100%;height:100%;object-fit:contain;">`;
     document.body.appendChild(arrow);
 
     // Posicionar burbuja
-    positionBubble(rect);
+    positionBubble(rect, dir);
 };
 
-const positionBubble = (rect) => {
+const positionBubble = (rect, dir = 'up') => {
     const bubble = document.getElementById('tutorial-bubble');
     if (!bubble) return;
     const bW  = bubble.offsetWidth  || 360;
@@ -324,14 +342,22 @@ const positionBubble = (rect) => {
     const wW  = window.innerWidth;
     const pad = 16;
 
-    // Centrar horizontalmente respecto al elemento, nunca salirse de pantalla
+    // Centrar horizontalmente respecto al elemento
     let left = rect.left + rect.width/2 - bW/2;
-    left = Math.max(pad, Math.min(left, wW - bW - pad));
+    let top;
 
-    // Poner debajo del elemento + flecha; si no cabe, arriba
-    let top = rect.bottom + 60; // espacio para la flecha
-    if (top + bH > wH - pad) top = rect.top - bH - 60;
-    if (top < pad) top = pad;
+    if (dir === 'left' || dir === 'right') {
+        // Burbuja centrada verticalmente, al lado opuesto de la flecha
+        top  = rect.top + rect.height/2 - bH/2;
+        left = dir === 'left' ? rect.right + 70 : rect.left - bW - 70;
+    } else {
+        // up/down: burbuja debajo de la flecha
+        top = rect.bottom + 65;
+        if (top + bH > wH - pad) top = rect.top - bH - 65;
+    }
+
+    top  = Math.max(pad, Math.min(top,  wH - bH - pad));
+    left = Math.max(pad, Math.min(left, wW - bW - pad));
 
     bubble.style.top       = `${top}px`;
     bubble.style.left      = `${left}px`;
@@ -362,37 +388,45 @@ const typewriterEffect = (el, text) => {
 //  SETUP DE PASOS ESPECIALES
 // ============================================================
 
-// Resaltar primera acción del mercado y esperar que la compre
+// Resaltar primera acción del mercado, moverla arriba y esperar que la compre
 const setupBuyTutorial = () => {
     // Encontrar el primer activo no poseído
     let targetSymbol = null;
-    for (const [sym, asset] of state.market) {
+    for (const [sym] of state.market) {
         if (!state.portfolio.has(sym)) { targetSymbol = sym; break; }
     }
     if (!targetSymbol) { tutorialNext(); return; }
 
     tutorialSelectedAction = targetSymbol;
 
-    // Resaltar solo el botón comprar de ese activo
+    // Mover el activo al inicio del mapa para que aparezca primero
+    const targetAsset = state.market.get(targetSymbol);
+    state.market.delete(targetSymbol);
+    const newMarket = new Map();
+    newMarket.set(targetSymbol, targetAsset);
+    state.market.forEach((v, k) => newMarket.set(k, v));
+    state.market = newMarket;
+    if (typeof renderMarket === 'function') renderMarket();
+
+    // Esperar que el DOM se actualice y resaltar el botón COMPRAR
     setTimeout(() => {
         const rows = document.querySelectorAll('.asset-row');
+        let targetBtn = null;
         rows.forEach(row => {
             const symEl = row.querySelector('.asset-symbol');
             if (symEl && symEl.textContent.trim() === targetSymbol) {
-                const btn = row.querySelector('.btn-buy');
-                if (btn) {
-                    highlightElement(btn, {});
-                    // Interceptar click
-                    btn._tutorialHandler = () => {
-                        if (state.portfolio.has(targetSymbol)) {
-                            // Ya fue comprado
-                            setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 500);
-                        }
-                    };
-                    btn.addEventListener('click', btn._tutorialHandler);
-                }
+                targetBtn = row.querySelector('.btn-buy');
             }
         });
+
+        if (targetBtn) {
+            // Scroll al botón
+            targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                highlightElement(targetBtn, { arrowDir: 'up' });
+                positionBubble(targetBtn.getBoundingClientRect(), 'up');
+            }, 400);
+        }
     }, 600);
 
     // Polling: esperar que aparezca en cartera

@@ -1424,8 +1424,20 @@ body {
     }
 }
 
-/* Flecha animada del tutorial — rebota hacia arriba */
+/* Flechas animadas del tutorial */
 @keyframes tut-bounce-up {
     0%   { transform: translateY(0px); }
     100% { transform: translateY(-8px); }
+}
+@keyframes tut-bounce-down {
+    0%   { transform: translateY(0px); }
+    100% { transform: translateY(8px); }
+}
+@keyframes tut-bounce-left {
+    0%   { transform: translateX(0px); }
+    100% { transform: translateX(-8px); }
+}
+@keyframes tut-bounce-right {
+    0%   { transform: translateX(0px); }
+    100% { transform: translateX(8px); }
 }
