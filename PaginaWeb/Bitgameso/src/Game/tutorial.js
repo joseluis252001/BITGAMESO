@@ -247,10 +247,15 @@ const renderTutorialStep = () => {
     const step = TUTORIAL_STEPS[tutorialStep];
     if (!step) return;
 
+    // Ocultar botones ANTES de iniciar typewriter
+    const btnNextPre   = document.getElementById('tut-btn-next');
+    const btnFinishPre = document.getElementById('tut-btn-finish');
+    if (btnNextPre)   { btnNextPre.style.opacity = '0.3';   btnNextPre.style.pointerEvents = 'none'; }
+    if (btnFinishPre) { btnFinishPre.style.opacity = '0.3'; btnFinishPre.style.pointerEvents = 'none'; }
+
     // Texto de la mascota con efecto typewriter
     const textEl = document.getElementById('tut-text');
     if (textEl) typewriterEffect(textEl, step.mascot);
-    // Nota: botones se muestran solo cuando el texto termina (ver typewriterEffect)
 
     // Contador de pasos
     const counter = document.getElementById('tut-step-counter');
