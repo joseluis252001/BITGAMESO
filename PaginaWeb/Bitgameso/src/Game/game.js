@@ -1570,9 +1570,7 @@ const renderHistorialList = () => {
     }).join('');
 };
 
-// Tutorial (próximamente)
-window.openTutorial  = () => { document.getElementById('modal-tutorial').style.display = 'flex'; };
-window.closeTutorial = () => { document.getElementById('modal-tutorial').style.display = 'none'; };
+// Tutorial gestionado por tutorial.js
 
 // ============================================================
 //  INIT
