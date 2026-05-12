@@ -557,35 +557,45 @@ const setupUseFoodTutorial = () => {
     const prevHealth  = state.saludMascota;
     const prevInvSize = state.inventory.size;
     let   waitingForAction = false;
+    // Interceptar el botón Enviar para saber exactamente qué pasó
+    let sentFood = false;
+
+    const btnEnviar = document.getElementById('btn-enviar');
+    const enviarHandler = () => { sentFood = true; };
+    if (btnEnviar) btnEnviar.addEventListener('click', enviarHandler, { once: true });
+
+    const btnVender = document.getElementById('btn-vender');
+    const venderHandler = () => { sentFood = false; };
+    if (btnVender) btnVender.addEventListener('click', venderHandler, { once: true });
 
     const check = setInterval(() => {
         if (!tutorialActive) { clearInterval(check); return; }
         if (waitingForAction) return;
 
-        const currentHealth  = state.saludMascota;
         const currentInvSize = state.inventory.size;
 
-        // Salud subió = envió comida correctamente ✅
-        if (currentHealth > prevHealth) {
+        // Inventario se redujo — verificar si fue enviando o vendiendo
+        if (currentInvSize < prevInvSize) {
             clearInterval(check);
-            setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
-            return;
-        }
+            if (btnEnviar) btnEnviar.removeEventListener('click', enviarHandler);
+            if (btnVender) btnVender.removeEventListener('click', venderHandler);
 
-        // Inventario se redujo pero salud NO subió = vendió la comida ❌
-        if (currentInvSize < prevInvSize && currentHealth <= prevHealth) {
-            clearInterval(check);
-            waitingForAction = true;
-            const textEl = document.getElementById('tut-text');
-            if (textEl) textEl.textContent = '😅 ¡Ups! Vendiste la comida en vez de enviarla. Compra otra verdura y usa el botón "Enviar". ¡Inténtalo de nuevo!';
-            setTimeout(() => {
-                // Volver al paso de abrir tienda
-                const stepIdx = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'click_target' && s.target === '#btn-comprar');
-                tutorialStep = stepIdx >= 0 ? stepIdx : tutorialStep - 3;
-                renderTutorialStep();
-            }, 3000);
+            if (sentFood || state.saludMascota >= prevHealth) {
+                // ✅ Envió correctamente (salud igual o mayor, o botón enviar fue presionado)
+                setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
+            } else {
+                // ❌ Vendió la comida
+                waitingForAction = true;
+                const textEl = document.getElementById('tut-text');
+                if (textEl) textEl.textContent = '😅 ¡Ups! Vendiste la comida en vez de enviarla. Compra otra verdura y usa el botón "Enviar". ¡Inténtalo de nuevo!';
+                setTimeout(() => {
+                    const stepIdx = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'click_target' && s.target === '#btn-comprar');
+                    tutorialStep = stepIdx >= 0 ? stepIdx : tutorialStep - 3;
+                    renderTutorialStep();
+                }, 3000);
+            }
         }
-    }, 500);
+    }, 300);
 };
 
 
