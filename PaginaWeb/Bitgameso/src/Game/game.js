@@ -1571,6 +1571,31 @@ const renderHistorialList = () => {
 };
 
 // Tutorial gestionado por tutorial.js
+// Fallback por si tutorial.js no carga a tiempo
+window.openTutorial = () => {
+    // Esperar hasta 3 segundos a que tutorial.js cargue
+    let attempts = 0;
+    const tryOpen = () => {
+        if (typeof TUTORIAL_STEPS !== 'undefined') {
+            // tutorial.js ya cargó — usar su función real
+            const realOpen = () => {
+                tutorialFirstRun = !localStorage.getItem(TUTORIAL_DONE_KEY());
+                tutorialActive   = true;
+                tutorialStep     = 0;
+                tutorialSelectedAction = null;
+                createTutorialUI();
+                renderTutorialStep();
+            };
+            realOpen();
+        } else if (attempts < 30) {
+            attempts++;
+            setTimeout(tryOpen, 100);
+        } else {
+            showToast('⚠️ Tutorial no disponible. Recarga la página e inténtalo de nuevo.');
+        }
+    };
+    tryOpen();
+};
 
 // ============================================================
 //  INIT
