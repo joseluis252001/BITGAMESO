@@ -1467,3 +1467,20 @@ body {
     object-fit: contain;
     vertical-align: middle;
 }
+
+/* ============================================================
+   ICONOS TIENDA DE COMIDA
+   ============================================================ */
+.legend-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
+.food-eff-icon {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    vertical-align: middle;
+}
