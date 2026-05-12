@@ -1,0 +1,506 @@
+// ============================================================
+//  BITGAMESO — tutorial.js
+//  Tutorial interactivo con overlay, mascota parlante y pasos
+// ============================================================
+
+const TUTORIAL_DONE_KEY = () => {
+    const u = localStorage.getItem('bitgameso_sesion_activa') || 'invitado';
+    return `bitgameso_tutorial_done_${u}`;
+};
+
+let tutorialActive   = false;
+let tutorialStep     = 0;
+let tutorialFirstRun = false;
+let tutorialSelectedAction = null; // acción que se comprará en el tutorial
+
+// ============================================================
+//  PASOS DEL TUTORIAL
+// ============================================================
+// Cada paso tiene:
+//   target    → selector CSS del elemento a resaltar (null = solo diálogo)
+//   mascot    → texto que dice la mascota
+//   waitFor   → evento que debe ocurrir para avanzar ('click_target' | 'auto' | 'buy' | 'sell' | 'buy_food' | 'use_food' | 'sell_food')
+//   scrollTo  → si debe hacer scroll al elemento
+const TUTORIAL_STEPS = [
+    // PASO 0 — Bienvenida
+    {
+        target:   null,
+        mascot:   '¡Hola! 👋 Soy tu mascota y te voy a enseñar cómo funciona BITGAMESO. ¡Es muy fácil! Presiona "Siguiente" para empezar.',
+        waitFor:  'next',
+    },
+    // PASO 1 — Mostrar monedas
+    {
+        target:   '.score-container',
+        mascot:   '💰 Aquí están tus monedas. Con ellas puedes invertir en el mercado y comprar comida para mí. ¡Cuídalas!',
+        waitFor:  'next',
+        scrollTo: true,
+    },
+    // PASO 2 — Mostrar botones nav
+    {
+        target:   '.nav-actions',
+        mascot:   '🛒 Estos son tus botones principales. "Comprar" es para comprar comida, "Vender" y "Enviar" son para usar los ítems de tu inventario.',
+        waitFor:  'next',
+        scrollTo: true,
+    },
+    // PASO 3 — Mostrar inventario
+    {
+        target:   '.inventory-section',
+        mascot:   '🎒 Aquí está tu inventario. La comida que compres aparecerá aquí. Haz click en un ítem para seleccionarlo y luego usa "Vender" o "Enviar".',
+        waitFor:  'next',
+        scrollTo: true,
+    },
+    // PASO 4 — Mostrar cartera
+    {
+        target:   '.portfolio-aside',
+        mascot:   '💼 Esta es tu Cartera. Aquí verás todas las acciones del mercado que compres. ¡Cada inversión aparecerá aquí!',
+        waitFor:  'next',
+        scrollTo: true,
+    },
+    // PASO 5 — Mostrar mascota
+    {
+        target:   '.pet-aside',
+        mascot:   '🐾 ¡Y aquí estoy yo, tu mascota! Mi salud depende de tus decisiones. Si vendes con ganancias, me alegro. Si pierdes mucho, me pongo triste. ¡Cuídame!',
+        waitFor:  'next',
+        scrollTo: true,
+    },
+    // PASO 6 — Mostrar mercado
+    {
+        target:   '.market-main',
+        mascot:   '📈 Este es el Mercado Global. Los precios cambian solos cada pocos segundos. ¡Tu objetivo es comprar barato y vender caro!',
+        waitFor:  'next',
+        scrollTo: true,
+    },
+    // PASO 7 — Indicar que compre una acción específica
+    {
+        target:   '.market-list',
+        mascot:   '🎯 ¡Momento de invertir! Voy a resaltar una acción para que la compres. ¡Presiona el botón COMPRAR de esa acción!',
+        waitFor:  'buy_tutorial',
+        scrollTo: true,
+    },
+    // PASO 8 — Mostrar que está en cartera
+    {
+        target:   '.portfolio-aside',
+        mascot:   '🎉 ¡Excelente! Ya tienes tu primera inversión en la Cartera. Mira cómo muestra el precio de compra y el precio actual.',
+        waitFor:  'next',
+        scrollTo: true,
+    },
+    // PASO 9 — Esperar momento bueno para vender
+    {
+        target:   '.portfolio-aside',
+        mascot:   '⏳ Ahora espera a que tu inversión esté en VERDE (ganancia). Cuando el número sea positivo, ¡es el momento de vender! Si está en rojo, mejor espera.',
+        waitFor:  'sell_tutorial',
+        scrollTo: true,
+    },
+    // PASO 10 — Comprar verdura
+    {
+        target:   '#btn-comprar',
+        mascot:   '🥕 ¡Bien vendido! Ahora aprendamos a comprarme comida. Presiona el botón "Comprar" para abrir la tienda.',
+        waitFor:  'click_target',
+        scrollTo: true,
+    },
+    // PASO 11 — Seleccionar verdura en tienda
+    {
+        target:   '.food-shop-grid',
+        mascot:   '🥦 En la tienda verás diferentes alimentos. Las VERDURAS me dan salud directamente. ¡Compra una verdura!',
+        waitFor:  'buy_food_tutorial',
+        scrollTo: false,
+    },
+    // PASO 12 — Mostrar inventario con el ítem
+    {
+        target:   '.inventory-section',
+        mascot:   '🎒 ¡Perfecto! La verdura ya está en tu inventario. Haz click en ella para seleccionarla.',
+        waitFor:  'select_food_tutorial',
+        scrollTo: true,
+    },
+    // PASO 13 — Mostrar opciones vender/enviar
+    {
+        target:   '.nav-actions',
+        mascot:   '💡 Con el ítem seleccionado tienes dos opciones: "Vender" para recuperar la mitad del precio, o "Enviar" para dármela a mí y recuperar mi salud. ¡Prueba Enviar!',
+        waitFor:  'use_food_tutorial',
+        scrollTo: true,
+    },
+    // PASO 14 — Mostrar mascota mejorada
+    {
+        target:   '.pet-aside',
+        mascot:   '😊 ¡Mira! Mi salud subió gracias a la verdura que me diste. ¡Así es como me cuidas! Entre más me alimentes, más feliz estaré.',
+        waitFor:  'next',
+        scrollTo: true,
+    },
+    // PASO 15 — Final
+    {
+        target:   null,
+        mascot:   '🏆 ¡Tutorial completado! Como recompensa, ¡te doy 1000 monedas extra! Recuerda: invierte en el mercado, cuídame con comida y ¡buena suerte! 🚀',
+        waitFor:  'finish',
+    },
+];
+
+// ============================================================
+//  INICIAR / CERRAR TUTORIAL
+// ============================================================
+window.openTutorial = () => {
+    tutorialFirstRun = !localStorage.getItem(TUTORIAL_DONE_KEY());
+    tutorialActive   = true;
+    tutorialStep     = 0;
+    tutorialSelectedAction = null;
+
+    createTutorialUI();
+    renderTutorialStep();
+};
+
+window.closeTutorial = () => {
+    tutorialActive = false;
+    removeTutorialUI();
+    removeHighlight();
+};
+
+const finishTutorial = () => {
+    // Dar monedas solo en el primer tutorial
+    if (tutorialFirstRun && !localStorage.getItem(TUTORIAL_DONE_KEY())) {
+        state.monedas += 1000;
+        if (typeof updateUI === 'function') updateUI();
+        localStorage.setItem(TUTORIAL_DONE_KEY(), 'true');
+    }
+    closeTutorial();
+    if (typeof showToast === 'function')
+        showToast(tutorialFirstRun ? '🎉 ¡Tutorial completado! +🪙1000 de regalo' : '🎓 ¡Repasaste el tutorial!');
+};
+
+// ============================================================
+//  UI DEL TUTORIAL
+// ============================================================
+const createTutorialUI = () => {
+    removeTutorialUI();
+
+    // Overlay oscuro — semi-transparente, no bloquea clicks
+    const overlay = document.createElement('div');
+    overlay.id = 'tutorial-overlay';
+    overlay.style.pointerEvents = 'none'; // permite interacción libre
+    document.body.appendChild(overlay);
+
+    // Ventana de mascota
+    const bubble = document.createElement('div');
+    bubble.id = 'tutorial-bubble';
+    bubble.innerHTML = `
+        <div class="tut-header">
+            <div class="tut-mascot-wrap">
+                <img id="tut-mascot-img" src="../assets/pets/${state.currentPet || 'Bunny-Pink-128'}.png" alt="Mascota">
+            </div>
+            ${!tutorialFirstRun ? `
+            <button class="tut-close" onclick="closeTutorial()" title="Cerrar tutorial">
+                <img src="../assets/arrows/X-Error-128.png" alt="Cerrar" style="width:22px;height:22px;object-fit:contain;">
+            </button>` : '<div style="width:30px"></div>'}
+        </div>
+        <div class="tut-speech">
+            <p id="tut-text"></p>
+        </div>
+        <div class="tut-footer">
+            <span id="tut-step-counter" class="tut-counter"></span>
+            <div class="tut-buttons">
+                <button id="tut-btn-next" class="tut-btn-primary" onclick="tutorialNext()" style="display:none;">Siguiente →</button>
+                <button id="tut-btn-finish" class="tut-btn-finish" onclick="finishTutorial()" style="display:none;">🏆 ¡Terminar!</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(bubble);
+};
+
+const removeTutorialUI = () => {
+    ['tutorial-overlay','tutorial-bubble','tutorial-highlight-box','tutorial-arrow'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    });
+};
+
+// ============================================================
+//  RENDER DE CADA PASO
+// ============================================================
+const renderTutorialStep = () => {
+    if (!tutorialActive) return;
+    const step = TUTORIAL_STEPS[tutorialStep];
+    if (!step) return;
+
+    // Texto de la mascota con efecto typewriter
+    const textEl = document.getElementById('tut-text');
+    if (textEl) typewriterEffect(textEl, step.mascot);
+
+    // Contador de pasos
+    const counter = document.getElementById('tut-step-counter');
+    if (counter) counter.textContent = `Paso ${tutorialStep + 1} de ${TUTORIAL_STEPS.length}`;
+
+    // Botones
+    const btnNext   = document.getElementById('tut-btn-next');
+    const btnFinish = document.getElementById('tut-btn-finish');
+    if (btnNext)   btnNext.style.display   = step.waitFor === 'next'   ? 'block' : 'none';
+    if (btnFinish) btnFinish.style.display = step.waitFor === 'finish' ? 'block' : 'none';
+
+    // Resaltar elemento
+    if (step.target) {
+        const el = document.querySelector(step.target);
+        if (el) {
+            if (step.scrollTo) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => highlightElement(el, step), 400);
+        }
+    } else {
+        removeHighlight();
+    }
+
+    // Pasos especiales
+    if (step.waitFor === 'buy_tutorial')       setupBuyTutorial();
+    if (step.waitFor === 'sell_tutorial')      setupSellTutorial();
+    if (step.waitFor === 'click_target')       setupClickTarget(step.target);
+    if (step.waitFor === 'buy_food_tutorial')  setupBuyFoodTutorial();
+    if (step.waitFor === 'select_food_tutorial') setupSelectFoodTutorial();
+    if (step.waitFor === 'use_food_tutorial')  setupUseFoodTutorial();
+};
+
+const tutorialNext = () => {
+    tutorialStep++;
+    if (tutorialStep >= TUTORIAL_STEPS.length) { finishTutorial(); return; }
+    renderTutorialStep();
+};
+
+window.tutorialNext = tutorialNext;
+window.finishTutorial = finishTutorial;
+
+// ============================================================
+//  HIGHLIGHT DE ELEMENTO
+// ============================================================
+const highlightElement = (el, step) => {
+    removeHighlight();
+    const rect = el.getBoundingClientRect();
+    const pad  = 8;
+
+    // Caja de resaltado
+    const box = document.createElement('div');
+    box.id = 'tutorial-highlight-box';
+    box.style.cssText = `
+        position: fixed;
+        top:    ${rect.top    - pad}px;
+        left:   ${rect.left   - pad}px;
+        width:  ${rect.width  + pad*2}px;
+        height: ${rect.height + pad*2}px;
+        border: 3px solid #CBA6F7;
+        border-radius: 16px;
+        box-shadow: 0 0 20px #CBA6F7;
+        z-index: 9990;
+        pointer-events: none;
+        animation: tut-pulse 1.5s infinite;
+    `;
+    document.body.appendChild(box);
+
+    // Flecha apuntando al elemento
+    const arrow = document.createElement('div');
+    arrow.id = 'tutorial-arrow';
+    const arrowSize = 48;
+
+    // Decidir posición de la flecha (arriba o abajo del elemento)
+    const wH = window.innerHeight;
+    const spaceBelow = wH - rect.bottom;
+    const arrowTop = spaceBelow > 80
+        ? rect.bottom + pad + 4          // flecha apunta hacia arriba (debajo del elemento)
+        : rect.top - pad - arrowSize - 4; // flecha apunta hacia abajo (arriba del elemento)
+
+    const arrowLeft = rect.left + rect.width/2 - arrowSize/2;
+    const pointingUp = spaceBelow > 80;
+
+    arrow.style.cssText = `
+        position: fixed;
+        top:  ${arrowTop}px;
+        left: ${Math.max(10, arrowLeft)}px;
+        width: ${arrowSize}px;
+        height: ${arrowSize}px;
+        z-index: 9991;
+        pointer-events: none;
+        animation: tut-bounce 0.7s infinite alternate;
+        transform: ${pointingUp ? 'rotate(90deg)' : 'rotate(-90deg)'};
+        filter: drop-shadow(0 0 6px #CBA6F7);
+    `;
+    arrow.innerHTML = `<img src="../assets/arrows/Arrow-Complete-Right-128.png" style="width:100%;height:100%;object-fit:contain;">`;
+    document.body.appendChild(arrow);
+
+    // Posicionar burbuja
+    positionBubble(rect);
+};
+
+const positionBubble = (rect) => {
+    const bubble = document.getElementById('tutorial-bubble');
+    if (!bubble) return;
+    const bH = bubble.offsetHeight || 220;
+    const wH = window.innerHeight;
+    const wW = window.innerWidth;
+
+    // Intentar poner burbuja abajo del elemento, sino arriba
+    let top = rect.bottom + 20;
+    if (top + bH > wH - 20) top = rect.top - bH - 20;
+    if (top < 10) top = 10;
+
+    let left = rect.left;
+    if (left + 380 > wW) left = wW - 390;
+    if (left < 10) left = 10;
+
+    bubble.style.top  = `${top}px`;
+    bubble.style.left = `${left}px`;
+};
+
+const removeHighlight = () => {
+    ['tutorial-highlight-box','tutorial-arrow'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    });
+};
+
+// ============================================================
+//  TYPEWRITER EFFECT
+// ============================================================
+const typewriterEffect = (el, text) => {
+    el.textContent = '';
+    let i = 0;
+    const interval = setInterval(() => {
+        el.textContent += text[i];
+        i++;
+        if (i >= text.length) clearInterval(interval);
+    }, 25);
+};
+
+// ============================================================
+//  SETUP DE PASOS ESPECIALES
+// ============================================================
+
+// Resaltar primera acción del mercado y esperar que la compre
+const setupBuyTutorial = () => {
+    // Encontrar el primer activo no poseído
+    let targetSymbol = null;
+    for (const [sym, asset] of state.market) {
+        if (!state.portfolio.has(sym)) { targetSymbol = sym; break; }
+    }
+    if (!targetSymbol) { tutorialNext(); return; }
+
+    tutorialSelectedAction = targetSymbol;
+
+    // Resaltar solo el botón comprar de ese activo
+    setTimeout(() => {
+        const rows = document.querySelectorAll('.asset-row');
+        rows.forEach(row => {
+            const symEl = row.querySelector('.asset-symbol');
+            if (symEl && symEl.textContent.trim() === targetSymbol) {
+                const btn = row.querySelector('.btn-buy');
+                if (btn) {
+                    highlightElement(btn, {});
+                    // Interceptar click
+                    btn._tutorialHandler = () => {
+                        if (state.portfolio.has(targetSymbol)) {
+                            // Ya fue comprado
+                            setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 500);
+                        }
+                    };
+                    btn.addEventListener('click', btn._tutorialHandler);
+                }
+            }
+        });
+    }, 600);
+
+    // Polling: esperar que aparezca en cartera
+    const poll = setInterval(() => {
+        if (!tutorialActive) { clearInterval(poll); return; }
+        if (state.portfolio.has(targetSymbol)) {
+            clearInterval(poll);
+            setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 800);
+        }
+    }, 500);
+};
+
+// Esperar que venda con ganancia (o mostrar aviso si intenta vender en rojo)
+const setupSellTutorial = () => {
+    if (!tutorialSelectedAction) { tutorialNext(); return; }
+    const sym = tutorialSelectedAction;
+
+    // Dar bono x2 automático en tutorial (primera vez)
+    if (tutorialFirstRun) {
+        const pos = state.portfolio.get(sym);
+        if (pos) {
+            // Forzar precio al doble para asegurar ganancia
+            const asset = state.market.get(sym);
+            if (asset) {
+                state.market.set(sym, { ...asset, price: pos.buyPrice * 2, changePercent: 100 });
+                if (typeof renderMarket === 'function') renderMarket();
+                if (typeof renderPortfolio === 'function') renderPortfolio();
+            }
+        }
+    }
+
+    // Interceptar botón vender en cartera
+    const checkSell = setInterval(() => {
+        if (!tutorialActive) { clearInterval(checkSell); return; }
+        if (!state.portfolio.has(sym)) {
+            clearInterval(checkSell);
+            setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
+        }
+    }, 400);
+
+    // Avisar si el precio está en rojo (solo orientativo)
+    const priceCheck = setInterval(() => {
+        if (!tutorialActive || !state.portfolio.has(sym)) { clearInterval(priceCheck); return; }
+        const pos = state.portfolio.get(sym);
+        const cur = state.market.get(sym);
+        if (pos && cur) {
+            const textEl = document.getElementById('tut-text');
+            if (textEl) {
+                if (cur.price >= pos.buyPrice) {
+                    textEl.textContent = '✅ ¡Está en verde! Es buen momento para vender. ¡Presiona VENDER en tu cartera!';
+                } else {
+                    textEl.textContent = '🔴 Aún está en rojo, espera un poco más antes de vender...';
+                }
+            }
+        }
+    }, 1500);
+};
+
+// Esperar click en elemento target
+const setupClickTarget = (selector) => {
+    if (!selector) return;
+    const el = document.querySelector(selector);
+    if (!el) return;
+
+    const handler = () => {
+        el.removeEventListener('click', handler);
+        setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 400);
+    };
+    el.addEventListener('click', handler);
+};
+
+// Esperar que compre comida tipo verdura
+const setupBuyFoodTutorial = () => {
+    const prevInv = state.inventory.size;
+    const check = setInterval(() => {
+        if (!tutorialActive) { clearInterval(check); return; }
+        if (state.inventory.size > prevInv) {
+            clearInterval(check);
+            // Cerrar tienda si sigue abierta
+            if (typeof closeFoodShop === 'function') closeFoodShop();
+            setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
+        }
+    }, 400);
+};
+
+// Esperar que seleccione un ítem del inventario
+const setupSelectFoodTutorial = () => {
+    const check = setInterval(() => {
+        if (!tutorialActive) { clearInterval(check); return; }
+        if (state.selectedFood) {
+            clearInterval(check);
+            setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 400);
+        }
+    }, 400);
+};
+
+// Esperar que envíe comida a la mascota
+const setupUseFoodTutorial = () => {
+    const prevHealth = state.saludMascota;
+    const check = setInterval(() => {
+        if (!tutorialActive) { clearInterval(check); return; }
+        if (state.saludMascota > prevHealth || !state.selectedFood) {
+            clearInterval(check);
+            setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
+        }
+    }, 400);
+};

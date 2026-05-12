@@ -209,9 +209,15 @@ body {
 /* Cartera y mascota con altura fija igual */
 .portfolio-aside,
 .pet-aside {
-    height: 380px;
+    height: 460px;
+    min-height: 460px;
+    max-height: 460px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
+
+.pet-aside { text-align: center; }
 
 /* Fila 2: Mercado ocupa todo el ancho */
 .market-main {
@@ -356,7 +362,7 @@ body {
 /* ============================================================
    MASCOTA — 5 CORAZONES
    ============================================================ */
-.pet-aside { text-align:center; }
+/* pet-aside text-align manejado abajo */
 
 .pet-container {
     width:120px; height:120px; margin:0 auto 14px;
@@ -1292,4 +1298,162 @@ body {
     .food-shop-grid { grid-template-columns: repeat(2, 1fr); }
     .pet-grid { grid-template-columns: repeat(2, 1fr); }
     .btn-header span { display: none; } /* solo iconos en pantallas muy pequeñas */
+}
+
+/* ============================================================
+   TUTORIAL
+   ============================================================ */
+#tutorial-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 9989;
+    pointer-events: none;
+}
+
+#tutorial-bubble {
+    position: fixed;
+    z-index: 9995;
+    background: white;
+    border-radius: 20px;
+    border: 3px solid var(--primary);
+    box-shadow: 0 8px 32px rgba(203,166,247,0.4);
+    width: 360px;
+    max-width: 90vw;
+    padding: 0;
+    overflow: hidden;
+    transition: top .3s ease, left .3s ease;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.tut-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dk));
+    padding: 12px 16px;
+}
+
+.tut-mascot-wrap img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: white;
+    padding: 4px;
+    border: 2px solid white;
+}
+
+.tut-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: .2s;
+    font-family: 'Poppins', sans-serif;
+}
+.tut-close:hover { background: rgba(255,255,255,0.35); }
+
+.tut-speech {
+    padding: 16px 18px 10px;
+    min-height: 80px;
+}
+
+#tut-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Triángulo del globo de diálogo */
+.tut-speech::before {
+    content: '';
+    display: block;
+    width: 0; height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 12px solid white;
+    position: absolute;
+    top: 74px;
+    left: 28px;
+}
+
+.tut-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 18px 14px;
+    border-top: 1px solid #eee;
+}
+
+.tut-counter {
+    font-size: 11px;
+    color: #aaa;
+    font-weight: 700;
+}
+
+.tut-btn-primary {
+    padding: 8px 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: .2s;
+    font-family: 'Poppins', sans-serif;
+}
+.tut-btn-primary:hover { opacity: .85; transform: translateY(-1px); }
+
+.tut-btn-finish {
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: .2s;
+    font-family: 'Poppins', sans-serif;
+    animation: pulse-pet 1.5s infinite;
+}
+.tut-btn-finish:hover { opacity: .9; }
+
+#tutorial-highlight-box {
+    transition: all .3s ease;
+}
+
+@keyframes tut-pulse {
+    0%,100% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 0 rgba(203,166,247,0.8); }
+    50%      { box-shadow: 0 0 0 9999px rgba(0,0,0,0.65), 0 0 20px 8px rgba(203,166,247,0.6); }
+}
+
+/* En móvil: burbuja abajo */
+@media (max-width: 768px) {
+    #tutorial-bubble {
+        width: 92vw;
+        bottom: 20px;
+        top: auto !important;
+        left: 4vw !important;
+        transform: none;
+    }
+}
+
+/* Flecha animada del tutorial */
+@keyframes tut-bounce {
+    0%   { transform: rotate(90deg) translateX(0); }
+    100% { transform: rotate(90deg) translateX(8px); }
 }
