@@ -210,8 +210,11 @@ body {
 .portfolio-aside,
 .pet-aside {
     height: 460px;
+<<<<<<< HEAD
     min-height: 460px;
     max-height: 460px;
+=======
+>>>>>>> 9677aa9679a4565ed0613ed6784592ccd5468ef7
     overflow: hidden;
     display: flex;
     flex-direction: column;
