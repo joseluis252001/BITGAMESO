@@ -671,7 +671,7 @@ window.openFoodShop = () => {
             <img src="../assets/food/${f.id}.png" alt="${f.name}" class="food-img">
             <span class="food-name">${f.name}</span>
             <span class="food-eff-tag ${catClass[f.cat]}">${catLabel[f.cat]}</span>
-            ${f.effectDuration ? `<span class="food-dur">⏱ +${f.effectDuration}s</span>` : ''}
+            ${f.effectDuration ? `<span class="food-dur"><img src="../assets/settings/Stopwatch.png" style="width:13px;height:13px;vertical-align:middle;object-fit:contain;"> +${f.effectDuration}s</span>` : ''}
             ${f.health ? `<span class="food-hp">❤️ +${f.health}</span>` : ''}
             ${inflTag}
             <span class="food-price">🪙 ${price.toLocaleString()}</span>
