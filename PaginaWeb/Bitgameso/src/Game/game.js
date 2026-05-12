@@ -666,26 +666,15 @@ window.openFoodShop = () => {
         const inflTag = timesBought > 0
             ? `<span class="food-inflation">🔥 x${Math.pow(2,timesBought)} inflación</span>` : '';
 
-        // Iconos por categoría
-        const catIcons = {
-            veg:      '<img src="../assets/Hearts/Heart-Red-128.png" class="food-eff-icon">',
-            fruit:    '',   // sin ícono de efecto
-            protein:  '<img src="../assets/coins/Coins-3-128.png" class="food-eff-icon">',
-            dulce:    '<img src="../assets/settings/Radial-Shine.png" class="food-eff-icon">',
-            candy:    '<img src="../assets/settings/Radial-Shine.png" class="food-eff-icon">',
-            misc:     '',   // sin ícono de efecto
-        };
-        const effIcon = catIcons[f.cat] || '';
-
         return `
         <div class="food-item ${catClass[f.cat]}">
             <img src="../assets/food/${f.id}.png" alt="${f.name}" class="food-img">
             <span class="food-name">${f.name}</span>
-            <span class="food-eff-tag ${catClass[f.cat]}">${effIcon} ${catLabel[f.cat]}</span>
+            <span class="food-eff-tag ${catClass[f.cat]}">${catLabel[f.cat]}</span>
             ${f.effectDuration ? `<span class="food-dur">⏱ +${f.effectDuration}s</span>` : ''}
-            ${f.health ? `<span class="food-hp"><img src="../assets/Hearts/Heart-Red-128.png" style="width:12px;vertical-align:middle;"> +${f.health}</span>` : ''}
+            ${f.health ? `<span class="food-hp">❤️ +${f.health}</span>` : ''}
             ${inflTag}
-            <span class="food-price"><img src="../assets/coins/Coins-3-128.png" style="width:14px;vertical-align:middle;"> ${price.toLocaleString()}</span>
+            <span class="food-price">🪙 ${price.toLocaleString()}</span>
             <button class="btn-action btn-buy btn-sm ${canBuy?'':'btn-disabled'}"
                     onclick="buyFood('${f.id}',${price})"
                     ${canBuy?'':'disabled'}>Comprar</button>
