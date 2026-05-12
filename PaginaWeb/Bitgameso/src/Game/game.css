@@ -209,7 +209,7 @@ body {
 /* Cartera y mascota con altura fija igual */
 .portfolio-aside,
 .pet-aside {
-    height: 380px;
+    height: 460px;
     overflow: hidden;
 }
 
