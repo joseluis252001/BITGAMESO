@@ -662,7 +662,9 @@ window.openFoodShop = () => {
         const priceBeforePet = Math.round(basePrice * Math.pow(inflRate, timesBought));
         const price = typeof getPetFoodPrice === 'function'
                       ? getPetFoodPrice(f, priceBeforePet) : priceBeforePet;
-        const canBuy = state.monedas >= price;
+        const currentQty = state.inventory.get(f.id)?.qty || 0;
+        const atLimit = currentQty >= MAX_FOOD_QTY;
+        const canBuy = state.monedas >= price && !atLimit;
         const inflTag = timesBought > 0
             ? `<span class="food-inflation">🔥 x${Math.pow(2,timesBought)} inflación</span>` : '';
 
@@ -677,7 +679,7 @@ window.openFoodShop = () => {
             <span class="food-price">🪙 ${price.toLocaleString()}</span>
             <button class="btn-action btn-buy btn-sm ${canBuy?'':'btn-disabled'}"
                     onclick="buyFood('${f.id}',${price})"
-                    ${canBuy?'':'disabled'}>Comprar</button>
+                    ${canBuy?'':'disabled'}>${atLimit ? '🔒 Máx 99' : 'Comprar'}</button>
         </div>`;
     }).join('');
     document.getElementById('modal-food-shop').style.display = 'flex';
@@ -1623,19 +1625,23 @@ const CODIGOS = {
         unica: false,
         recompensa: (usuario) => {
             state.monedas += 500;
-            // Añadir comidas al inventario
-            const addFood = (id, qty) => {
+            // Añadir comidas respetando límite de 99
+            const addFoodSafe = (id, qty) => {
                 const food = foodDatabase.find(f => f.id === id);
-                if (!food) return;
+                if (!food) return 0;
                 const existing = state.inventory.get(id);
-                state.inventory.set(id, { ...food, price: 0, qty: (existing?.qty || 0) + qty });
+                const currentQty = existing?.qty || 0;
+                const canAdd = Math.min(qty, MAX_FOOD_QTY - currentQty);
+                if (canAdd <= 0) return 0;
+                state.inventory.set(id, { ...food, price: 0, qty: currentQty + canAdd });
+                return canAdd;
             };
-            addFood('Carrot-128', 2);
-            addFood('Fish-128', 1);
-            addFood('Candy-Blue-128', 3);
-            addFood('Pumpkin-128', 3);
+            const r1 = addFoodSafe('Carrot-128', 2);
+            const r2 = addFoodSafe('Fish-128', 1);
+            const r3 = addFoodSafe('Candy-Blue-128', 3);
+            const r4 = addFoodSafe('Pumpkin-128', 3);
             logEvent('bonus', 'Código BIENVENIDA canjeado', '+500 monedas + comidas gratis');
-            return '🎁 ¡Código válido! +500 monedas + 2 zanahorias, 1 pescado, 3 dulces, 3 calabazas';
+            return `🎁 ¡Código válido! +500 monedas + ${r1} zanahorias, ${r2} pescado, ${r3} dulces, ${r4} calabazas`;
         }
     },
     'JOSELUIS': {
