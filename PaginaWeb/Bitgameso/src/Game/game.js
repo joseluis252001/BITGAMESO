@@ -26,7 +26,28 @@ const state = {
 };
 
 const refs = {};
-const MAX_FOOD_QTY = 99; // Límite máximo de unidades por ítem de comida
+const MAX_FOOD_QTY   = 99;  // Límite máximo para comida normal
+const MAX_FOOD_MISC  = 5;   // Límite para categoría "otros"
+const MISC_COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 horas en ms
+
+const getMiscCooldownKey = (foodId) => {
+    const u = localStorage.getItem('bitgameso_sesion_activa') || 'invitado';
+    return `bitgameso_misc_cd_${foodId}_${u}`;
+};
+
+const getMiscCooldownRemaining = (foodId) => {
+    const lastBuy = parseInt(localStorage.getItem(getMiscCooldownKey(foodId)) || '0');
+    return Math.max(0, MISC_COOLDOWN_MS - (Date.now() - lastBuy));
+};
+
+const formatCooldown = (ms) => {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+};
 
 // ============================================================
 //  150+ ACTIVOS
