@@ -26,6 +26,7 @@ const state = {
 };
 
 const refs = {};
+const MAX_FOOD_QTY = 99; // Límite máximo de unidades por ítem de comida
 
 // ============================================================
 //  150+ ACTIVOS
