@@ -664,8 +664,12 @@ window.openFoodShop = () => {
         const price = typeof getPetFoodPrice === 'function'
                       ? getPetFoodPrice(f, priceBeforePet) : priceBeforePet;
         const currentQty = state.inventory.get(f.id)?.qty || 0;
-        const atLimit = currentQty >= MAX_FOOD_QTY;
-        const canBuy = state.monedas >= price && !atLimit;
+        const isMisc = f.cat === 'misc';
+        const maxQty = isMisc ? MAX_FOOD_MISC : MAX_FOOD_QTY;
+        const atLimit = currentQty >= maxQty;
+        const miscCdRemaining = isMisc ? getMiscCooldownRemaining(f.id) : 0;
+        const onCooldown = miscCdRemaining > 0;
+        const canBuy = state.monedas >= price && !atLimit && !onCooldown;
         const inflTag = timesBought > 0
             ? `<span class="food-inflation">🔥 x${Math.pow(2,timesBought)} inflación</span>` : '';
 
@@ -680,7 +684,7 @@ window.openFoodShop = () => {
             <span class="food-price">🪙 ${price.toLocaleString()}</span>
             <button class="btn-action btn-buy btn-sm ${canBuy?'':'btn-disabled'}"
                     onclick="buyFood('${f.id}',${price})"
-                    ${canBuy?'':'disabled'}>${atLimit ? '🔒 Máx 99' : 'Comprar'}</button>
+                    ${canBuy?'':'disabled'}>${atLimit ? `🔒 Máx ${isMisc ? MAX_FOOD_MISC : MAX_FOOD_QTY}` : onCooldown ? `⏳ ${formatCooldown(miscCdRemaining)}` : 'Comprar'}</button>
         </div>`;
     }).join('');
     document.getElementById('modal-food-shop').style.display = 'flex';
