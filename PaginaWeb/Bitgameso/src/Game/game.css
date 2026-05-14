@@ -400,6 +400,8 @@ body {
     z-index:9999; backdrop-filter:blur(4px);
 }
 
+.modal-mascota-box { max-width: 480px; }
+
 .modal-box {
     background:white; border-radius:24px; padding:28px;
     max-width:480px; width:90%;
@@ -897,16 +899,23 @@ body {
 /* ====   SISTEMA DE MASCOTAS — DESBLOQUEO Y HABILIDADES
    ==== */
 
-/* Grid de mascotas mejorado */
+/* Grid de mascotas mejorado — 3 columnas, altura fija ~3 filas */
 .pet-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-    max-height: 440px;
+    max-height: 360px;
     overflow-y: auto;
+    overflow-x: hidden;
     margin-bottom: 16px;
-    padding-right: 4px;
+    padding-right: 6px;
+    scroll-behavior: smooth;
 }
+
+/* Scrollbar bonita */
+.pet-grid::-webkit-scrollbar { width: 6px; }
+.pet-grid::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 10px; }
+.pet-grid::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
 .pet-option {
     display: flex;
@@ -1258,7 +1267,9 @@ body {
     .filter-tab { padding: 3px 8px; font-size: 10px; }
 
     /* Modales en móvil */
-    .modal-box { padding: 20px 16px; }
+    .modal-mascota-box { max-width: 480px; }
+
+.modal-box { padding: 20px 16px; }
     .food-shop-grid { grid-template-columns: repeat(3, 1fr); }
     .info-grid { grid-template-columns: 1fr; }
     .pet-grid { grid-template-columns: repeat(3, 1fr); }

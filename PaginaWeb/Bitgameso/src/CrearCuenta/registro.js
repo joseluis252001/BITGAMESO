@@ -47,10 +47,12 @@ function togglePass(fieldId, btn) {
     if (!input) return;
     if (input.type === 'password') {
         input.type = 'text';
-        btn.textContent = 'Ocultar';
+        btn.style.opacity = '1';
+        btn.style.background = '#a87ee0';
     } else {
         input.type = 'password';
-        btn.textContent = 'Ver';
+        btn.style.opacity = '0.7';
+        btn.style.background = '#CBA6F7';
     }
 }
 

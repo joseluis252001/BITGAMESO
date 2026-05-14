@@ -283,15 +283,37 @@ const GOLDEN_DEFS = (() => {
         ['Shark-128',        'Shark-128-Gold',        'Tiburon Dorado',     10000000,'shark'],
         ['Sheep-128',        'Sheep-128-Gold',        'Oveja Dorada',       10000000,'sheep'],
     ];
+    // Descripciones x2 para mascotas doradas
+    const goldenDescMap = {
+        'bear':          ['⚡ Mercado x4 permanente','🍬 Dulces con 20% descuento','⚠️ Penalización reducida en ventas negativas'],
+        'bird':          ['⚡ Mercado x6 permanente','+2 monedas cada 2 segundos','🍎 Comida cuesta x3 (en vez de x4)','⏸️ Pausa al operar igual'],
+        'bunny':         ['🚀 Turbo x8 por 60s (cooldown 3 min)','⚡ Mercado x8 durante el turbo'],
+        'cat_beige':     ['⚡ Mercado x4 permanente','Dulces y Pescado duran x8','−2% salud cada 20 segundos'],
+        'cat_blue':      ['⚡ Mercado x4 permanente','Dulces y Pescado duran x10','−5% salud cada 20 segundos'],
+        'cat_pink':      ['⚡ Mercado x4 permanente','Dulces y Pescado duran x12','−7% salud cada 25 segundos'],
+        'cat_tiger':     ['⚡ Mercado x4 permanente','Dulces y Pescado duran x14','−9% salud cada 30 segundos'],
+        'tiger_beige':   ['⚡ Mercado x6 permanente','Proteínas duran x30','Sin inflación en proteínas'],
+        'tiger_rose':    ['⚡ Mercado x6 permanente','Proteínas duran x50','Dulces y proteínas sin inflación'],
+        'cat_white':     ['⚡ Mercado x4 permanente','Bono de sector +24%','Pescado y Dulces duran x40 sin inflación'],
+        'chicken_white': ['⚡ Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2 e inflación +250%'],
+        'chicken_yellow':['⚡ Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2.5 e inflación +450%','100% de ganar lo que pagaste al vender'],
+        'cow':           ['Compras en mercado −50%','Ganancias en ventas x300%','−11% salud cada 30 segundos'],
+        'frog':          ['Predicción perfecta de sector por 60s','Requiere 3+ acciones del mismo sector','Cooldown 1 minuto'],
+        'penguin':       ['Pescado 100% gratis','+100% ganancia en ventas','+6% interés adicional','70% de repetir acción al vender','+2000 monedas cada 2 minutos','Compra en rojo = salud −30% | −12%/50s'],
+        'penguin_pink':  ['Pescado 100% gratis','+140% ganancia en ventas','+16% interés adicional','100% de repetir acción al vender','+3000 monedas cada 2 minutos','Compra en rojo = salud −40% | −12%/50s'],
+        'shark':         ['⚡ Mercado x4 permanente','Resetea toda la inflación','Ventas multiplicadas x16','Con 3+ del mismo sector: +30% bono y +60% extra','−15% salud cada 2 minutos'],
+        'sheep':         ['⚡ Mercado x4 permanente','Tienda gratis si no hay inflación','Si pierdes: tienda se triplica','+3400 monedas cada 30 segundos','Al vender: +50% ganancia, 100% repetir, predicción 70s, 50% de ganar 5000 extra'],
+    };
+
     pairs.forEach(([baseId, id, label, cost, passive], i) => {
         const base = PET_DEFS[baseId];
         defs[id] = {
             id, baseId, label, cost, order: i,
-            marketSpeed: base.marketSpeed,
+            marketSpeed: Math.min(base.marketSpeed * 2, 4),
             passive,
             golden: true,
-            desc: base.desc + ' | Efectos x2',
-            passiveDesc: base.passiveDesc,
+            desc: `✨ DORADA — ${base.desc} (efectos x2)`,
+            passiveDesc: goldenDescMap[passive] || base.passiveDesc.map(l => l + ' (x2)'),
         };
     });
     return defs;

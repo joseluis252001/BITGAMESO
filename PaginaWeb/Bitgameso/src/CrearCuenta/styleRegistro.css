@@ -193,21 +193,26 @@ button:hover {
     right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    width: auto;
-    padding: 4px 10px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
     margin: 0;
-    font-size: 0.72rem;
-    font-weight: bold;
-    background: #CBA6F7;
-    color: white;
+    font-size: 1rem;
+    background: transparent;
+    color: #CBA6F7;
     border: none;
-    border-radius: 6px;
+    border-radius: 50%;
     cursor: pointer;
-    line-height: 1.4;
-    transition: background 0.2s;
+    line-height: 1;
+    transition: opacity 0.2s, background 0.2s;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-toggle-pass:hover {
-    background: #a87ee0;
+    opacity: 1;
+    background: #f0e7ff;
     transform: translateY(-50%);
 }
