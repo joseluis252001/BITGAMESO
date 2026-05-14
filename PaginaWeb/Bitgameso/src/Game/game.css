@@ -490,10 +490,7 @@ body {
 
 /* ====   MODAL: MASCOTAS
    ==== */
-.pet-grid {
-    display:grid; grid-template-columns:repeat(4,1fr);
-    gap:10px; max-height:300px; overflow-y:auto; margin-bottom:16px;
-}
+/* pet-grid definido abajo */
 
 .pet-option {
     display:flex; flex-direction:column; align-items:center; gap:4px;
