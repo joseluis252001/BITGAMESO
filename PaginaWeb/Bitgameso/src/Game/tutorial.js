@@ -219,8 +219,13 @@ const renderTutorialStep = () => {
     if (step.target) {
         const el = document.querySelector(step.target);
         if (el) {
-            if (step.scrollTo) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => highlightElement(el, step), 400);
+            if (step.scrollTo) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Esperar que scroll termine antes de calcular posición del highlight
+                setTimeout(() => highlightElement(el, step), 600);
+            } else {
+                setTimeout(() => highlightElement(el, step), 400);
+            }
         }
     } else {
         removeHighlight();
@@ -406,56 +411,79 @@ const setupBuyTutorial = () => {
         if (!state.portfolio.has(sym)) { targetSymbol = sym; break; }
     }
     if (!targetSymbol) { tutorialNext(); return; }
-
     tutorialSelectedAction = targetSymbol;
 
-    // Mover el activo al inicio del mapa para que aparezca primero
+    // Mover el activo al inicio del mapa
     const targetAsset = state.market.get(targetSymbol);
     state.market.delete(targetSymbol);
     const newMarket = new Map();
     newMarket.set(targetSymbol, targetAsset);
     state.market.forEach((v, k) => newMarket.set(k, v));
     state.market = newMarket;
+
+    // Forzar filtro 'Todos' para que se vea el activo
+    if (typeof setFilter === 'function') setFilter('Todos');
     if (typeof renderMarket === 'function') renderMarket();
 
-    // Scroll al mercado primero, luego resaltar botón
+    // Paso 1: scroll al mercado
     const marketEl = document.querySelector('.market-main');
     if (marketEl) marketEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+    // Paso 2: tras scroll, encontrar el botón y resaltarlo
     setTimeout(() => {
-        const rows = document.querySelectorAll('.asset-row');
-        let targetBtn = null;
-        let targetRow = null;
-        rows.forEach(row => {
-            const symEl = row.querySelector('.asset-symbol');
-            if (symEl && symEl.textContent.trim() === targetSymbol) {
-                targetBtn = row.querySelector('.btn-buy');
-                targetRow = row;
-            }
-        });
+        const highlightTargetBtn = () => {
+            const rows = document.querySelectorAll('.asset-row');
+            let targetBtn = null;
+            rows.forEach(row => {
+                const symEl = row.querySelector('.asset-symbol');
+                if (symEl && symEl.textContent.trim() === targetSymbol) {
+                    targetBtn = row.querySelector('.btn-buy');
+                }
+            });
 
-        if (targetBtn) {
-            // Scroll al botón específico dentro del mercado
-            targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            addActionGlow(targetBtn);
-            // Esperar que el scroll termine antes de posicionar
-            setTimeout(() => {
-                highlightElement(targetBtn, { arrowDir: 'up' });
-                // Reposicionar burbuja después del scroll
+            if (targetBtn) {
+                // Deshabilitar todos los otros botones comprar temporalmente
+                document.querySelectorAll('.btn-buy').forEach(btn => {
+                    if (btn !== targetBtn) {
+                        btn.style.opacity = '0.3';
+                        btn.style.pointerEvents = 'none';
+                    }
+                });
+
+                // Scroll al botón y resaltar
+                targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => {
                     const rect = targetBtn.getBoundingClientRect();
                     highlightElement(targetBtn, { arrowDir: 'up' });
                     positionBubble(rect, 'up');
-                }, 300);
-            }, 600);
-        }
-    }, 800);
+                    addActionGlow(targetBtn);
 
-    // Polling: esperar que aparezca en cartera
+                    // Actualizar texto de la burbuja
+                    const textEl = document.getElementById('tut-text');
+                    if (textEl) textEl.textContent = 'Presiona COMPRAR en la accion resaltada arriba para hacer tu primera inversion!';
+                }, 500);
+            }
+        };
+        highlightTargetBtn();
+    }, 900);
+
+    // Polling: esperar que aparezca en cartera y restaurar botones
     const poll = setInterval(() => {
-        if (!tutorialActive) { clearInterval(poll); return; }
+        if (!tutorialActive) {
+            clearInterval(poll);
+            document.querySelectorAll('.btn-buy').forEach(btn => {
+                btn.style.opacity = '';
+                btn.style.pointerEvents = '';
+            });
+            return;
+        }
         if (state.portfolio.has(targetSymbol)) {
             clearInterval(poll);
+            // Restaurar botones
+            document.querySelectorAll('.btn-buy').forEach(btn => {
+                btn.style.opacity = '';
+                btn.style.pointerEvents = '';
+            });
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 800);
         }
     }, 500);
