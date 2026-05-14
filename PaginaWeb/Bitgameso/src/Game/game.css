@@ -408,6 +408,7 @@ body {
     border:3px solid var(--text); box-shadow:var(--shadow); text-align:center;
 }
 .modal-wide   { max-width:700px; }
+.modal-pet-scroll { max-height: 70vh; overflow-y: auto; padding-right: 4px; }
 .modal-box h3 { font-family:'Fredoka',sans-serif; font-size:1.4rem; margin:0 0 6px; }
 .modal-subtitle { color:#aaa; font-size:.85rem; margin:0 0 14px; }
 .modal-header   { margin-bottom:12px; }
@@ -896,23 +897,13 @@ body {
 /* ====   SISTEMA DE MASCOTAS — DESBLOQUEO Y HABILIDADES
    ==== */
 
-/* Grid de mascotas mejorado — 3 columnas, altura fija ~3 filas */
+/* Grid de mascotas — 3 columnas, sin scroll propio */
 .pet-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-    max-height: 360px;
-    overflow-y: auto;
-    overflow-x: hidden;
     margin-bottom: 16px;
-    padding-right: 6px;
-    scroll-behavior: smooth;
 }
-
-/* Scrollbar bonita */
-.pet-grid::-webkit-scrollbar { width: 6px; }
-.pet-grid::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 10px; }
-.pet-grid::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
 .pet-option {
     display: flex;
@@ -1549,7 +1540,7 @@ body {
 
 .pet-grid-gold-section {
     margin-top: 16px;
-    border-top: 2px solid gold;
+    border-top: 2px dashed #ffd700;
     padding-top: 12px;
 }
 

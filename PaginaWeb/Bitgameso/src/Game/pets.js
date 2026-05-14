@@ -899,7 +899,16 @@ window.openPetInfo = (petId) => {
     if (!modal) return;
 
     title.textContent = def.label;
-    img.src = `../assets/pets/${petId}.png`;
+    // Para mascotas doradas usar imagen base con filtro dorado
+    const imgSrc = def.golden && def.baseId
+        ? `../assets/pets/${def.baseId}.png`
+        : `../assets/pets/${petId}.png`;
+    img.src = imgSrc;
+    if (def.golden) {
+        img.style.filter = 'sepia(1) saturate(3) hue-rotate(5deg) brightness(1.1)';
+    } else {
+        img.style.filter = '';
+    }
     desc.textContent = def.desc;
 
     list.innerHTML = (def.passiveDesc || []).map(line => `
@@ -977,9 +986,9 @@ window.openPetSelector = () => {
 
     if (state.victoryAchieved) {
         html += `<div class="pet-grid-gold-section">
-            <h4>Mascotas Doradas — Efectos x2</h4>
-            <div class="pet-grid">${PET_ORDER_GOLDEN.map(id => buildPetCard(id, true)).join('')}</div>
+            <h4>✨ Mascotas Doradas — Efectos x2</h4>
         </div>`;
+        html += PET_ORDER_GOLDEN.map(id => buildPetCard(id, true)).join('');
     }
 
     grid.innerHTML = html;
