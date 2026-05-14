@@ -22,7 +22,9 @@ const state = {
         futureVision: 0,
     },
     selectedFood: null,
-    petData: null,   // Map<petId, {health, unlocked}> — gestionado por pets.js
+    petData: null,              // Map<petId, {health, unlocked}> — gestionado por pets.js
+    marketSpeedEnabled: true,   // false = fuerza velocidad normal aunque la mascota tenga pasivo de velocidad
+    victoryAchieved:   false,   // true cuando todas las mascotas normales llegan a 100 de salud
 };
 
 const refs = {};
@@ -312,15 +314,17 @@ const saveGame = () => {
             state.petData.set(state.currentPet, d);
         }
         localStorage.setItem(getSaveKey(), JSON.stringify({
-            monedas:       state.monedas,
-            saludMascota:  state.saludMascota,
-            currentPet:    state.currentPet,
-            portfolio:     Array.from(state.portfolio.entries()),
-            inventory:     Array.from(state.inventory.entries()),
-            foodInflation: Array.from(state.foodInflation.entries()),
-            sectorBonus:   Array.from(state.sectorBonus.entries()),
-            effectsTime:   { ...state.effectsTime },
-            petData:       state.petData ? Array.from(state.petData.entries()) : [],
+            monedas:            state.monedas,
+            saludMascota:       state.saludMascota,
+            currentPet:         state.currentPet,
+            portfolio:          Array.from(state.portfolio.entries()),
+            inventory:          Array.from(state.inventory.entries()),
+            foodInflation:      Array.from(state.foodInflation.entries()),
+            sectorBonus:        Array.from(state.sectorBonus.entries()),
+            effectsTime:        { ...state.effectsTime },
+            petData:            state.petData ? Array.from(state.petData.entries()) : [],
+            victoryAchieved:    state.victoryAchieved || false,
+            marketSpeedEnabled: state.marketSpeedEnabled !== false,
         }));
     } catch(e) { console.warn('Error guardando',e); }
 };
@@ -348,6 +352,9 @@ const loadGame = () => {
                 state.saludMascota = activeData.health;
             }
         }
+        state.victoryAchieved    = d.victoryAchieved    ?? false;
+        state.marketSpeedEnabled = d.marketSpeedEnabled ?? true;
+
         // Restaurar efectos activos — solo los que aún tienen tiempo
         if (d.effectsTime) {
             state.effectsTime.marketFast   = Math.max(0, d.effectsTime.marketFast   || 0);
@@ -725,6 +732,11 @@ window.buyFood = (foodId, price) => {
     const timesB = (state.foodInflation.get(foodId) || 0) + 1;
     state.foodInflation.set(foodId, timesB);
 
+    // Cooldown 2 horas para categoría "otros"
+    if (food.cat === 'misc') {
+        localStorage.setItem(getMiscCooldownKey(food.id), Date.now().toString());
+    }
+
     const nextPrice = Math.round(price * 2);
     showToast(`🛒 Compraste ${food.name} por 🪙${price} | Próximo precio: 🪙${nextPrice}`);
     logEvent('comida', `Compraste ${food.name}`, `Precio: 🪙${price} | Efecto: ${catLabel[food.cat]}`);
@@ -927,7 +939,13 @@ const changePetHealth = (delta) => {
 
 const renderPet = () => {
     const s = document.getElementById('pet-character');
-    if (s) s.style.backgroundImage = `url('../assets/pets/${state.currentPet}.png')`;
+    if (!s) return;
+    const def = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet] : null;
+    const imgId = def?.baseId || state.currentPet;
+    s.style.backgroundImage = `url('../assets/pets/${imgId}.png')`;
+    s.style.filter = def?.golden
+        ? 'sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25) drop-shadow(0 0 10px gold)'
+        : '';
 };
 
 // ============================================================
@@ -1027,6 +1045,8 @@ window.resetGame = () => {
     state.effectsTime = { marketFast:0, doubleProfit:0, futureVision:0 };
     state.selectedFood = null;
     state.currentPet = 'Bunny-Pink-128';
+    state.victoryAchieved = false;
+    state.marketSpeedEnabled = true;
     state.petData = null;
     if (typeof initPetData === 'function') initPetData();
     if (typeof sheepPriceTripled !== 'undefined') sheepPriceTripled = false;

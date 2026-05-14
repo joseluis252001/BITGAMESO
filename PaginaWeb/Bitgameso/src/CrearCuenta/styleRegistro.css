@@ -175,3 +175,39 @@ button:hover {
 
 .link-highlight { color: #CBA6F7; text-decoration: none; font-weight: bold; }
 .link-highlight:hover { text-decoration: underline; }
+
+.pass-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pass-field input {
+    flex: 1;
+    margin: 10px 0;
+    padding-right: 56px;
+}
+
+.btn-toggle-pass {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: auto;
+    padding: 4px 10px;
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: bold;
+    background: #CBA6F7;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    line-height: 1.4;
+    transition: background 0.2s;
+}
+
+.btn-toggle-pass:hover {
+    background: #a87ee0;
+    transform: translateY(-50%);
+}

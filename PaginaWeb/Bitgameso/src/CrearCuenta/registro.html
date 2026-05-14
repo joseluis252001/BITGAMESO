@@ -30,8 +30,14 @@
         <form id="form-registro">
             <input type="text" id="nombre" placeholder="Nombre de usuario" required>
             <input type="email" id="email" placeholder="Correo electrónico" required>
-            <input type="password" id="pass1" placeholder="Contraseña" required>
-            <input type="password" id="pass2" placeholder="Confirmar contraseña" required>
+            <div class="pass-field">
+                <input type="password" id="pass1" placeholder="Contraseña" required>
+                <button type="button" class="btn-toggle-pass" onclick="togglePass('pass1', this)" aria-label="Mostrar contraseña">Ver</button>
+            </div>
+            <div class="pass-field">
+                <input type="password" id="pass2" placeholder="Confirmar contraseña" required>
+                <button type="button" class="btn-toggle-pass" onclick="togglePass('pass2', this)" aria-label="Mostrar confirmar contraseña">Ver</button>
+            </div>
             <button type="submit">Registrarme</button>
         </form>
         <p style="margin-top: 15px; font-size: 0.8rem;">

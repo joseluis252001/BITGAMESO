@@ -258,6 +258,81 @@ const PET_ORDER = [
 ];
 
 // ============================================================
+//  MASCOTAS DORADAS — se desbloquean tras victoria (todas a 100 HP)
+//  golden:true | baseId = imagen base | efectos positivos x2
+// ============================================================
+const GOLDEN_DEFS = (() => {
+    const defs = {};
+    const pairs = [
+        ['Bear-100',         'Bear-100-Gold',         'Oso Dorado',         50000,  'bear'],
+        ['Bird-128',         'Bird-128-Gold',         'Pajaro Dorado',      50000,  'bird'],
+        ['Bunny-Pink-128',   'Bunny-Pink-128-Gold',   'Conejito Dorado',    50000,  'bunny'],
+        ['Cat-Beige-128',    'Cat-Beige-128-Gold',    'Gato Beige Dorado',  1000,   'cat_beige'],
+        ['Cat-Blue-128',     'Cat-Blue-128-Gold',     'Gato Azul Dorado',   1000,   'cat_blue'],
+        ['Cat-Pink-128',     'Cat-Pink-128-Gold',     'Gato Rosa Dorado',   1000,   'cat_pink'],
+        ['Cat-Tiger-128',    'Cat-Tiger-128-Gold',    'Gato Tigre Dorado',  10000,  'cat_tiger'],
+        ['Cat-Tiger-Beige-128','Cat-Tiger-Beige-128-Gold','Tigre Beige Dorado',10000,'tiger_beige'],
+        ['Cat-Tiger-Rose-128','Cat-Tiger-Rose-128-Gold','Tigre Rosa Dorado', 10000, 'tiger_rose'],
+        ['Cat-White-128',    'Cat-White-128-Gold',    'Gato Blanco Dorado', 100000, 'cat_white'],
+        ['Chicken-White-128','Chicken-White-128-Gold','Pollito Dorado',     100000, 'chicken_white'],
+        ['Chicken-Yellow-128','Chicken-Yellow-128-Gold','Pollito Amarillo Dorado',100000,'chicken_yellow'],
+        ['Cow-128',          'Cow-128-Gold',          'Vaca Dorada',        1000000,'cow'],
+        ['Frog-128',         'Frog-128-Gold',         'Rana Dorada',        1000000,'frog'],
+        ['Penguin-128',      'Penguin-128-Gold',      'Pinguino Dorado',    1000000,'penguin'],
+        ['Penguin-Pink-128', 'Penguin-Pink-128-Gold', 'Pinguino Rosa Dorado',10000000,'penguin_pink'],
+        ['Shark-128',        'Shark-128-Gold',        'Tiburon Dorado',     10000000,'shark'],
+        ['Sheep-128',        'Sheep-128-Gold',        'Oveja Dorada',       10000000,'sheep'],
+    ];
+    pairs.forEach(([baseId, id, label, cost, passive], i) => {
+        const base = PET_DEFS[baseId];
+        defs[id] = {
+            id, baseId, label, cost, order: i,
+            marketSpeed: base.marketSpeed,
+            passive,
+            golden: true,
+            desc: base.desc + ' | Efectos x2',
+            passiveDesc: base.passiveDesc,
+        };
+    });
+    return defs;
+})();
+
+// Inyectar doradas en PET_DEFS
+Object.assign(PET_DEFS, GOLDEN_DEFS);
+
+const PET_ORDER_GOLDEN = [
+    'Bear-100-Gold','Bird-128-Gold','Bunny-Pink-128-Gold',
+    'Cat-Beige-128-Gold','Cat-Blue-128-Gold','Cat-Pink-128-Gold',
+    'Cat-Tiger-128-Gold','Cat-Tiger-Beige-128-Gold','Cat-Tiger-Rose-128-Gold',
+    'Cat-White-128-Gold','Chicken-White-128-Gold','Chicken-Yellow-128-Gold',
+    'Cow-128-Gold','Frog-128-Gold','Penguin-128-Gold',
+    'Penguin-Pink-128-Gold','Shark-128-Gold','Sheep-128-Gold',
+];
+
+// ============================================================
+//  VICTORIA — verificar si todas las mascotas normales tienen 100 HP
+// ============================================================
+const checkVictory = () => {
+    if (state.victoryAchieved) return;
+    if (!state.petData) return;
+    const allAt100 = PET_ORDER.every(id => {
+        const d = state.petData.get(id);
+        return d && d.unlocked && Math.round(d.health) >= 100;
+    });
+    if (allAt100) {
+        state.victoryAchieved = true;
+        if (typeof saveGame === 'function') saveGame();
+        const modal = document.getElementById('modal-victory');
+        if (modal) modal.style.display = 'flex';
+    }
+};
+
+window.closeVictoryModal = () => {
+    const modal = document.getElementById('modal-victory');
+    if (modal) modal.style.display = 'none';
+};
+
+// ============================================================
 //  ESTADO DE MASCOTAS (se integra con state)
 // ============================================================
 // state.petData = Map<petId, { health, unlocked }>
@@ -289,6 +364,13 @@ const initPetData = () => {
     bunny.unlocked = true;
     if (!bunny.health || bunny.health < 1) bunny.health = 50;
     state.petData.set('Bunny-Pink-128', bunny);
+
+    // Inicializar mascotas doradas (bloqueadas por defecto)
+    PET_ORDER_GOLDEN.forEach(id => {
+        if (!state.petData.has(id)) {
+            state.petData.set(id, { health: 0, unlocked: false, everUsed: false });
+        }
+    });
 };
 
 // ============================================================
@@ -313,17 +395,20 @@ const startPassivesForPet = (petId) => {
     clearPassiveTimers();
     const def = PET_DEFS[petId];
 
-    // ALWAYS start market — bulletproof fallback chain
-    let speed = 3000; // default
+    // Calcular velocidad de la mascota (doradas duplican la velocidad, max x4)
+    let petNativeSpeed = 3000;
     if (def) {
-        if      (def.marketSpeed >= 4)   speed = 750;
-        else if (def.marketSpeed >= 3)   speed = 1000;
-        else if (def.marketSpeed >= 2)   speed = 1500;
-        else if (def.marketSpeed >= 1.5) speed = 2000;
-        else                             speed = 3000;
+        const effSpeed = def.golden ? Math.min(def.marketSpeed * 2, 4) : def.marketSpeed;
+        if      (effSpeed >= 4)   petNativeSpeed = 750;
+        else if (effSpeed >= 3)   petNativeSpeed = 1000;
+        else if (effSpeed >= 2)   petNativeSpeed = 1500;
+        else if (effSpeed >= 1.5) petNativeSpeed = 2000;
     }
 
-    // Call startMarket directly — guaranteed to work
+    // Respetar toggle de velocidad: si está desactivado usar velocidad normal
+    const speedEnabled = (typeof state !== 'undefined' && state.marketSpeedEnabled !== false);
+    const speed = speedEnabled ? petNativeSpeed : 3000;
+
     if (typeof startMarket === 'function') {
         startMarket(speed);
     } else {
@@ -333,15 +418,17 @@ const startPassivesForPet = (petId) => {
     if (!def) return;
 
     switch(def.passive) {
-        case 'bird':
+        case 'bird': {
+            const birdCoins = def?.golden ? 2 : 1;
             passiveTimers.bird = setInterval(() => {
                 if (!birdPaused) {
-                    state.monedas += 1;
+                    state.monedas += birdCoins;
                     if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
                     _getSaveGame()();
                 }
             }, 2000);
             break;
+        }
 
         case 'cat_beige':
             petHungerTimer = setInterval(() => { _getChangePH()(-1);  _getCheckGO()(); }, 20000); break;
@@ -357,11 +444,12 @@ const startPassivesForPet = (petId) => {
 
         case 'penguin':
         case 'penguin_pink': {
-            const amount = def.passive === 'penguin' ? 1000 : 1500;
+            const baseAmt = def.passive === 'penguin' ? 1000 : 1500;
+            const amount  = def.golden ? baseAmt * 2 : baseAmt;
             passiveTimers.coins = setInterval(() => {
                 state.monedas += amount;
                 if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                _getShowToast()(` +${amount} del Pingüino!`);
+                _getShowToast()(` +${amount} del Pinguino!`);
                 _getSaveGame()();
             }, 120000);
             petHungerTimer = setInterval(() => { _getChangePH()(-12); _getCheckGO()(); }, 50000);
@@ -371,14 +459,16 @@ const startPassivesForPet = (petId) => {
         case 'shark':
             petHungerTimer = setInterval(() => { _getChangePH()(-15); _getCheckGO()(); }, 120000); break;
 
-        case 'sheep':
+        case 'sheep': {
+            const sheepCoins = def.golden ? 3400 : 1700;
             passiveTimers.coins = setInterval(() => {
-                state.monedas += 1700;
+                state.monedas += sheepCoins;
                 if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                _getShowToast()(' +1700 de la Oveja!');
+                _getShowToast()(` +${sheepCoins} de la Oveja!`);
                 _getSaveGame()();
             }, 30000);
             break;
+        }
 
         case 'chicken_white':
         case 'chicken_yellow':
@@ -406,17 +496,17 @@ const resetNonProteinInflation = () => {
 
 // Obtener multiplicador de duración de efecto según mascota activa y categoría de comida
 const getEffectDurationMultiplier = (foodCat) => {
-    const pet = state.currentPet;
-    const isDulceFish = foodCat === 'dulce' || foodCat === 'pescado_single';
+    const def = PET_DEFS[state.currentPet];
+    const gm  = def?.golden ? 2 : 1;
 
-    switch(PET_DEFS[pet]?.passive) {
-        case 'cat_beige':  return (foodCat === 'dulce' || foodCat === 'proteina') ? 4  : 1;
-        case 'cat_blue':   return (foodCat === 'dulce' || foodCat === 'proteina') ? 5  : 1;
-        case 'cat_pink':   return (foodCat === 'dulce' || foodCat === 'proteina') ? 6  : 1;
-        case 'cat_tiger':  return (foodCat === 'dulce' || foodCat === 'proteina') ? 7  : 1;
-        case 'tiger_beige':return foodCat === 'proteina' ? 15 : 1;
-        case 'tiger_rose': return (foodCat === 'proteina' || foodCat === 'dulce') ? 25 : 1;
-        case 'cat_white':  return (foodCat === 'dulce' || foodCat === 'proteina') ? 20 : 1;
+    switch(def?.passive) {
+        case 'cat_beige':  return (foodCat === 'dulce' || foodCat === 'proteina') ? 4*gm  : 1;
+        case 'cat_blue':   return (foodCat === 'dulce' || foodCat === 'proteina') ? 5*gm  : 1;
+        case 'cat_pink':   return (foodCat === 'dulce' || foodCat === 'proteina') ? 6*gm  : 1;
+        case 'cat_tiger':  return (foodCat === 'dulce' || foodCat === 'proteina') ? 7*gm  : 1;
+        case 'tiger_beige':return foodCat === 'proteina' ? 15*gm : 1;
+        case 'tiger_rose': return (foodCat === 'proteina' || foodCat === 'dulce') ? 25*gm : 1;
+        case 'cat_white':  return (foodCat === 'dulce' || foodCat === 'proteina') ? 20*gm : 1;
         default: return 1;
     }
 };
@@ -448,7 +538,8 @@ const isSheepFreeShop = (foodId) => {
 
 // Obtener precio modificado por mascota activa
 const getPetFoodPrice = (food, basePrice) => {
-    const pet  = PET_DEFS[state.currentPet]?.passive;
+    const def = PET_DEFS[state.currentPet];
+    const pet = def?.passive;
     const isFish = food.id === 'Fish-128';
 
     if (isFishFree() && isFish) return 0;
@@ -456,14 +547,14 @@ const getPetFoodPrice = (food, basePrice) => {
 
     let price = basePrice;
 
-    // Bear: dulces -10%
-    if (pet === 'bear' && food.cat === 'dulce') price *= 0.9;
+    // Bear: dulces -10% (dorado -20%, efecto positivo x2)
+    if (pet === 'bear' && food.cat === 'dulce') price *= def?.golden ? 0.8 : 0.9;
 
-    // Bird: toda comida x4
+    // Bird: toda comida x4 (penalizacion, no cambia)
     if (pet === 'bird') price *= 4;
 
-    // Pollito: proteínas x2 precio base
-    if (pet === 'chicken_white' && food.cat === 'proteina') price *= 2;
+    // Pollito: proteinas precio mayor (penalizacion, no cambia)
+    if (pet === 'chicken_white'  && food.cat === 'proteina') price *= 2;
     if (pet === 'chicken_yellow' && food.cat === 'proteina') price *= 2.5;
 
     return Math.round(price);
@@ -481,88 +572,102 @@ const getProteinInflationRate = () => {
 //  MODIFICADORES EN VENTAS DEL MERCADO
 // ============================================================
 const applyPetSellModifiers = (pos, cur, baseProfit) => {
-    const pet = PET_DEFS[state.currentPet]?.passive;
+    const def = PET_DEFS[state.currentPet];
+    const pet = def?.passive;
+    const gm  = def?.golden ? 2 : 1; // multiplicador para efectos positivos
     let payout = pos.buyPrice + baseProfit;
     let extraMsg = '';
 
     switch(pet) {
         case 'bear':
+            // Penalizacion negativa, no cambia con dorada
             if (baseProfit < 0) {
                 const penalty = Math.abs(pos.buyPrice);
                 payout -= penalty;
-                extraMsg += ` |  Penalización -${_getFmt()(penalty)}`;
+                extraMsg += ` | Penalizacion -${_getFmt()(penalty)}`;
             }
             break;
 
         case 'cow':
             if (baseProfit > 0) {
-                payout = pos.buyPrice + baseProfit * 1.5;
-                extraMsg += ' |  Ganancia x150%';
+                const cowMult = def?.golden ? 3 : 1.5;
+                payout = pos.buyPrice + baseProfit * cowMult;
+                extraMsg += def?.golden ? ' | Ganancia x300%' : ' | Ganancia x150%';
             }
             break;
 
-        case 'chicken_yellow':
-            if (Math.random() < 0.5) {
+        case 'chicken_yellow': {
+            const ckChance = def?.golden ? 1.0 : 0.5;
+            if (Math.random() < ckChance) {
                 payout += pos.buyPrice;
-                extraMsg += ` |  Bonus +${_getFmt()(pos.buyPrice)}`;
+                extraMsg += ` | Bonus +${_getFmt()(pos.buyPrice)}`;
             }
             break;
+        }
 
-        case 'penguin':
-            payout = pos.buyPrice + baseProfit * 1.5 + pos.buyPrice * 0.03;
-            extraMsg += ' |  +50% +3%';
-            if (Math.random() < 0.35) {
+        case 'penguin': {
+            const pgMult   = def?.golden ? 2.0 : 1.5;
+            const pgInt    = def?.golden ? 0.06 : 0.03;
+            const pgRepeat = def?.golden ? 0.70 : 0.35;
+            payout = pos.buyPrice + baseProfit * pgMult + pos.buyPrice * pgInt;
+            extraMsg += def?.golden ? ' | +100% +6%' : ' | +50% +3%';
+            if (Math.random() < pgRepeat) {
                 state.portfolio.set(pos.symbol, { ...pos });
-                extraMsg += ' |  ¡Acción repetida!';
+                extraMsg += ' | Accion repetida!';
             }
             break;
+        }
 
-        case 'penguin_pink':
-            payout = pos.buyPrice + baseProfit * 1.7 + pos.buyPrice * 0.08;
-            extraMsg += ' |  +70% +8%';
-            if (Math.random() < 0.75) {
+        case 'penguin_pink': {
+            const ppMult   = def?.golden ? 2.4 : 1.7;
+            const ppInt    = def?.golden ? 0.16 : 0.08;
+            const ppRepeat = def?.golden ? 1.0 : 0.75;
+            payout = pos.buyPrice + baseProfit * ppMult + pos.buyPrice * ppInt;
+            extraMsg += def?.golden ? ' | +140% +16%' : ' | +70% +8%';
+            if (Math.random() < ppRepeat) {
                 state.portfolio.set(pos.symbol, { ...pos });
-                extraMsg += ' |  ¡Acción repetida!';
+                extraMsg += ' | Accion repetida!';
             }
             break;
+        }
 
         case 'shark': {
-            payout = pos.buyPrice * 8;
-            extraMsg += ' |  x8';
-            // Check sector bonus
+            const sharkMult = def?.golden ? 16 : 8;
+            payout = pos.buyPrice * sharkMult;
+            extraMsg += def?.golden ? ' | x16' : ' | x8';
             const counts = countBySector();
             if ((counts.get(pos.type) || 0) >= 3) {
-                const extra = pos.buyPrice * 0.15 + pos.buyPrice * 0.30;
+                const extra = pos.buyPrice * (0.15 + 0.30) * gm;
                 payout += extra;
-                extraMsg += ` | +15% bono +30% extra`;
+                extraMsg += def?.golden ? ' | Bono sector x2' : ' | +15% +30% extra';
             }
             break;
         }
 
         case 'cat_white': {
-            // Sector bonus 12% instead of 3%
             if (state.sectorBonus.get(pos.type)) {
-                const bonusAmt = pos.buyPrice * 0.12;
+                const bonusPct = def?.golden ? 0.24 : 0.12;
+                const bonusAmt = pos.buyPrice * bonusPct;
                 payout += bonusAmt;
-                extraMsg += ` |  Bono sector +12%`;
+                extraMsg += def?.golden ? ' | Bono sector +24%' : ' | Bono sector +12%';
             }
             break;
         }
 
         case 'sheep': {
-            const gain25 = pos.buyPrice * 0.25;
-            payout += gain25;
-            extraMsg += ` |  +25%`;
-            if (Math.random() < 0.50) {
+            const sheepBonus = pos.buyPrice * (def?.golden ? 0.50 : 0.25);
+            payout += sheepBonus;
+            extraMsg += def?.golden ? ' | +50%' : ' | +25%';
+            const sheepRepeat = def?.golden ? 1.0 : 0.50;
+            if (Math.random() < sheepRepeat) {
                 state.portfolio.set(pos.symbol, { ...pos });
-                extraMsg += ' |  Repetida!';
+                extraMsg += ' | Repetida!';
             }
-            // 25% de 2500 extra
+            const bonusCoins = def?.golden ? 5000 : 2500;
             if (Math.random() < 0.25) {
-                state.monedas += 2500;
-                extraMsg += ' |  +2500 bonus!';
+                state.monedas += bonusCoins;
+                extraMsg += ` | +${bonusCoins} bonus!`;
             }
-            // 100% predicción de una acción por 35s
             activateSheepPrediction(pos.symbol);
             break;
         }
@@ -589,8 +694,9 @@ const activateSheepPrediction = (excludeSymbol) => {
 
 // Modificadores en COMPRA del mercado
 const applyPetBuyModifiers = (assetPrice) => {
-    const pet = PET_DEFS[state.currentPet]?.passive;
-    if (pet === 'cow') return assetPrice * 0.5;   // -50%
+    const def = PET_DEFS[state.currentPet];
+    const pet = def?.passive;
+    if (pet === 'cow') return assetPrice * (def?.golden ? 0.25 : 0.5);  // -50% o -75%
     return assetPrice;
 };
 
@@ -622,29 +728,32 @@ const checkSheepPenalty = (profit) => {
 //  HABILIDADES ACTIVAS (BOTONES EN MASCOTA)
 // ============================================================
 
-// Conejo: Turbo x4
+// Conejo: Turbo x4 (dorado x8 por 60s)
 window.activateBunnyTurbo = () => {
     if (bunnyTurboCooldown) { _getShowToast()(' Turbo en cooldown, espera 3 minutos'); return; }
-    if (bunnyTurboActive)   { _getShowToast()(' ¡Turbo ya activo!'); return; }
+    if (bunnyTurboActive)   { _getShowToast()(' Turbo ya activo!'); return; }
+    const isGolden   = PET_DEFS[state.currentPet]?.golden;
+    const turboSpeed = isGolden ? 375 : 750;  // x8 o x4
+    const turboDur   = isGolden ? 60000 : 30000;
     bunnyTurboActive = true;
-    if(typeof startMarket==="function") startMarket(750);;
-    _getShowToast()(' ¡TURBO x4 activado por 30s!');
+    if (typeof startMarket === 'function') startMarket(turboSpeed);
+    _getShowToast()(isGolden ? ' Turbo x8 activado por 60s!' : ' Turbo x4 activado por 30s!');
     setTimeout(() => {
         bunnyTurboActive = false;
-        if(typeof startMarket==="function") startMarket(3000);;
+        if (typeof startMarket === 'function') startMarket(3000);
         _getShowToast()(' Turbo terminado.');
         bunnyTurboCooldown = true;
         renderPetAbilityButton();
         setTimeout(() => {
             bunnyTurboCooldown = false;
             renderPetAbilityButton();
-            _getShowToast()(' ¡Turbo disponible de nuevo!');
-        }, 180000); // 3 min
-    }, 30000);
+            _getShowToast()(' Turbo disponible de nuevo!');
+        }, 180000); // 3 min (cooldown no cambia)
+    }, turboDur);
     renderPetAbilityButton();
 };
 
-// Rana: Predicción perfecta del sector
+// Rana: Prediccion perfecta del sector (dorada 60s)
 window.activateFrogPrediction = () => {
     if (frogCooldown) { _getShowToast()(' Habilidad de Rana en cooldown (1 min)'); return; }
     const counts = countBySector();
@@ -652,7 +761,9 @@ window.activateFrogPrediction = () => {
     counts.forEach((c, type) => { if (c >= 3) targetSector = type; });
     if (!targetSector) { _getShowToast()(' Necesitas 3+ acciones del mismo sector'); return; }
 
-    // Predicción perfecta: mostrar futuro real de ese sector
+    const isGolden  = PET_DEFS[state.currentPet]?.golden;
+    const predDur   = isGolden ? 60000 : 30000;
+
     state.market.forEach((a, sym) => {
         if (a.type === targetSector) {
             const pred = parseFloat((Math.random() * 10 - 5).toFixed(2));
@@ -660,7 +771,7 @@ window.activateFrogPrediction = () => {
         }
     });
     _getRenderMarket()();
-    _getShowToast()(` ¡Predicción perfecta del sector ${targetSector} por 30s!`);
+    _getShowToast()(` Prediccion perfecta del sector ${targetSector} por ${isGolden ? '60s' : '30s'}!`);
     frogCooldown = true;
     renderPetAbilityButton();
     setTimeout(() => {
@@ -671,42 +782,70 @@ window.activateFrogPrediction = () => {
             }
         });
         _getRenderMarket()();
-        _getShowToast()(' Predicción de Rana terminada.');
-    }, 30000);
+        _getShowToast()(' Prediccion de Rana terminada.');
+    }, predDur);
     setTimeout(() => {
         frogCooldown = false;
         renderPetAbilityButton();
-        _getShowToast()(' ¡Habilidad de Rana disponible!');
+        _getShowToast()(' Habilidad de Rana disponible!');
     }, 60000);
 };
 
 // ============================================================
 //  RENDER BOTÓN DE HABILIDAD ACTIVA EN MASCOTA
 // ============================================================
+// Mascotas con velocidad de mercado pasiva que NO tienen cooldown propio
+const PASSIVE_SPEED_PETS = new Set([
+    'bear','bird','cat_beige','cat_blue','cat_pink','cat_tiger',
+    'cat_tiger_beige','cat_tiger_rose','cat_white',
+    'chicken_white','chicken_yellow','cow','penguin','penguin_pink','shark','sheep'
+]);
+
+window.toggleMarketSpeed = () => {
+    state.marketSpeedEnabled = !state.marketSpeedEnabled;
+    if (typeof startPassivesForPet === 'function') startPassivesForPet(state.currentPet);
+    renderPetAbilityButton();
+    const pet = PET_DEFS[state.currentPet];
+    const label = pet ? `x${pet.marketSpeed}` : '';
+    _getShowToast()(state.marketSpeedEnabled
+        ? `Velocidad ${label} activada`
+        : 'Velocidad normal activada (x1)');
+};
+
 const renderPetAbilityButton = () => {
     const container = document.getElementById('pet-ability-area');
     if (!container) return;
     const pet = PET_DEFS[state.currentPet];
     if (!pet) { container.innerHTML = ''; return; }
 
+    const isGolden = pet.golden === true;
     let html = '';
     switch(pet.passive) {
         case 'bunny':
             html = `<button class="btn-pet-ability ${bunnyTurboCooldown?'ability-cooldown':''}"
                         onclick="activateBunnyTurbo()" ${bunnyTurboCooldown?'disabled':''}>
-                         Turbo x4 ${bunnyTurboCooldown?'(cooldown 3min)':'(30s)'}
+                        ${isGolden ? 'Turbo x8' : 'Turbo x4'} ${bunnyTurboCooldown ? '(cooldown 3min)' : isGolden ? '(60s)' : '(30s)'}
                     </button>`;
             break;
         case 'frog':
             html = `<button class="btn-pet-ability ${frogCooldown?'ability-cooldown':''}"
                         onclick="activateFrogPrediction()" ${frogCooldown?'disabled':''}>
-                         Predicción ${frogCooldown?'(cooldown 1min)':'(30s)'}
+                        Prediccion ${frogCooldown ? '(cooldown 1min)' : isGolden ? '(60s)' : '(30s)'}
                     </button>`;
             break;
-        default:
-            html = '';
+        default: {
+            // Mascotas con velocidad pasiva: mostrar toggle
+            const effSpeed = isGolden ? Math.min(pet.marketSpeed * 2, 4) : pet.marketSpeed;
+            if (PASSIVE_SPEED_PETS.has(pet.passive) && effSpeed > 1) {
+                const on = state.marketSpeedEnabled !== false;
+                html = `<button class="btn-pet-ability ${on ? '' : 'ability-cooldown'}"
+                            onclick="toggleMarketSpeed()">
+                            Velocidad x${effSpeed}: ${on ? 'Activa' : 'Desactivada'}
+                        </button>`;
+            }
+        }
     }
-    // Add info button for active pet
+
     const infoDef = PET_DEFS[state.currentPet];
     if (infoDef) {
         html += `<button class="btn-pet-info-active" onclick="openPetInfo('${state.currentPet}')">
@@ -763,57 +902,72 @@ window.closePetInfo = () => {
     if (modal) modal.style.display = 'none';
 };
 
+const buildPetCard = (id, golden = false) => {
+    const def  = PET_DEFS[id];
+    const data = state.petData.get(id) || { health: 0, unlocked: false };
+    const isActive   = id === state.currentPet;
+    const isUnlocked = data.unlocked;
+    const canUnlock  = golden ? canUnlockGoldenPet(id) : canUnlockPet(id);
+    const cost       = def.cost;
+    const imgId      = def.baseId || id;
+    const goldenStyle = golden ? 'filter:sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25);border:2px solid gold;box-shadow:0 0 10px rgba(255,200,0,0.6);' : '';
+
+    let btnHtml = '';
+    if (isActive) {
+        btnHtml = `<span class="pet-badge active">Activa</span>`;
+    } else if (isUnlocked) {
+        btnHtml = `<button class="btn-pet-select" onclick="selectPet('${id}','${def.label}')">Seleccionar</button>`;
+    } else if (canUnlock) {
+        btnHtml = `<button class="btn-pet-unlock" onclick="unlockPet('${id}')">
+            ${cost.toLocaleString()}
+        </button>`;
+    } else {
+        const reason = golden && !state.victoryAchieved ? 'Requiere Victoria' : 'Bloqueado';
+        btnHtml = `<span class="pet-badge locked">${reason}</span>`;
+    }
+
+    const hearts = getHeartConfig(Math.round(data.health));
+    const heartHtml = hearts.map(t =>
+        `<img src="../assets/Hearts/${heartImg[t]}.png" class="pet-grid-heart">`
+    ).join('');
+
+    return `
+    <div class="pet-option ${isActive?'pet-selected':''} ${isUnlocked?'':'pet-locked'}">
+        <div class="pet-card-header">
+            <div class="pet-preview" style="background-image:url('../assets/pets/${imgId}.png');${goldenStyle}"></div>
+            <button class="btn-pet-info" onclick="event.stopPropagation(); openPetInfo('${id}')" title="Ver habilidades">
+                <img src="../assets/arrows/Exclamation-Mark-128.png" alt="Info" class="pet-info-icon">
+            </button>
+        </div>
+        ${golden ? '<span class="pet-golden-badge">DORADA x2</span>' : ''}
+        <span class="pet-label ${golden?'pet-golden-label':''}">${def.label}</span>
+        <div class="pet-grid-hearts">${heartHtml}</div>
+        ${btnHtml}
+    </div>`;
+};
+
 window.openPetSelector = () => {
     initPetData();
     const grid = document.getElementById('pet-grid');
     if (!grid) return;
 
-    grid.innerHTML = PET_ORDER.map(id => {
-        const def  = PET_DEFS[id];
-        const data = state.petData.get(id) || { health: 0, unlocked: false };
-        const isActive   = id === state.currentPet;
-        const isUnlocked = data.unlocked;
-        const canUnlock  = canUnlockPet(id);
-        const cost       = def.cost;
+    let html = PET_ORDER.map(id => buildPetCard(id, false)).join('');
 
-        let btnHtml = '';
-        if (isActive) {
-            btnHtml = `<span class="pet-badge active"> Activa</span>`;
-        } else if (isUnlocked) {
-            btnHtml = `<button class="btn-pet-select" onclick="selectPet('${id}','${def.label}')">Seleccionar</button>`;
-        } else if (canUnlock) {
-            btnHtml = `<button class="btn-pet-unlock" onclick="unlockPet('${id}')">
-                 ${cost === 0 ? 'Gratis' : `${cost.toLocaleString()}`}
-            </button>`;
-        } else {
-            btnHtml = `<span class="pet-badge locked"> Bloqueado</span>`;
-        }
-
-        const hearts = getHeartConfig(Math.round(data.health));
-        const heartHtml = hearts.map(t =>
-            `<img src="../assets/Hearts/${heartImg[t]}.png" class="pet-grid-heart">`
-        ).join('');
-
-        return `
-        <div class="pet-option ${isActive?'pet-selected':''} ${isUnlocked?'':'pet-locked'}">
-            <div class="pet-card-header">
-                <div class="pet-preview" style="background-image:url('../assets/pets/${id}.png')"></div>
-                <button class="btn-pet-info" onclick="event.stopPropagation(); openPetInfo('${id}')" title="Ver habilidades">
-                    <img src="../assets/arrows/Exclamation-Mark-128.png" alt="Info" class="pet-info-icon">
-                </button>
-            </div>
-            <span class="pet-label">${def.label}</span>
-            <div class="pet-grid-hearts">${heartHtml}</div>
-            ${btnHtml}
+    if (state.victoryAchieved) {
+        html += `<div class="pet-grid-gold-section">
+            <h4>Mascotas Doradas — Efectos x2</h4>
+            <div class="pet-grid">${PET_ORDER_GOLDEN.map(id => buildPetCard(id, true)).join('')}</div>
         </div>`;
-    }).join('');
+    }
 
+    grid.innerHTML = html;
     document.getElementById('modal-mascota').style.display = 'flex';
 };
 
 const canUnlockPet = (id) => {
+    if (PET_ORDER_GOLDEN.includes(id)) return canUnlockGoldenPet(id);
     const idx = PET_ORDER.indexOf(id);
-    if (idx === 0) return true; // primero siempre
+    if (idx === 0) return true;
     const prevId   = PET_ORDER[idx - 1];
     const prevData = state.petData.get(prevId);
     if (!prevData || !prevData.unlocked) return false;
@@ -822,15 +976,30 @@ const canUnlockPet = (id) => {
     return state.monedas >= def.cost;
 };
 
+const canUnlockGoldenPet = (id) => {
+    if (!state.victoryAchieved) return false;
+    const idx = PET_ORDER_GOLDEN.indexOf(id);
+    if (idx < 0) return false;
+    if (idx > 0) {
+        const prevId   = PET_ORDER_GOLDEN[idx - 1];
+        const prevData = state.petData.get(prevId);
+        if (!prevData || !prevData.unlocked) return false;
+        if (Math.round(prevData.health) < 100) return false;
+    }
+    return state.monedas >= PET_DEFS[id].cost;
+};
+
 window.unlockPet = (id) => {
-    if (!canUnlockPet(id)) { _getShowToast()(' No puedes desbloquear esta mascota aún'); return; }
+    const isGolden = PET_ORDER_GOLDEN.includes(id);
+    const canUnlock = isGolden ? canUnlockGoldenPet(id) : canUnlockPet(id);
+    if (!canUnlock) { _getShowToast()(' No puedes desbloquear esta mascota aun'); return; }
     const def  = PET_DEFS[id];
     const data = state.petData.get(id) || { health: 0, unlocked: false };
     state.monedas -= def.cost;
     data.unlocked = true;
-    data.health   = 50; // empieza con 50% de salud
+    data.health   = 50;
     state.petData.set(id, data);
-    _getShowToast()(` ¡Desbloqueaste ${def.label}!`);
+    _getShowToast()(` Desbloqueaste ${def.label}!`);
     _getLogEvent()('mascota', `Desbloqueaste ${def.label}`, `Costo: ${def.cost.toLocaleString()}`);
     _getUpdateUI()();
     openPetSelector();
@@ -877,4 +1046,6 @@ const _origChangePetHealth = typeof changePetHealth === 'function' ? changePetHe
 const syncPetHealthToData = () => {
     const data = state.petData.get(state.currentPet);
     if (data) { data.health = state.saludMascota; state.petData.set(state.currentPet, data); }
+    // Verificar condicion de victoria cada vez que cambia la salud
+    checkVictory();
 };

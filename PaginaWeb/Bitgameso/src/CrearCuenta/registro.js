@@ -42,6 +42,18 @@ if (registroForm) {
     });
 }
 
+function togglePass(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Ocultar';
+    } else {
+        input.type = 'password';
+        btn.textContent = 'Ver';
+    }
+}
+
 // ============================================================
 //  Lluvia de Monedas Interactivas (sin cambios)
 // ============================================================

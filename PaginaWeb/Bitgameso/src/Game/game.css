@@ -1424,6 +1424,18 @@ body {
     }
 }
 
+/* Brillo en botones que el jugador debe presionar durante el tutorial */
+.tut-action-glow {
+    animation: tut-btn-glow 0.9s infinite alternate !important;
+    position: relative;
+    z-index: 9992;
+}
+
+@keyframes tut-btn-glow {
+    0%   { box-shadow: 0 0 6px 2px rgba(203,166,247,0.7), 0 0 0 2px #CBA6F7; }
+    100% { box-shadow: 0 0 18px 8px rgba(203,166,247,1),  0 0 0 3px #CBA6F7; }
+}
+
 /* Flechas animadas del tutorial */
 @keyframes tut-bounce-up {
     0%   { transform: translateY(0px); }
@@ -1440,6 +1452,105 @@ body {
 @keyframes tut-bounce-right {
     0%   { transform: translateX(0px); }
     100% { transform: translateX(8px); }
+}
+
+/* ============================================================
+   VICTORIA
+   ============================================================ */
+.victory-box {
+    background: linear-gradient(135deg, #fff9e6 0%, #fffde0 100%);
+    border: 3px solid gold;
+    box-shadow: 0 0 40px rgba(255,200,0,0.5), 10px 10px 0 #c8a000;
+    text-align: center;
+    padding: 36px 32px;
+}
+
+.victory-stars {
+    font-size: 1.8rem;
+    letter-spacing: 8px;
+    color: gold;
+    margin-bottom: 8px;
+    animation: victory-star-pulse 1.2s infinite alternate;
+}
+
+@keyframes victory-star-pulse {
+    0%   { text-shadow: 0 0 8px gold; opacity: 0.8; }
+    100% { text-shadow: 0 0 24px gold; opacity: 1; }
+}
+
+.victory-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 2.4rem;
+    color: #b8860b;
+    margin: 0 0 12px;
+    text-shadow: 1px 2px 0 rgba(0,0,0,0.1);
+}
+
+.victory-msg {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.victory-sub {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.btn-victory-continue {
+    background: linear-gradient(135deg, #f5c518, #e0a800);
+    color: #333;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: .2s;
+    box-shadow: 0 4px 0 #b8860b;
+}
+
+.btn-victory-continue:hover { opacity: .9; transform: translateY(-2px); }
+
+/* Mascotas doradas en la cuadricula */
+.pet-golden-glow {
+    filter: sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25);
+    border: 2px solid gold !important;
+    box-shadow: 0 0 14px rgba(255,200,0,0.6) !important;
+}
+
+.pet-golden-label {
+    color: #b8860b !important;
+    font-weight: 700;
+}
+
+.pet-golden-badge {
+    background: linear-gradient(135deg, #f5c518, #e0a800);
+    color: #333;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 2px 6px;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.pet-grid-gold-section {
+    margin-top: 16px;
+    border-top: 2px solid gold;
+    padding-top: 12px;
+}
+
+.pet-grid-gold-section h4 {
+    color: #b8860b;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+    margin: 0 0 10px;
+    text-align: center;
 }
 
 /* ============================================================
