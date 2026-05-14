@@ -26,7 +26,7 @@ const TUTORIAL_STEPS = [
     // PASO 0 — Bienvenida
     {
         target:  null,
-        mascot:  'Hola! Soy tu mascota y voy a explicarte lo basico de BITGAMESO en pocos pasos. Presiona "Siguiente" para comenzar.',
+        mascot:  'Hola! Soy tu mascota y te voy a ensenar lo basico de BITGAMESO en pocos pasos. Presiona Siguiente para comenzar.',
         waitFor: 'next',
     },
     // PASO 1 — Monedas + mascota
@@ -39,8 +39,8 @@ const TUTORIAL_STEPS = [
     // PASO 2 — El mercado
     {
         target:   '.market-main',
-        arrowDir: 'down',
-        mascot:   'Este es el Mercado. Los precios de las acciones cambian solos cada pocos segundos. Tu objetivo: comprar barato y vender cuando el precio suba. La inversion aparece en tu Cartera (a la derecha).',
+        arrowDir: 'up',
+        mascot:   'Este es el Mercado Global. Los precios cambian solos cada pocos segundos. Tu objetivo: comprar barato y vender cuando el precio suba. La inversion aparece en tu Cartera.',
         waitFor:  'next',
         scrollTo: true,
     },
@@ -153,7 +153,13 @@ const createTutorialUI = () => {
     bubble.innerHTML = `
         <div class="tut-header">
             <div class="tut-mascot-wrap">
-                <img id="tut-mascot-img" src="../assets/pets/${state.currentPet || 'Bunny-Pink-128'}.png" alt="Mascota">
+                <img id="tut-mascot-img" src="../assets/pets/${(() => {
+                    const petDef = typeof PET_DEFS !== 'undefined' && PET_DEFS[state.currentPet];
+                    return (petDef && petDef.golden && petDef.baseId) ? petDef.baseId : (state.currentPet || 'Bunny-Pink-128');
+                })()}.png" alt="Mascota" style="${(() => {
+                    const petDef = typeof PET_DEFS !== 'undefined' && PET_DEFS[state.currentPet];
+                    return (petDef && petDef.golden) ? 'filter:sepia(1) saturate(3) hue-rotate(5deg) brightness(1.1)' : '';
+                })()}">
             </div>
             ${!tutorialFirstRun ? `
             <button class="tut-close" onclick="closeTutorial()" title="Cerrar tutorial">
@@ -249,15 +255,16 @@ const highlightElement = (el, step) => {
     // Caja de resaltado
     const box = document.createElement('div');
     box.id = 'tutorial-highlight-box';
+    const isLarge = rect.width > 500 || rect.height > 300;
     box.style.cssText = `
         position: fixed;
         top:    ${rect.top    - pad}px;
         left:   ${rect.left   - pad}px;
         width:  ${rect.width  + pad*2}px;
         height: ${rect.height + pad*2}px;
-        border: 3px solid #CBA6F7;
+        border: ${isLarge ? '4px' : '3px'} solid #CBA6F7;
         border-radius: 16px;
-        box-shadow: 0 0 20px #CBA6F7;
+        box-shadow: 0 0 0 4px rgba(203,166,247,0.3), 0 0 30px #CBA6F7;
         z-index: 9990;
         pointer-events: none;
         animation: tut-pulse 1.5s infinite;
@@ -411,26 +418,38 @@ const setupBuyTutorial = () => {
     state.market = newMarket;
     if (typeof renderMarket === 'function') renderMarket();
 
-    // Esperar que el DOM se actualice y resaltar el botón COMPRAR
+    // Scroll al mercado primero, luego resaltar botón
+    const marketEl = document.querySelector('.market-main');
+    if (marketEl) marketEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
     setTimeout(() => {
         const rows = document.querySelectorAll('.asset-row');
         let targetBtn = null;
+        let targetRow = null;
         rows.forEach(row => {
             const symEl = row.querySelector('.asset-symbol');
             if (symEl && symEl.textContent.trim() === targetSymbol) {
                 targetBtn = row.querySelector('.btn-buy');
+                targetRow = row;
             }
         });
 
         if (targetBtn) {
+            // Scroll al botón específico dentro del mercado
             targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
             addActionGlow(targetBtn);
+            // Esperar que el scroll termine antes de posicionar
             setTimeout(() => {
                 highlightElement(targetBtn, { arrowDir: 'up' });
-                positionBubble(targetBtn.getBoundingClientRect(), 'up');
-            }, 400);
+                // Reposicionar burbuja después del scroll
+                setTimeout(() => {
+                    const rect = targetBtn.getBoundingClientRect();
+                    highlightElement(targetBtn, { arrowDir: 'up' });
+                    positionBubble(rect, 'up');
+                }, 300);
+            }, 600);
         }
-    }, 600);
+    }, 800);
 
     // Polling: esperar que aparezca en cartera
     const poll = setInterval(() => {
