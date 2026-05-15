@@ -106,9 +106,10 @@ body {
 .score-container {
     display:flex; align-items:center; gap:6px;
     font-weight:700; font-size:.9rem; flex-shrink:0;
+    color: #CBA6F7;
 }
 .coin-icon      { width:22px; }
-#monedas-count  { color:var(--primary); font-weight:700; }
+#monedas-count  { color:#CBA6F7; font-weight:700; }
 
 /* Efectos activos */
 .active-effects { display:flex; gap:6px; overflow-x:auto; }
@@ -1779,7 +1780,7 @@ body {
 
 #tut-text {
     font-size: 13px;
-    color: var(--text);
+    color: #CBA6F7;
     line-height: 1.6;
     margin: 0;
 }
@@ -1802,12 +1803,12 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 10px 18px 14px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #FFF5BA;
 }
 
 .tut-counter {
     font-size: 11px;
-    color: #aaa;
+    color: #CBA6F7;
     font-weight: 700;
 }
 

@@ -46,16 +46,16 @@ window.renderBalance = () => {
  if (elCapital) {
  elCapital.textContent = fmt(capital);
  // Color según crecimiento (más que monedas iniciales = verde)
- elCapital.style.color = capital > 1000 ? '#27ae60' : '#e74c3c';
+ elCapital.style.color = capital > 1000 ? '#52b788' : '#e67e22';
  }
 
  // Índice de diversificación junto al capital
  if (elDivScore) {
  const score = window.calculateDiversificationScore();
  elDivScore.textContent = `${score}/100`;
- elDivScore.style.color = score >= 80 ? '#27ae60'
- : score >= 50 ? '#f39c12'
- : '#e74c3c';
+ elDivScore.style.color = score >= 80 ? '#52b788'
+ : score >= 50 ? '#CBA6F7'
+ : '#e67e22';
  }
 };
 
@@ -257,7 +257,7 @@ window.showAssetFicha = (symbol) => {
  <button onclick="document.getElementById('modal-ficha-activo').style.display='none'"
  style="background:#f0e7ff;border:none;font-size:1.2rem;cursor:pointer;color:#CBA6F7;width:32px;height:32px;border-radius:50%;font-weight:700;line-height:1;">X</button>
  </div>
- <p style="margin:0 0 16px; color:#666; font-size:0.85rem;">${ficha.name} · ${ficha.type}</p>
+ <p style="margin:0 0 16px; color:#CBA6F7; font-size:0.85rem;">${ficha.name} · ${ficha.type}</p>
  <div style="
  background: ${catColor};
  border-radius: 10px;
@@ -270,23 +270,23 @@ window.showAssetFicha = (symbol) => {
  </div>
  <table style="width:100%; font-size:0.82rem; border-collapse:collapse;">
  <tr style="border-bottom:1px solid #eee;">
- <td style="padding:8px 0; color:#999;">Riesgo</td>
- <td style="padding:8px 0; font-weight:700;">${ficha.riesgo}</td>
+ <td style="padding:8px 0; color:#CBA6F7; opacity:0.7;">Riesgo</td>
+ <td style="padding:8px 0; font-weight:700; color:#CBA6F7;">${ficha.riesgo}</td>
  </tr>
- <tr style="border-bottom:1px solid #eee;">
- <td style="padding:8px 0; color:#999;">Rendimiento</td>
- <td style="padding:8px 0; font-weight:700;">${ficha.rendimiento}</td>
+ <tr style="border-bottom:1px solid #f0e7ff;">
+ <td style="padding:8px 0; color:#CBA6F7; opacity:0.7;">Rendimiento</td>
+ <td style="padding:8px 0; font-weight:700; color:#CBA6F7;">${ficha.rendimiento}</td>
  </tr>
- <tr style="border-bottom:1px solid #eee;">
- <td style="padding:8px 0; color:#999;">Horizonte</td>
- <td style="padding:8px 0; font-weight:700;">${ficha.horizonte}</td>
+ <tr style="border-bottom:1px solid #f0e7ff;">
+ <td style="padding:8px 0; color:#CBA6F7; opacity:0.7;">Horizonte</td>
+ <td style="padding:8px 0; font-weight:700; color:#CBA6F7;">${ficha.horizonte}</td>
  </tr>
  <tr>
- <td style="padding:8px 0; color:#999;">Precio actual</td>
- <td style="padding:8px 0; font-weight:700;">${fmt(ficha.precio)}</td>
+ <td style="padding:8px 0; color:#CBA6F7; opacity:0.7;">Precio actual</td>
+ <td style="padding:8px 0; font-weight:700; color:#CBA6F7;">${fmt(ficha.precio)}</td>
  </tr>
  </table>
- <p style="margin:14px 0 0; font-size:0.75rem; color:#aaa; text-align:center;">
+ <p style="margin:14px 0 0; font-size:0.75rem; color:#CBA6F7; opacity:0.6; text-align:center;">
  Los bonos tienen crecimiento estable del 0.5% por tick.<br>
  Las acciones tienen mayor volatilidad y potencial.
  </p>
@@ -311,12 +311,13 @@ const injectFinanceStyles = () => {
  }
  .balance-label {
  font-size: 10px;
- color: #999;
+ color: #CBA6F7;
+ opacity: 0.75;
  white-space: nowrap;
  }
  .balance-value {
  font-size: 12px;
- color: #4C4F69;
+ color: #CBA6F7;
  font-weight: 600;
  }
  .balance-divider {
@@ -332,12 +333,12 @@ const injectFinanceStyles = () => {
  white-space: nowrap;
  }
  .asset-cat-badge.bond {
- background: #a8e6cf;
- color: #1a6640;
+ background: #B2F2BB;
+ color: #2d6a4f;
  }
  .asset-cat-badge.stock {
  background: #FFB6C1;
- color: #8b1a2f;
+ color: #7d1c2e;
  }
  .btn-asset-info {
  background: none;
