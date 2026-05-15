@@ -679,31 +679,25 @@ const setupClickTarget = (selector) => {
 
 // ============================================================
 //  SETUP PASO 6 — COMPRAR MANZANA EN TIENDA
-//  Solo resalta la Manzana, bloquea todo lo demás, sin inflación
+//  Solo resalta la Manzana, sin overlay que tape la tienda
 // ============================================================
 const setupBuyFoodTutorial = () => {
-    const TUTORIAL_FOOD_ID = 'Apple-128'; // Siempre la Manzana
+    const TUTORIAL_FOOD_ID = 'Apple-128';
     const prevInvSize = state.inventory ? state.inventory.size : 0;
     const prevQty     = state.inventory && state.inventory.has(TUTORIAL_FOOD_ID)
         ? (state.inventory.get(TUTORIAL_FOOD_ID).qty || 1) : 0;
 
-    // Deshabilitar overlay para que la tienda sea clickeable
+    // Quitar overlay completamente para este paso
     disableOverlayBlock();
+    const overlayEl = document.getElementById('tutorial-overlay');
+    if (overlayEl) overlayEl.style.display = 'none';
 
-    // Abrir tienda automáticamente si no está abierta
+    // Abrir tienda si no está abierta
     const shopModal = document.getElementById('modal-food-shop');
-    if (!shopModal || shopModal.style.display === 'none' || shopModal.style.display === '') {
-        if (typeof openFoodShop === 'function') openFoodShop();
+    const shopVisible = shopModal && shopModal.style.display !== 'none' && shopModal.style.display !== '';
+    if (!shopVisible && typeof openFoodShop === 'function') {
+        openFoodShop();
     }
-
-    // Elevar el modal de la tienda por encima del overlay
-    setTimeout(() => {
-        const modal = document.getElementById('modal-food-shop');
-        if (modal) {
-            modal.style.zIndex   = '9996'; // Por encima de overlay (9989) y burbuja (9995)
-            modal.style.position = 'fixed';
-        }
-    }, 300);
 
     const doHighlightApple = () => {
         // Buscar el item de Manzana en la tienda
@@ -804,6 +798,10 @@ const setupBuyFoodTutorial = () => {
         if (boughtApple) {
             clearInterval(check);
             restoreShop();
+
+            // Restaurar overlay
+            const overlayEl = document.getElementById('tutorial-overlay');
+            if (overlayEl) overlayEl.style.display = '';
             enableOverlayBlock();
 
             // Restaurar z-index del modal de tienda
@@ -825,8 +823,11 @@ const setupBuyFoodTutorial = () => {
 //  SETUP PASO 7 — SELECCIONAR ITEM DEL INVENTARIO
 // ============================================================
 const setupSelectFoodTutorial = () => {
-    // Deshabilitar overlay y resaltar el inventario
+    // Quitar overlay para que el inventario sea clickeable
     disableOverlayBlock();
+    const overlayEl = document.getElementById('tutorial-overlay');
+    if (overlayEl) overlayEl.style.display = 'none';
+
     const invEl = document.querySelector('.inventory-section');
     if (invEl) {
         elevateElement(invEl);
@@ -839,6 +840,10 @@ const setupSelectFoodTutorial = () => {
             clearInterval(check);
             removeActionGlow();
             lowerAllElevated();
+            // Restaurar overlay
+            const ov = document.getElementById('tutorial-overlay');
+            if (ov) ov.style.display = '';
+            enableOverlayBlock();
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 400);
         }
     }, 400);
