@@ -687,6 +687,15 @@ const setupBuyFoodTutorial = () => {
     const prevQty     = state.inventory && state.inventory.has(TUTORIAL_FOOD_ID)
         ? (state.inventory.get(TUTORIAL_FOOD_ID).qty || 1) : 0;
 
+    // Deshabilitar overlay para que la tienda sea clickeable
+    disableOverlayBlock();
+
+    // Abrir tienda automáticamente si no está abierta
+    const shopGrid = document.querySelector('.food-shop-grid');
+    if (!shopGrid || shopGrid.offsetParent === null) {
+        if (typeof openFoodShop === 'function') openFoodShop();
+    }
+
     const doHighlightApple = () => {
         // Buscar el item de Manzana en la tienda
         const allItems = document.querySelectorAll('.food-item');
@@ -786,6 +795,7 @@ const setupBuyFoodTutorial = () => {
         if (boughtApple) {
             clearInterval(check);
             restoreShop();
+            enableOverlayBlock();
 
             // CANCELAR inflación generada por la compra del tutorial
             if (state.foodInflation && state.foodInflation.has(TUTORIAL_FOOD_ID)) {
