@@ -341,6 +341,8 @@ const loadGame = () => {
         if (!raw) return;
         const d = JSON.parse(raw);
         state.monedas       = d.monedas      ?? 1000;
+        // Sanitizar monedas por si son NaN o Infinity
+        if (!isFinite(state.monedas) || isNaN(state.monedas)) state.monedas = 1000;
         state.saludMascota  = d.saludMascota ?? 75;
         state.currentPet    = d.currentPet   ?? 'Bunny-Pink-128';
         state.portfolio     = new Map(d.portfolio     || []);
@@ -508,7 +510,12 @@ const fetchMarket = () => {
     });
     const now = new Date();
     if (refs.marketUpdated) refs.marketUpdated.textContent = `Actualizado: ${now.toLocaleTimeString()}`;
-    if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
+    if (refs.monedasCount) {
+        const _m = state.monedas;
+        refs.monedasCount.textContent = (!isFinite(_m) || isNaN(_m)) ? '0.00'
+            : _m >= 1e15 ? _m.toExponential(2)
+            : parseFloat(_m).toFixed(2);
+    }
     renderMarket();
     renderPortfolio();
     saveGame();
@@ -1078,7 +1085,17 @@ window.resetGame = () => {
 //  UI GENERAL
 // ============================================================
 const updateUI = () => {
-    if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
+    const m = state.monedas;
+    let mStr;
+    if (!isFinite(m) || isNaN(m)) {
+        mStr = '0.00';
+        state.monedas = 0;
+    } else if (m >= 1e15) {
+        mStr = m.toExponential(2);
+    } else {
+        mStr = parseFloat(m).toFixed(2);
+    }
+    if (refs.monedasCount) refs.monedasCount.textContent = mStr;
     renderMarket();
     renderPortfolio();
     renderPetHealth();
@@ -1915,7 +1932,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadGame(); // carga desde localStorage (ya actualizado por initCloudSync)
 
     // Actualizar monedas en pantalla inmediatamente tras cargar
-    if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
+    if (refs.monedasCount) {
+        const _m = state.monedas;
+        refs.monedasCount.textContent = (!isFinite(_m) || isNaN(_m)) ? '0.00'
+            : _m >= 1e15 ? _m.toExponential(2)
+            : parseFloat(_m).toFixed(2);
+    }
     if (typeof initPetData === 'function') initPetData();
 
     // Botones nav
