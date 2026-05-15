@@ -720,20 +720,20 @@ window.openFoodShop = () => {
         const onCooldown = miscCdRemaining > 0;
         const canBuy = state.monedas >= price && !atLimit && !onCooldown;
         const inflTag = timesBought > 0
-            ? `<span class="food-inflation"> x${Math.pow(2,timesBought)} inflación</span>` : '';
+            ? `<span class="food-inflation">x${Math.pow(2,timesBought)} inflacion</span>` : '';
 
         return `
         <div class="food-item ${catClass[f.cat]}">
             <img src="../assets/food/${f.id}.png" alt="${f.name}" class="food-img">
             <span class="food-name">${f.name}</span>
-            <span class="food-eff-tag ${catClass[f.cat]}">${f.cat === 'fruta' ? '<img src="../assets/settings/Stopwatch.png" style="width:12px;height:12px;vertical-align:middle;object-fit:contain;margin-right:3px;" onerror="this.style.display=\'none\'">' : ''}${catLabel[f.cat]}</span>
+            <span class="food-eff-tag ${catClass[f.cat]}">${catLabel[f.cat]}</span>
             ${f.effectDuration ? `<span class="food-dur">+${f.effectDuration}s</span>` : ''}
-            ${f.health ? `<span class="food-hp">️ +${f.health}</span>` : ''}
+            ${f.health ? `<span class="food-hp">+${f.health} salud</span>` : ''}
             ${inflTag}
-            <span class="food-price"> ${price.toLocaleString()}</span>
+            <span class="food-price">${price.toLocaleString()}</span>
             <button class="btn-action btn-buy btn-sm ${canBuy?'':'btn-disabled'}"
                     onclick="buyFood('${f.id}',${price})"
-                    ${canBuy?'':'disabled'}>${atLimit ? ` Máx ${isMisc ? MAX_FOOD_MISC : MAX_FOOD_QTY}` : onCooldown ? ` ${formatCooldown(miscCdRemaining)}` : 'Comprar'}</button>
+                    ${canBuy?'':'disabled'}>${atLimit ? `Max ${isMisc ? MAX_FOOD_MISC : MAX_FOOD_QTY}` : onCooldown ? `${formatCooldown(miscCdRemaining)}` : 'Comprar'}</button>
         </div>`;
     }).join('');
     document.getElementById('modal-food-shop').style.display = 'flex';

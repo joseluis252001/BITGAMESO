@@ -593,17 +593,32 @@ body {
 
 /* ====   MODAL: TIENDA DE COMIDA
    ==== */
+
+/* Modal tienda: borde amarillo suave */
+#modal-food-shop .modal-box {
+    border-color: #FFF5BA;
+    box-shadow: 5px 5px 0px #FFF5BA;
+}
+#modal-food-shop .modal-box h3 {
+    color: #CBA6F7;
+}
+#modal-food-shop .modal-subtitle {
+    color: #CBA6F7;
+    opacity: .7;
+}
+
 .food-legend {
     display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:14px;
 }
 .legend-tag {
     padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;
+    display:flex; align-items:center; gap:4px;
 }
-.legend-tag.veg     { background:#edfff0; color:#5a9e6f; }
-.legend-tag.fruit   { background:#fff3e0; color:#a05400; }
-.legend-tag.protein { background:#ffe0e0; color:#a00000; }
-.legend-tag.candy   { background:#f0e7ff; color:#6a0dad; }
-.legend-tag.misc    { background:#e8eaf6; color:#3949ab; }
+.legend-tag.veg     { background:#edfff0; color:#CBA6F7; }
+.legend-tag.fruit   { background:#fff5f0; color:#CBA6F7; }
+.legend-tag.protein { background:#fff0f3; color:#CBA6F7; }
+.legend-tag.candy   { background:#f0e7ff; color:#CBA6F7; }
+.legend-tag.misc    { background:#f0f5ff; color:#CBA6F7; }
 
 .food-shop-grid {
     display:grid; grid-template-columns:repeat(4,1fr);
@@ -612,31 +627,31 @@ body {
 
 .food-item {
     display:flex; flex-direction:column; align-items:center; gap:4px;
-    padding:10px 8px; border-radius:14px; border:2px solid #eee;
+    padding:10px 8px; border-radius:14px; border:2px solid #FFF5BA;
     background:white; transition:.15s;
 }
-.food-item:hover { border-color:var(--primary); background:#fdf7ff; }
-.food-item.veg     { border-color:#c3e6c3; }
-.food-item.fruit   { border-color:#ffd9a0; }
-.food-item.protein { border-color:#ffb3b3; }
-.food-item.candy   { border-color:#d9b3ff; }
-.food-item.misc    { border-color:#b3c0ff; }
+.food-item:hover { border-color:#CBA6F7; background:#fdf7ff; }
+.food-item.veg     { border-color:#B2F2BB; }
+.food-item.fruit   { border-color:#FFB6C1; }
+.food-item.protein { border-color:#FFB6C1; }
+.food-item.candy   { border-color:#CBA6F7; }
+.food-item.misc    { border-color:#A0E7E5; }
 
 .food-img   { width:48px; height:48px; object-fit:contain; }
-.food-name  { font-size:11px; font-weight:700; text-align:center; }
+.food-name  { font-size:11px; font-weight:700; text-align:center; color:#CBA6F7; }
 
 .food-eff-tag {
     font-size:9px; padding:2px 7px; border-radius:8px; font-weight:700;
     text-align:center; white-space:nowrap;
 }
-.food-eff-tag.veg     { background:#edfff0; color:#5a9e6f; }
-.food-eff-tag.fruit   { background:#fff3e0; color:#a05400; }
-.food-eff-tag.protein { background:#ffe0e0; color:#a00000; }
-.food-eff-tag.candy   { background:#f0e7ff; color:#6a0dad; }
-.food-eff-tag.misc    { background:#e8eaf6; color:#3949ab; }
+.food-eff-tag.veg     { background:#edfff0; color:#CBA6F7; }
+.food-eff-tag.fruit   { background:#fff0f3; color:#CBA6F7; }
+.food-eff-tag.protein { background:#fff0f3; color:#CBA6F7; }
+.food-eff-tag.candy   { background:#f0e7ff; color:#CBA6F7; }
+.food-eff-tag.misc    { background:#f0f5ff; color:#CBA6F7; }
 
-.food-dur, .food-hp { font-size:10px; color:#888; }
-.food-price { font-size:11px; font-weight:700; color:var(--primary-dk); }
+.food-dur, .food-hp { font-size:10px; color:#CBA6F7; opacity:.75; }
+.food-price { font-size:11px; font-weight:700; color:#CBA6F7; }
 
 /* ====   MODAL: MASCOTAS
    ==== */
@@ -688,8 +703,20 @@ body {
 .btn-modal-close {
     padding:10px 28px; border-radius:12px; border:2px solid #ddd;
     background:white; font-weight:700; cursor:pointer; transition:.2s;
+    color: #CBA6F7;
 }
 .btn-modal-close:hover { background:#f5f5f5; }
+
+/* Botón Cerrar específico de la tienda de comida — morado */
+#modal-food-shop .btn-modal-close {
+    background: #CBA6F7;
+    color: #FFFFFF;
+    border-color: #CBA6F7;
+}
+#modal-food-shop .btn-modal-close:hover {
+    background: #b48ded;
+    border-color: #b48ded;
+}
 
 /* ====   TOAST
    ==== */
