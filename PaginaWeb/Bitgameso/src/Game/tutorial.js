@@ -848,9 +848,25 @@ const setupSelectFoodTutorial = () => {
 //  SETUP PASO 8 — ENVIAR COMIDA
 // ============================================================
 const setupUseFoodTutorial = () => {
-    const prevHealth  = state.saludMascota;
-    const prevInvSize = state.inventory ? state.inventory.size : 0;
-    let sentFood      = false;
+    const prevHealth = state.saludMascota;
+    let sentFood     = false;
+
+    // Capturar la cantidad actual del item seleccionado (o cualquier item del inventario)
+    const getFoodQty = () => {
+        if (!state.inventory) return 0;
+        // Si hay un alimento seleccionado, rastrear ese específicamente
+        if (state.selectedFood && state.inventory.has(state.selectedFood)) {
+            const entry = state.inventory.get(state.selectedFood);
+            return typeof entry === 'object' ? (entry.qty ?? 1) : 1;
+        }
+        // Fallback: sumar todas las cantidades del inventario
+        let total = 0;
+        state.inventory.forEach(v => { total += typeof v === 'object' ? (v.qty ?? 1) : 1; });
+        return total;
+    };
+
+    const prevFoodQty  = getFoodQty();
+    const prevInvSize  = state.inventory ? state.inventory.size : 0;
 
     const btnEnviar = document.getElementById('btn-enviar');
     const btnVender = document.getElementById('btn-vender');
@@ -871,8 +887,15 @@ const setupUseFoodTutorial = () => {
     const check = setInterval(() => {
         if (!tutorialActive) { clearInterval(check); return; }
 
+        const currentFoodQty = getFoodQty();
         const currentInvSize = state.inventory ? state.inventory.size : 0;
-        if (currentInvSize < prevInvSize) {
+
+        // Detectar uso del item: bajó la cantidad O bajó el tamaño del inventario O subió la salud
+        const usedFood = currentFoodQty < prevFoodQty
+                      || currentInvSize < prevInvSize
+                      || state.saludMascota > prevHealth;
+
+        if (usedFood) {
             clearInterval(check);
             if (btnEnviar) btnEnviar.removeEventListener('click', enviarHandler);
             if (btnVender) btnVender.removeEventListener('click', venderHandler);
@@ -888,7 +911,7 @@ const setupUseFoodTutorial = () => {
                 if (textEl) textEl.textContent = '¡Ups! Vendiste la manzana en vez de enviarla. Compra otra Manzana y usa el boton "Enviar". ¡Intentalo de nuevo!';
                 setTimeout(() => {
                     // Volver al paso de abrir la tienda
-                    const stepIdx = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'click_target' && s.target === '#btn-comprar');
+                    const stepIdx = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'buy_food_tutorial');
                     tutorialStep = stepIdx >= 0 ? stepIdx : tutorialStep - 3;
                     renderTutorialStep();
                 }, 3000);
