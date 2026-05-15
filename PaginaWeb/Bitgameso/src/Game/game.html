@@ -153,33 +153,33 @@
 
     <!-- ====== MODAL: DEPOSITAR ====== -->
     <div id="modal-depositar" class="modal-overlay" style="display:none;">
-        <div class="modal-box">
-            <h3>💳 Depositar Monedas</h3>
-            <p class="modal-subtitle">Elige cuánto depositar. ¡Cuesta vida de tu mascota!</p>
+        <div class="modal-box" style="border-color:#CBA6F7; box-shadow:5px 5px 0px #CBA6F7;">
+            <h3 style="color:#CBA6F7;">Depositar Monedas</h3>
+            <p class="modal-subtitle" style="color:#CBA6F7; opacity:.75;">Elige cuanto depositar. Cuesta vida de tu mascota.</p>
             <div class="deposit-options">
                 <div class="deposit-card" onclick="doDeposit(100, 1)">
-                    <span class="dep-amount">🪙 100</span>
-                    <span class="dep-cost cost-low">-1% ❤️</span>
+                    <span class="dep-amount"><img src="../assets/coins/Coins-3-128.png" style="width:18px;height:18px;vertical-align:middle;object-fit:contain;margin-right:4px;"> 100</span>
+                    <span class="dep-cost cost-low">-1% <img src="../assets/Hearts/Heart-Sad-128.png" style="width:14px;height:14px;vertical-align:middle;object-fit:contain;"></span>
                     <span class="dep-note">Siempre disponible</span>
                 </div>
                 <div class="deposit-card" onclick="doDeposit(1000, 10)">
-                    <span class="dep-amount">🪙 1,000</span>
-                    <span class="dep-cost cost-mid">-10% ❤️</span>
-                    <span class="dep-note">Necesitas ≥11% salud</span>
+                    <span class="dep-amount"><img src="../assets/coins/Coins-3-128.png" style="width:18px;height:18px;vertical-align:middle;object-fit:contain;margin-right:4px;"> 1,000</span>
+                    <span class="dep-cost cost-mid">-10% <img src="../assets/Hearts/Heart-Sad-128.png" style="width:14px;height:14px;vertical-align:middle;object-fit:contain;"></span>
+                    <span class="dep-note">Necesitas 11% salud</span>
                 </div>
                 <div class="deposit-card" onclick="doDeposit(10000, 40)">
-                    <span class="dep-amount">🪙 10,000</span>
-                    <span class="dep-cost cost-high">-40% ❤️</span>
-                    <span class="dep-note">Necesitas ≥41% salud</span>
+                    <span class="dep-amount"><img src="../assets/coins/Coins-3-128.png" style="width:18px;height:18px;vertical-align:middle;object-fit:contain;margin-right:4px;"> 10,000</span>
+                    <span class="dep-cost cost-high">-40% <img src="../assets/Hearts/Heart-Sad-128.png" style="width:14px;height:14px;vertical-align:middle;object-fit:contain;"></span>
+                    <span class="dep-note">Necesitas 41% salud</span>
                 </div>
                 <div class="deposit-card" onclick="doDeposit(100000, 70)">
-                    <span class="dep-amount">🪙 100,000</span>
-                    <span class="dep-cost cost-danger">-70% ❤️</span>
-                    <span class="dep-note">Necesitas ≥71% salud</span>
+                    <span class="dep-amount"><img src="../assets/coins/Coins-3-128.png" style="width:18px;height:18px;vertical-align:middle;object-fit:contain;margin-right:4px;"> 100,000</span>
+                    <span class="dep-cost cost-danger">-70% <img src="../assets/Hearts/Heart-Sad-128.png" style="width:14px;height:14px;vertical-align:middle;object-fit:contain;"></span>
+                    <span class="dep-note">Necesitas 71% salud</span>
                 </div>
             </div>
             <p id="deposit-warning" class="deposit-warning" style="display:none;"></p>
-            <button onclick="closeDeposit()" class="btn-modal-close" style="margin-top:16px;">Cancelar</button>
+            <button onclick="closeDeposit()" class="btn-modal-close" style="margin-top:16px; background:#CBA6F7; color:white; border-color:#CBA6F7;">Cancelar</button>
         </div>
     </div>
 

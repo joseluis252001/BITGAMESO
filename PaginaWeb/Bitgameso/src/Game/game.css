@@ -213,7 +213,11 @@ body {
     flex-direction: column;
 }
 
-.pet-aside { text-align: center; }
+/* Borde amarillo para el aside de mascotas */
+.pet-aside {
+    border-color: #FFF5BA !important;
+    box-shadow: 5px 5px 0px #FFF5BA !important;
+}
 
 /* Borde morado para el card del Mercado Global */
 .market-main {
@@ -600,13 +604,13 @@ body {
 .dep-unavailable { opacity:.4; cursor:not-allowed; }
 .dep-unavailable:hover { transform:none !important; border-color:#eee !important; background:white !important; }
 
-.dep-amount { font-size:1.1rem; font-weight:700; color:var(--text); }
-.dep-cost   { font-size:.85rem; font-weight:700; padding:3px 10px; border-radius:10px; }
-.cost-low    { background:#edfff0; color:#5a9e6f; }
-.cost-mid    { background:#fff3e0; color:#a05400; }
-.cost-high   { background:#ffe0e0; color:#a00000; }
-.cost-danger { background:#f8d7da; color:#7a0000; }
-.dep-note    { font-size:10px; color:#aaa; }
+.dep-amount { font-size:1.1rem; font-weight:700; color:#CBA6F7; display:flex; align-items:center; }
+.dep-cost   { font-size:.85rem; font-weight:700; padding:3px 10px; border-radius:10px; display:flex; align-items:center; gap:4px; }
+.cost-low    { background:#edfff0; color:#2d6a4f; }
+.cost-mid    { background:#FFF5BA; color:#CBA6F7; }
+.cost-high   { background:#fff0f3; color:#FFB6C1; }
+.cost-danger { background:#ffe8d6; color:#e67e22; }
+.dep-note    { font-size:10px; color:#CBA6F7; opacity:.65; }
 
 .deposit-warning {
     background:#fff3cd; border:1px solid #ffc107; border-radius:10px;
