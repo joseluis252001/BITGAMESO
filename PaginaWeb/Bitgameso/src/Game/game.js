@@ -1717,28 +1717,47 @@ const CODIGOS = {
     'DAVID': {
         unica: true,
         recompensa: (usuario) => {
-            // +1,000,000,000,000 monedas
             state.monedas += 1_000_000_000_000;
-
-            // +99 calabazas
             const calabazaId = 'Pumpkin-128';
             const existing   = state.inventory.get(calabazaId);
             if (existing) {
                 existing.qty = Math.min((existing.qty || 1) + 99, 99);
                 state.inventory.set(calabazaId, existing);
             } else {
-                state.inventory.set(calabazaId, {
-                    id:     calabazaId,
-                    name:   'Calabaza',
-                    cat:    'verdura',
-                    health: 12,
-                    qty:    99,
-                });
+                state.inventory.set(calabazaId, { id: calabazaId, name: 'Calabaza', cat: 'verdura', health: 12, qty: 99 });
             }
-
             if (typeof renderInventory === 'function') renderInventory();
             logEvent('bonus', 'Código DAVID canjeado', '+1,000,000,000,000 monedas + 99 calabazas');
             return 'Código válido! +1,000,000,000,000 monedas + 99 calabazas';
+        }
+    },
+    'PRUEBADEV': {
+        unica: true,
+        recompensa: (usuario) => {
+            // +100,000,000,000,000,000,000,000 monedas
+            state.monedas += 1e23;
+
+            // 99 de TODAS las comidas
+            foodDatabase.forEach(food => {
+                const maxQty = food.cat === 'misc' ? 5 : 99;
+                const existing = state.inventory.get(food.id);
+                if (existing) {
+                    existing.qty = maxQty;
+                    state.inventory.set(food.id, existing);
+                } else {
+                    state.inventory.set(food.id, {
+                        id:     food.id,
+                        name:   food.name,
+                        cat:    food.cat,
+                        health: food.health,
+                        qty:    maxQty,
+                    });
+                }
+            });
+
+            if (typeof renderInventory === 'function') renderInventory();
+            logEvent('bonus', 'Código PRUEBADEV canjeado', '+1e23 monedas + 99 de toda la comida');
+            return 'Código válido! +100,000,000,000,000,000,000,000 monedas + 99 de toda la comida';
         }
     },
 };
