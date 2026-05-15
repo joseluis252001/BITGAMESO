@@ -313,7 +313,7 @@ const saveGame = () => {
             d.health = state.saludMascota;
             state.petData.set(state.currentPet, d);
         }
-        localStorage.setItem(getSaveKey(), JSON.stringify({
+        const saveData = JSON.stringify({
             monedas:            state.monedas,
             saludMascota:       state.saludMascota,
             currentPet:         state.currentPet,
@@ -325,7 +325,11 @@ const saveGame = () => {
             petData:            state.petData ? Array.from(state.petData.entries()) : [],
             victoryAchieved:    state.victoryAchieved || false,
             marketSpeedEnabled: state.marketSpeedEnabled !== false,
-        }));
+        });
+        // Guardar local siempre (rápido)
+        localStorage.setItem(getSaveKey(), saveData);
+        // Marcar que hay cambios para sincronizar con Supabase
+        if (typeof window.markSyncPending === 'function') window.markSyncPending();
     } catch(e) { console.warn('Error guardando',e); }
 };
 
@@ -1829,7 +1833,7 @@ setInterval(() => {
     }
 }, 10000);
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Verificar que hay una sesión activa
     const sesionActiva = localStorage.getItem('bitgameso_sesion_activa');
     if (!sesionActiva) {
@@ -1848,7 +1852,11 @@ document.addEventListener('DOMContentLoaded', () => {
     refs.petHealthValue = document.getElementById('pet-health-value');
     refs.petMessage     = document.getElementById('pet-message');
 
-    loadGame();
+    // Cargar progreso: primero nube, luego local
+    if (typeof window.initCloudSync === 'function') {
+        await window.initCloudSync(); // carga desde Supabase si hay guardado más reciente
+    }
+    loadGame(); // carga desde localStorage (ya actualizado por initCloudSync)
 
     // Actualizar monedas en pantalla inmediatamente tras cargar
     if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
