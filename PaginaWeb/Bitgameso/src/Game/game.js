@@ -964,9 +964,13 @@ const renderPet = () => {
     const def = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet] : null;
     const imgId = def?.baseId || state.currentPet;
     s.style.backgroundImage = `url('../assets/pets/${imgId}.png')`;
-    s.style.filter = def?.golden
-        ? 'sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25) drop-shadow(0 0 10px gold)'
-        : '';
+    if (def?.diamond) {
+        s.style.filter = 'sepia(1) saturate(5) hue-rotate(185deg) brightness(1.2) contrast(1.1) drop-shadow(0 0 12px #6ec6ff)';
+    } else if (def?.golden) {
+        s.style.filter = 'sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25) drop-shadow(0 0 10px gold)';
+    } else {
+        s.style.filter = '';
+    }
 };
 
 // ============================================================

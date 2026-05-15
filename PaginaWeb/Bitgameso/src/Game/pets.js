@@ -1002,6 +1002,8 @@ window.openPetInfo = (petId) => {
     img.src = imgSrc;
     if (def.golden) {
         img.style.filter = 'sepia(1) saturate(3) hue-rotate(5deg) brightness(1.1)';
+    } else if (def.diamond) {
+        img.style.filter = 'sepia(1) saturate(5) hue-rotate(185deg) brightness(1.2) contrast(1.1)';
     } else {
         img.style.filter = '';
     }
@@ -1054,7 +1056,7 @@ const buildPetCard = (id, golden = false, diamond = false) => {
     const imgId = def.baseId || id;
 
     const goldenStyle  = golden  ? 'filter:sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25);border:2px solid gold;box-shadow:0 0 10px rgba(255,200,0,0.6);' : '';
-    const diamondStyle = diamond ? 'filter:saturate(1.5) brightness(1.3) hue-rotate(180deg) contrast(1.2);border:2px solid #a8d8ff;box-shadow:0 0 14px rgba(100,200,255,0.8);' : '';
+    const diamondStyle = diamond ? 'filter:sepia(1) saturate(5) hue-rotate(185deg) brightness(1.2) contrast(1.1);border:3px solid #6ec6ff;box-shadow:0 0 18px rgba(100,200,255,0.9), 0 0 6px #a8d8ff;' : '';
     const imgStyle     = diamond ? diamondStyle : goldenStyle;
 
     let btnHtml = '';
