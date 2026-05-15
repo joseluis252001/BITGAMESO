@@ -79,15 +79,16 @@ const TUTORIAL_STEPS = [
     // PASO 9 — Mascotas
     {
         target:   '.pet-aside',
-        arrowDir: 'left',
+        arrowDir: 'right',
         mascot:   'Esta soy yo, tu mascota. Cada mascota tiene habilidades unicas que afectan el mercado. Hay mascotas que aceleran el mercado, duplican ganancias o predicen precios. Usa el boton "Mascotas" para ver todas.',
         waitFor:  'next',
         scrollTo: true,
     },
     // PASO 10 — Final
     {
-        target:  null,
-        mascot:  'Tutorial completado! Como recompensa te doy 1000 monedas extra. El objetivo final es tener todas las mascotas con 100 de salud. Buena suerte!',
+        target:   '.pet-aside',
+        arrowDir: 'right',
+        mascot:   'Tutorial completado! Como recompensa te doy 1000 monedas extra. El objetivo final es tener todas las mascotas con 100 de salud. Buena suerte!',
         waitFor: 'finish',
     },
 ];
