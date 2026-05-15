@@ -1175,13 +1175,13 @@ const petTips = [
     "¿Hodl? ¡Mejor invierte en 3 activos Digital y gana un bono especial! ",
     // GAMING
     "¡Me encantan los videojuegos! Si inviertes en 3 acciones Gaming tendrás un bono del 3% ",
-    "El sector Gaming vale billones. ¿Ya tienes 3 acciones? ¡Tu bonificación te espera! ️",
+    "El sector Gaming vale billones. ¿Ya tienes 3 acciones? ¡Tu bonificación te espera!",
     "Jugar y ganar: eso hacen los jugadores de Gaming en el mercado. ¡3 acciones = bono! ",
     "Los gamers saben invertir. ¡Consigue 3 acciones Gaming y desbloquea tu bonificación! ",
     "¡Level up! Con 3 acciones Gaming conseguirás un bono del 3% en tus próximas ganancias ",
     // NFT
     "Los NFT son únicos como yo  ¡Invierte en 3 y consigue un bono del 3%!",
-    "Arte digital, colecciones únicas… ¡3 acciones NFT te dan una bonificación especial! ️",
+    "Arte digital, colecciones únicas… ¡3 acciones NFT te dan una bonificación especial!",
     "El mundo de los NFT puede sorprenderte. ¡Con 3 activos NFT obtendrás un bono del 3%! ",
     "¿Arte o inversión? ¡Los dos! Con 3 acciones NFT ganas una bonificación de inmediato ",
     "Los coleccionistas de NFT saben algo que tú no… ¡3 acciones y lo descubrirás con un bono! ",
@@ -1621,7 +1621,7 @@ window.clearHistorial = () => {
     if (!confirm('¿Seguro que quieres limpiar todo el historial?')) return;
     localStorage.removeItem(HISTORIAL_KEY());
     renderHistorialList();
-    showToast('️ Historial limpiado');
+    showToast('Historial limpiado');
 };
 
 const renderHistorialList = () => {
@@ -1738,7 +1738,7 @@ const CODIGOS = {
     'DAVID': {
         unica: true,
         recompensa: (usuario) => {
-            state.monedas += 1_000_000_000_000;
+            state.monedas += 1_000_000;
             const calabazaId = 'Pumpkin-128';
             const existing   = state.inventory.get(calabazaId);
             if (existing) {
@@ -1748,15 +1748,15 @@ const CODIGOS = {
                 state.inventory.set(calabazaId, { id: calabazaId, name: 'Calabaza', cat: 'verdura', health: 12, qty: 99 });
             }
             if (typeof renderInventory === 'function') renderInventory();
-            logEvent('bonus', 'Código DAVID canjeado', '+1,000,000,000,000 monedas + 99 calabazas');
+            logEvent('bonus', 'Código DAVID canjeado', '+1,000,000 monedas + 99 calabazas');
             return 'Código válido! +1,000,000,000,000 monedas + 99 calabazas';
         }
     },
     'PRUEBADEV': {
         unica: true,
         recompensa: (usuario) => {
-            // +100,000,000,000,000,000,000,000 monedas
-            state.monedas += 1e23;
+            // +100,000,000,000 monedas
+            state.monedas += 100000000000;
 
             // 99 de TODAS las comidas
             foodDatabase.forEach(food => {
@@ -1777,8 +1777,8 @@ const CODIGOS = {
             });
 
             if (typeof renderInventory === 'function') renderInventory();
-            logEvent('bonus', 'Código PRUEBADEV canjeado', '+1e23 monedas + 99 de toda la comida');
-            return 'Código válido! +100,000,000,000,000,000,000,000 monedas + 99 de toda la comida';
+            logEvent('bonus', 'Código PRUEBADEV canjeado', '+100,000,000,000 monedas + 99 de toda la comida');
+            return 'Código válido! +100,000,000,000 monedas + 99 de toda la comida';
         }
     },
 };
