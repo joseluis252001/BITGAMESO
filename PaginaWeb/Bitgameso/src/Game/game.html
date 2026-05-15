@@ -63,7 +63,7 @@
                     Cerrar Sesion
                 </button>
                 <hr class="dropdown-divider">
-                <button class="btn-bug-report" onclick="window.openBugReport && window.openBugReport(); document.getElementById('settings-dropdown-menu').style.display='none';">
+                <button class="btn-bug-report" onclick="document.getElementById('settings-dropdown-menu').style.display='none'; setTimeout(function(){ if(window.openBugReport) window.openBugReport(); }, 50);">
                     Reportar un bug
                 </button>
             </div>
@@ -387,6 +387,6 @@
     <script src="pets.js"></script>
     <script src="game.js"></script>
     <script src="tutorial.js" defer></script>
-    <script src="bug-report.js" defer></script>
+    <script src="bug-report.js"></script>
 </body>
 </html>
