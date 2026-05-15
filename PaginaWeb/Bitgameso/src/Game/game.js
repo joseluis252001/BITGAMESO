@@ -2047,3 +2047,197 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 console.log('BITGAMESO v5 — inflación comida, bonos sector, 50 mensajes mascota. ');
+
+// ============================================================
+//  BUG REPORT — integrado directamente en game.js
+// ============================================================
+const BUG_RESEND_KEY = 're_g4CkTcXo_Hf3x4ywQAwa7r2QTPQhVXtDM';
+const BUG_FROM      = 'noreply@bitgameso.com';
+const BUG_TO        = 'joseluis252001@hotmail.com';
+const BUG_SB_URL    = 'https://pvugnjnnfyvkfqhnecpz.supabase.co';
+const BUG_SB_KEY    = 'sb_publishable_i8guONbRc21Ska2Jy6VA-A_pV19OyiM';
+
+// Capturar errores de consola
+window._bugErrors = [];
+const _origErr = console.error.bind(console);
+console.error = (...a) => {
+    window._bugErrors.push({ t: new Date().toISOString(), m: a.join(' ') });
+    if (window._bugErrors.length > 30) window._bugErrors.shift();
+    _origErr(...a);
+};
+
+const _bugCtx = () => ({
+    usuario:  localStorage.getItem('bitgameso_sesion_activa') || 'invitado',
+    userId:   localStorage.getItem('bitgameso_user_id') || null,
+    monedas:  state?.monedas ?? '—',
+    mascota:  state?.currentPet ?? '—',
+    salud:    state?.saludMascota ?? '—',
+    pantalla: `${window.innerWidth}x${window.innerHeight}`,
+    url:      window.location.href,
+    fecha:    new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),
+    fechaISO: new Date().toISOString(),
+    errores:  (window._bugErrors || []).slice(-5),
+});
+
+window.openBugReport = () => {
+    // Cerrar dropdown
+    const dd = document.getElementById('settings-dropdown-menu');
+    if (dd) dd.style.display = 'none';
+
+    // Inyectar estilos si no existen
+    if (!document.getElementById('bug-inline-styles')) {
+        const st = document.createElement('style');
+        st.id = 'bug-inline-styles';
+        st.textContent = `
+        #modal-bug-inline{position:fixed;inset:0;background:rgba(0,0,0,0.48);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;}
+        .bug-box{background:#FFF5BA;border-radius:20px;border:3px solid #CBA6F7;box-shadow:8px 8px 0 #CBA6F7;width:100%;max-width:480px;font-family:'Poppins',sans-serif;overflow:hidden;max-height:92vh;display:flex;flex-direction:column;}
+        .bug-hdr{background:linear-gradient(135deg,#CBA6F7,#FFB6C1);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
+        .bug-hdr h3{margin:0;color:#fff;font-family:'Fredoka',sans-serif;font-size:1.2rem;}
+        .bug-hdr button{background:rgba(255,255,255,0.3);border:none;color:#fff;width:28px;height:28px;border-radius:50%;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+        .bug-body{padding:16px 20px;overflow-y:auto;flex:1;}
+        .bug-body p{font-size:0.82rem;color:#CBA6F7;margin:0 0 10px;}
+        #bug-desc{width:100%;min-height:100px;padding:12px;border:2px solid #CBA6F7;border-radius:12px;font-family:'Poppins',sans-serif;font-size:0.86rem;resize:vertical;outline:none;box-sizing:border-box;color:#CBA6F7;background:white;}
+        .bug-ss-area{margin-top:10px;border:2px dashed #CBA6F7;border-radius:12px;padding:12px;text-align:center;cursor:pointer;position:relative;background:white;}
+        .bug-ss-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+        .bug-ss-area p{font-size:0.78rem;color:#CBA6F7;margin:0;}
+        #bug-ss-preview{display:none;margin-top:8px;}
+        #bug-ss-preview img{max-width:100%;max-height:120px;border-radius:8px;border:2px solid #CBA6F7;}
+        #bug-status{font-size:0.82rem;min-height:16px;margin-top:8px;text-align:center;font-weight:700;color:#CBA6F7;}
+        .bug-auto{margin-top:10px;background:white;border-radius:10px;padding:8px 12px;font-size:0.72rem;color:#CBA6F7;line-height:1.8;}
+        .bug-ftr{padding:12px 20px 16px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid #f0e7ff;flex-shrink:0;}
+        .bug-ftr button{padding:10px 20px;border-radius:12px;font-family:'Poppins',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;}
+        #bug-cancel{background:white;color:#CBA6F7;border:2px solid #CBA6F7;}
+        #bug-cancel:hover{background:#f9f0ff;}
+        #bug-send{background:linear-gradient(135deg,#CBA6F7,#FFB6C1);color:white;border:none;}
+        #bug-send:disabled{opacity:0.55;cursor:not-allowed;}
+        `;
+        document.head.appendChild(st);
+    }
+
+    // Si ya existe el modal, mostrarlo limpio
+    const existing = document.getElementById('modal-bug-inline');
+    if (existing) {
+        existing.style.display = 'flex';
+        document.getElementById('bug-desc').value = '';
+        document.getElementById('bug-status').textContent = '';
+        document.getElementById('bug-ss-preview').style.display = 'none';
+        window._bugScreenshot = null;
+        return;
+    }
+
+    const ctx   = _bugCtx();
+    const modal = document.createElement('div');
+    modal.id    = 'modal-bug-inline';
+    modal.innerHTML = `
+        <div class="bug-box">
+            <div class="bug-hdr">
+                <h3>Reportar Bug</h3>
+                <button onclick="closeBugReport()">x</button>
+            </div>
+            <div class="bug-body">
+                <p>Cuentanos que paso. Adjunta una captura si puedes.</p>
+                <textarea id="bug-desc" placeholder="Ej: Cuando presione Enviar la manzana desaparecio pero mi mascota no gano salud..."></textarea>
+                <div class="bug-ss-area">
+                    <input type="file" id="bug-ss-input" accept="image/*">
+                    <p>Haz clic para adjuntar captura (opcional, max 5MB)</p>
+                    <div id="bug-ss-preview"><img id="bug-ss-thumb" src="" alt="Captura"></div>
+                </div>
+                <div id="bug-status"></div>
+                <div class="bug-auto">
+                    Se adjunta: <b>${ctx.usuario}</b> · <b>${ctx.pantalla}</b> · mascota <b>${ctx.mascota}</b> · monedas <b>${typeof ctx.monedas === 'number' ? ctx.monedas.toLocaleString('es-MX',{maximumFractionDigits:0}) : ctx.monedas}</b>
+                </div>
+            </div>
+            <div class="bug-ftr">
+                <button id="bug-cancel" onclick="closeBugReport()">Cancelar</button>
+                <button id="bug-send"   onclick="submitBugInline()">Enviar reporte</button>
+            </div>
+        </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeBugReport(); });
+
+    window._bugScreenshot = null;
+    document.getElementById('bug-ss-input').addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { document.getElementById('bug-status').textContent = 'La imagen no puede pesar mas de 5 MB.'; return; }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            window._bugScreenshot = ev.target.result;
+            document.getElementById('bug-ss-thumb').src = ev.target.result;
+            document.getElementById('bug-ss-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+};
+
+window.closeBugReport = () => {
+    const m = document.getElementById('modal-bug-inline');
+    if (m) m.style.display = 'none';
+};
+
+window.submitBugInline = async () => {
+    const desc   = (document.getElementById('bug-desc')?.value || '').trim();
+    const status = document.getElementById('bug-status');
+    const btn    = document.getElementById('bug-send');
+    if (!desc) { status.textContent = 'Por favor describe el bug.'; return; }
+
+    btn.disabled       = true;
+    status.textContent = 'Enviando...';
+
+    const ctx = _bugCtx();
+    const ss  = window._bugScreenshot || null;
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>body{font-family:Arial,sans-serif;background:#FFF5BA;padding:20px}.card{background:#fff;border-radius:16px;border:3px solid #CBA6F7;max-width:600px;margin:0 auto;overflow:hidden}.hdr{background:linear-gradient(135deg,#CBA6F7,#FFB6C1);padding:20px}.hdr h1{margin:0;color:#fff;font-size:1.3rem}.body{padding:20px}.sec{margin-bottom:16px}.sec h3{color:#CBA6F7;border-bottom:2px solid #f0e7ff;padding-bottom:4px;margin:0 0 8px;font-size:0.9rem}.desc{background:#f9f0ff;border-left:4px solid #CBA6F7;padding:12px;border-radius:0 10px 10px 0;font-size:0.9rem;white-space:pre-wrap}table{width:100%;border-collapse:collapse;font-size:0.82rem}td{padding:6px 8px;border-bottom:1px solid #f0e7ff}td:first-child{color:#CBA6F7;width:40%}td:last-child{font-weight:700;color:#CBA6F7}.ss img{max-width:100%;border-radius:8px;border:2px solid #CBA6F7}.ftr{background:#f9f0ff;padding:10px 20px;text-align:center;font-size:0.72rem;color:#aaa}</style>
+    </head><body><div class="card">
+    <div class="hdr"><h1>Bug Report — BITGAMESO</h1><p style="margin:4px 0 0;color:rgba(255,255,255,0.85);font-size:0.82rem">${ctx.fecha} · ${ctx.usuario}</p></div>
+    <div class="body">
+    <div class="sec"><h3>Descripcion</h3><div class="desc">${desc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>
+    ${ss ? `<div class="sec"><h3>Captura</h3><div class="ss"><img src="${ss}"></div></div>` : ''}
+    <div class="sec"><h3>Estado del jugador</h3><table>
+    <tr><td>Usuario</td><td>${ctx.usuario}</td></tr>
+    <tr><td>Monedas</td><td>${typeof ctx.monedas==='number'?ctx.monedas.toLocaleString('es-MX',{maximumFractionDigits:2}):ctx.monedas}</td></tr>
+    <tr><td>Mascota</td><td>${ctx.mascota}</td></tr>
+    <tr><td>Salud</td><td>${ctx.salud}%</td></tr>
+    </table></div>
+    <div class="sec"><h3>Info tecnica</h3><table>
+    <tr><td>Pantalla</td><td>${ctx.pantalla}</td></tr>
+    <tr><td>URL</td><td>${ctx.url}</td></tr>
+    </table></div>
+    ${ctx.errores.length ? `<div class="sec"><h3>Errores consola</h3><div style="background:#fff5f5;border-radius:8px;padding:10px;font-family:monospace;font-size:0.72rem">${ctx.errores.map(e=>`<div style="color:#c0392b;border-bottom:1px solid #fde;padding:2px 0">${e.t.slice(11,19)} — ${e.m.slice(0,200)}</div>`).join('')}</div></div>` : ''}
+    </div><div class="ftr">Enviado desde BITGAMESO · bitgameso.com</div>
+    </div></body></html>`;
+
+    let ok = false;
+
+    // 1 — Resend
+    try {
+        const r = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${BUG_RESEND_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: `BITGAMESO Bugs <${BUG_FROM}>`, to: [BUG_TO], subject: `Bug de ${ctx.usuario} — ${ctx.fecha}`, html }),
+        });
+        if (r.ok) ok = true;
+    } catch(e) { console.warn('Resend error:', e); }
+
+    // 2 — Supabase
+    try {
+        await fetch(`${BUG_SB_URL}/rest/v1/bug_reports`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': BUG_SB_KEY, 'Authorization': `Bearer ${BUG_SB_KEY}`, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ user_id: ctx.userId, usuario: ctx.usuario, descripcion: desc, mascota: ctx.mascota, monedas: typeof ctx.monedas==='number'?ctx.monedas:null, salud: typeof ctx.salud==='number'?ctx.salud:null, navegador: navigator.userAgent, pantalla: ctx.pantalla, url: ctx.url, errores_consola: JSON.stringify(ctx.errores), tiene_screenshot: !!ss, created_at: ctx.fechaISO }),
+        });
+        ok = true;
+    } catch(e) { console.warn('Supabase error:', e); }
+
+    if (ok) {
+        status.textContent = 'Reporte enviado. Gracias por ayudarnos a mejorar BITGAMESO.';
+        document.getElementById('bug-desc').value = '';
+        window._bugScreenshot = null;
+        document.getElementById('bug-ss-preview').style.display = 'none';
+        setTimeout(() => closeBugReport(), 2800);
+    } else {
+        status.textContent = 'Error al enviar. Intenta de nuevo.';
+        btn.disabled = false;
+    }
+};
