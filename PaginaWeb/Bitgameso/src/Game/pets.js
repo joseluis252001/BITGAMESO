@@ -312,7 +312,7 @@ const GOLDEN_DEFS = (() => {
             marketSpeed: Math.min(base.marketSpeed * 2, 4),
             passive,
             golden: true,
-            desc: `DORADA — ${base.desc} (efectos x2)`,
+            desc: `✨ DORADA — ${base.desc} (efectos x2)`,
             passiveDesc: goldenDescMap[passive] || base.passiveDesc.map(l => l + ' (x2)'),
         };
     });
@@ -590,22 +590,141 @@ const startPassivesForPet = (petId) => {
 
         case 'chicken_white':
         case 'chicken_yellow':
-            // Reset inflation on non-protein foods on activation
-            resetNonProteinInflation();
+            // Ya no resetea automáticamente — es botón con cooldown
             break;
     }
 
     renderPetAbilityButton();
 };
 
-const resetNonProteinInflation = () => {
+// ============================================================
+//  VARIABLES DE ESTADO — POLLOS, PINGÜINOS, TIBURÓN
+// ============================================================
+
+// Pollos — cooldown del botón de reset de inflación
+// Guardamos timestamp del último uso por mascota
+const getChickenCooldownKey = () => {
+    const u = localStorage.getItem('bitgameso_sesion_activa') || 'invitado';
+    return `bitgameso_chicken_cd_${state.currentPet}_${u}`;
+};
+
+// Cooldowns en ms según mascota
+const CHICKEN_COOLDOWNS = {
+    'chicken_white':         10 * 60 * 1000,  // Pollito: 10 min
+    'chicken_yellow':        20 * 60 * 1000,  // Pollito Amarillo: 20 min
+    // dorados y diamante se calculan dinámicamente
+};
+const getChickenCooldownMs = () => {
+    const def = PET_DEFS[state.currentPet];
+    const base = def?.passive === 'chicken_white' ? 10 : 20; // min base
+    if (def?.diamond) return (base + 40) * 60 * 1000;  // +40 min para diamante
+    if (def?.golden)  return (base + 20) * 60 * 1000;  // +20 min para dorado
+    return base * 60 * 1000;
+};
+
+const isChickenOnCooldown = () => {
+    const last = parseInt(localStorage.getItem(getChickenCooldownKey()) || '0');
+    return Date.now() - last < getChickenCooldownMs();
+};
+
+const getChickenCooldownRemaining = () => {
+    const last = parseInt(localStorage.getItem(getChickenCooldownKey()) || '0');
+    return Math.max(0, getChickenCooldownMs() - (Date.now() - last));
+};
+
+// Pingüino — peces gratis por hora
+const getPenguinFishKey = () => {
+    const u = localStorage.getItem('bitgameso_sesion_activa') || 'invitado';
+    return `bitgameso_penguin_fish_${state.currentPet}_${u}`;
+};
+const PENGUIN_COOLDOWN_MS = 60 * 60 * 1000; // 1 hora
+
+const getPenguinMaxFreeFish = () => {
+    const def = PET_DEFS[state.currentPet];
+    const passive = def?.passive;
+    if (passive !== 'penguin' && passive !== 'penguin_pink') return 0;
+    if (def?.diamond) return passive === 'penguin_pink' ? 13 : 11;
+    if (def?.golden)  return passive === 'penguin_pink' ? 9  : 7;
+    return passive === 'penguin_pink' ? 5 : 3;
+};
+
+const getPenguinFishData = () => {
+    try {
+        const raw = localStorage.getItem(getPenguinFishKey());
+        if (!raw) return { count: 0, resetAt: Date.now() + PENGUIN_COOLDOWN_MS };
+        return JSON.parse(raw);
+    } catch { return { count: 0, resetAt: Date.now() + PENGUIN_COOLDOWN_MS }; }
+};
+
+const savePenguinFishData = (data) => {
+    localStorage.setItem(getPenguinFishKey(), JSON.stringify(data));
+};
+
+const getPenguinFreeFishRemaining = () => {
+    const data = getPenguinFishData();
+    // Si ya pasó la hora, resetear
+    if (Date.now() >= data.resetAt) {
+        const fresh = { count: 0, resetAt: Date.now() + PENGUIN_COOLDOWN_MS };
+        savePenguinFishData(fresh);
+        return getPenguinMaxFreeFish();
+    }
+    return Math.max(0, getPenguinMaxFreeFish() - data.count);
+};
+
+// Tiburón — penalización al cambiar de mascota
+let sharkPenaltyActive = false;
+
+window.activateSharkReset = () => {
+    const def = PET_DEFS[state.currentPet];
+    if (!def || def.passive !== 'shark') return;
+
+    // Resetear inflación de todo excepto pescado y carne
+    let count = 0;
     state.foodInflation.forEach((_, foodId) => {
         const food = foodDatabase.find(f => f.id === foodId);
-        if (food && food.cat !== 'proteina') {
+        if (food && food.id !== 'Fish-128' && food.id !== 'Meat-128') {
             state.foodInflation.delete(foodId);
+            count++;
         }
     });
-    _getShowToast()(' Inflación de frutas/verduras/dulces/misc reseteada!');
+
+    sharkPenaltyActive = true;
+    _getShowToast()(`Inflacion reseteada (${count} alimentos). Advertencia: cambiar de mascota le costara 50% de vida a la siguiente!`);
+    renderPetAbilityButton();
+};
+
+// Compra de peces con pingüino — verificar gratis
+const tryPenguinFreeFish = (foodId) => {
+    if (foodId !== 'Fish-128') return false;
+    const def = PET_DEFS[state.currentPet];
+    if (!def || (def.passive !== 'penguin' && def.passive !== 'penguin_pink')) return false;
+
+    const data = getPenguinFishData();
+    const now  = Date.now();
+
+    // Resetear si pasó la hora
+    if (now >= data.resetAt) {
+        data.count   = 0;
+        data.resetAt = now + PENGUIN_COOLDOWN_MS;
+    }
+
+    const maxFree = getPenguinMaxFreeFish();
+    if (data.count >= maxFree) return false; // Ya usó todos los gratis
+
+    // Dar el pez gratis sin inflar
+    const existing = state.inventory.get('Fish-128');
+    const fishDef  = foodDatabase.find(f => f.id === 'Fish-128');
+    if (!fishDef) return false;
+
+    state.inventory.set('Fish-128', { ...fishDef, price: 0, qty: (existing?.qty || 0) + 1 });
+    // NO incrementar foodInflation (es gratis)
+    data.count++;
+    savePenguinFishData(data);
+
+    const remaining = maxFree - data.count;
+    const mins = Math.round((data.resetAt - now) / 60000);
+    _getShowToast()(`Pescado gratis! (${remaining} gratis restantes, se reponen en ${mins} min)`);
+    return true; // Indica que fue gratis, no cobrar
 };
 
 // ============================================================
@@ -846,6 +965,19 @@ const checkSheepPenalty = (profit) => {
 //  HABILIDADES ACTIVAS (BOTONES EN MASCOTA)
 // ============================================================
 
+// Pingüino — botón para pez gratis
+window.activatePenguinFreeFish = () => {
+    const result = tryPenguinFreeFish('Fish-128');
+    if (!result) {
+        const fishData = getPenguinFishData();
+        const mins = Math.ceil((fishData.resetAt - Date.now()) / 60000);
+        _getShowToast()(`No quedan peces gratis. Se reponen en ${mins} min`);
+    }
+    renderPetAbilityButton();
+    if (typeof renderInventory === 'function') renderInventory();
+    if (typeof saveGame === 'function') saveGame();
+};
+
 // Conejo: Turbo x4 (dorado x8 por 60s)
 window.activateBunnyTurbo = () => {
     if (bunnyTurboCooldown) { _getShowToast()(' Turbo en cooldown, espera 3 minutos'); return; }
@@ -869,6 +1001,39 @@ window.activateBunnyTurbo = () => {
         }, 180000); // 3 min (cooldown no cambia)
     }, turboDur);
     renderPetAbilityButton();
+};
+
+// Pollo — resetear inflación (botón con cooldown)
+window.activateChickenReset = () => {
+    const def = PET_DEFS[state.currentPet];
+    if (!def || (def.passive !== 'chicken_white' && def.passive !== 'chicken_yellow')) return;
+
+    if (isChickenOnCooldown()) {
+        const rem = getChickenCooldownRemaining();
+        const mins = Math.ceil(rem / 60000);
+        _getShowToast()(`Cooldown activo: ${mins} min restantes`);
+        return;
+    }
+
+    // Resetear inflación excepto pescado y carne
+    let count = 0;
+    state.foodInflation.forEach((_, foodId) => {
+        if (foodId !== 'Fish-128' && foodId !== 'Meat-128') {
+            state.foodInflation.delete(foodId);
+            count++;
+        }
+    });
+
+    localStorage.setItem(getChickenCooldownKey(), Date.now().toString());
+    const mins = Math.round(getChickenCooldownMs() / 60000);
+    _getShowToast()(`Inflacion reseteada (${count} alimentos)! Cooldown: ${mins} min`);
+    renderPetAbilityButton();
+
+    // Actualizar botón cuando termine el cooldown
+    setTimeout(() => {
+        renderPetAbilityButton();
+        _getShowToast()('Habilidad del Pollito disponible!');
+    }, getChickenCooldownMs());
 };
 
 // Rana: Prediccion perfecta del sector (dorada 60s)
@@ -951,6 +1116,39 @@ const renderPetAbilityButton = () => {
                         Prediccion ${frogCooldown ? '(cooldown 1min)' : isGolden ? '(60s)' : '(30s)'}
                     </button>`;
             break;
+        case 'chicken_white':
+        case 'chicken_yellow': {
+            const onCd   = isChickenOnCooldown();
+            const remMs  = onCd ? getChickenCooldownRemaining() : 0;
+            const remMin = Math.ceil(remMs / 60000);
+            const cdMins = Math.round(getChickenCooldownMs() / 60000);
+            html = `<button class="btn-pet-ability ${onCd ? 'ability-cooldown' : ''}"
+                        onclick="activateChickenReset()" ${onCd ? 'disabled' : ''}>
+                        Resetear Inflacion ${onCd ? `(${remMin} min restantes)` : `(CD: ${cdMins} min)`}
+                    </button>`;
+            break;
+        }
+        case 'penguin':
+        case 'penguin_pink': {
+            const fishLeft = getPenguinFreeFishRemaining();
+            const maxFish  = getPenguinMaxFreeFish();
+            const fishData = getPenguinFishData();
+            const minsLeft = fishLeft > 0 ? '' : ` (repone en ${Math.ceil((fishData.resetAt - Date.now()) / 60000)} min)`;
+            html = `<button class="btn-pet-ability ${fishLeft <= 0 ? 'ability-cooldown' : ''}"
+                        onclick="activatePenguinFreeFish()" ${fishLeft <= 0 ? 'disabled' : ''}>
+                        Pez Gratis: ${fishLeft}/${maxFish}${minsLeft}
+                    </button>`;
+            break;
+        }
+        case 'shark': {
+            const penLabel = sharkPenaltyActive ? ' (Penalizacion activa!)' : '';
+            html = `<button class="btn-pet-ability"
+                        onclick="activateSharkReset()"
+                        style="${sharkPenaltyActive ? 'background:linear-gradient(135deg,#e67e22,#d35400);' : ''}">
+                        Resetear Inflacion${penLabel}
+                    </button>`;
+            break;
+        }
         default: {
             // Mascotas con velocidad pasiva: mostrar toggle
             const effSpeed = isGolden ? Math.min(pet.marketSpeed * 2, 4) : pet.marketSpeed;
@@ -1169,12 +1367,29 @@ window.unlockPet = (id) => {
 window.selectPet = (id, label) => {
     // Guardar salud de la mascota actual antes de cambiar
     saveCurPetHealth();
+
+    // Penalización del Tiburón: si venía del tiburón con sharkPenaltyActive
+    // la nueva mascota pierde 50% de su vida (o muere si tiene 1% o menos)
+    if (sharkPenaltyActive) {
+        const newData = state.petData.get(id);
+        const newHealth = newData ? newData.health : 75;
+        if (newHealth <= 1) {
+            // Muere directamente
+            if (newData) { newData.health = 0; state.petData.set(id, newData); }
+            _getShowToast()(`Penalizacion del Tiburon: ${label} tenia ${newHealth}% y murio!`);
+        } else {
+            const penalized = Math.floor(newHealth * 0.5);
+            if (newData) { newData.health = penalized; state.petData.set(id, newData); }
+            _getShowToast()(`Penalizacion del Tiburon: ${label} perdio 50% de vida (${newHealth}% → ${penalized}%)`);
+        }
+        sharkPenaltyActive = false;
+    }
+
     state.currentPet = id;
-    // Restaurar salud de la nueva mascota
+    // Restaurar salud de la nueva mascota (ya modificada por penalización si aplica)
     const data = state.petData.get(id);
     if (data) {
         state.saludMascota = data.health;
-        // Marcar como usada para que si llega a 0% no se resetee
         data.everUsed = true;
         state.petData.set(id, data);
     }
@@ -1184,8 +1399,10 @@ window.selectPet = (id, label) => {
     closePetSelector();
     renderPetAbilityButton();
     _getShowToast()(`Ahora juegas con ${label}!`);
-    _getLogEvent()('mascota', `Cambiaste a ${label}`, '');
+    _getLogEvent()('mascota', `Cambiaste a ${label}`, sharkPenaltyActive ? 'Penalizacion del Tiburon aplicada' : '');
     _getSaveGame()();
+    // Verificar game over si la nueva mascota quedó en 0
+    if (state.saludMascota <= 0 && typeof checkGameOver === 'function') checkGameOver();
 };
 
 window.closePetSelector = () => {

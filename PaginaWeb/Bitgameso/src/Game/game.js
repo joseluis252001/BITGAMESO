@@ -744,7 +744,19 @@ window.closeFoodShop = () => { document.getElementById('modal-food-shop').style.
 window.buyFood = (foodId, price) => {
     const food = foodDatabase.find(f=>f.id===foodId);
     if (!food) return;
-    if (state.monedas < price) { showToast(' Monedas insuficientes'); return; }
+
+    // Pingüino: intentar dar el pescado gratis (sin cobrar ni inflar)
+    if (foodId === 'Fish-128' && typeof tryPenguinFreeFish === 'function') {
+        const wasFree = tryPenguinFreeFish(foodId);
+        if (wasFree) {
+            logEvent('comida', `Pescado gratis del Pinguino`, `Sin costo ni inflacion`);
+            updateUI();
+            openFoodShop();
+            return;
+        }
+    }
+
+    if (state.monedas < price) { showToast('Monedas insuficientes'); return; }
     state.monedas -= price;
     const existing = state.inventory.get(foodId);
     state.inventory.set(foodId, { ...food, price, qty:(existing?.qty||0)+1 });
@@ -762,7 +774,6 @@ window.buyFood = (foodId, price) => {
     showToast(`Compraste ${food.name} por ${price} | Proximo precio: ${nextPrice}`);
     logEvent('comida', `Compraste ${food.name}`, `Precio: ${price} | Efecto: ${catLabel[food.cat]}`);
     updateUI();
-    // Refrescar la tienda para mostrar precios actualizados — NO cerrar
     openFoodShop();
 };
 
