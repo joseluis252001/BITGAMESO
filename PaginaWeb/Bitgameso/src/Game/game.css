@@ -1560,6 +1560,21 @@ body {
     }
 }
 
+/* En tablet (iPad): burbuja centrada, tamaño adecuado */
+@media (min-width: 601px) and (max-width: 1024px) {
+    #tutorial-bubble {
+        width: 380px;
+        max-width: calc(100vw - 40px);
+        /* JS controla top/left, pero aseguramos que no se salga */
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .tut-speech { padding: 14px 16px 10px; }
+    #tut-text   { font-size: 13px; line-height: 1.6; }
+    .tut-mascot-wrap img { width: 52px; height: 52px; }
+}
+
 /* Brillo en botones que el jugador debe presionar durante el tutorial */
 .tut-action-glow {
     animation: tut-btn-glow 0.9s infinite alternate !important;

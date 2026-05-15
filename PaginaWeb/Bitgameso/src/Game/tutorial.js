@@ -372,15 +372,41 @@ const positionBubble = (rect, dir = 'up') => {
     const wW  = window.innerWidth;
     const pad = 16;
 
-    let left = rect.left + rect.width/2 - bW/2;
+    // En pantallas pequeñas/tablet: centrar horizontalmente abajo
+    if (wW <= 1024 && wW >= 601) {
+        // Tablet: centrar horizontalmente, posicionar debajo o arriba del elemento
+        let top, left;
+        left = Math.max(pad, (wW - bW) / 2);
+
+        if (rect && rect.width) {
+            top = rect.bottom + 60;
+            if (top + bH > wH - pad) top = rect.top - bH - 60;
+        } else {
+            top = wH / 2 - bH / 2;
+        }
+        top  = Math.max(pad, Math.min(top, wH - bH - pad));
+        left = Math.max(pad, Math.min(left, wW - bW - pad));
+        bubble.style.top       = `${top}px`;
+        bubble.style.left      = `${left}px`;
+        bubble.style.transform = 'none';
+        return;
+    }
+
+    // Móvil: fijo abajo (manejado por CSS)
+    if (wW <= 600) return;
+
+    // PC: lógica original
+    let left = rect ? rect.left + rect.width/2 - bW/2 : wW/2 - bW/2;
     let top;
 
-    if (dir === 'left' || dir === 'right') {
+    if (rect && (dir === 'left' || dir === 'right')) {
         top  = rect.top + rect.height/2 - bH/2;
         left = dir === 'left' ? rect.right + 70 : rect.left - bW - 70;
-    } else {
+    } else if (rect) {
         top = rect.bottom + 65;
         if (top + bH > wH - pad) top = rect.top - bH - 65;
+    } else {
+        top = wH/2 - bH/2;
     }
 
     top  = Math.max(pad, Math.min(top,  wH - bH - pad));
