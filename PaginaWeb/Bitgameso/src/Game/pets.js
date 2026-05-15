@@ -312,7 +312,7 @@ const GOLDEN_DEFS = (() => {
             marketSpeed: Math.min(base.marketSpeed * 2, 4),
             passive,
             golden: true,
-            desc: `✨ DORADA — ${base.desc} (efectos x2)`,
+            desc: `DORADA — ${base.desc} (efectos x2)`,
             passiveDesc: goldenDescMap[passive] || base.passiveDesc.map(l => l + ' (x2)'),
         };
     });
@@ -1183,7 +1183,7 @@ window.selectPet = (id, label) => {
     startPassivesForPet(id);
     closePetSelector();
     renderPetAbilityButton();
-    _getShowToast()(`🐾 ¡Ahora juegas con ${label}!`);
+    _getShowToast()(`Ahora juegas con ${label}!`);
     _getLogEvent()('mascota', `Cambiaste a ${label}`, '');
     _getSaveGame()();
 };

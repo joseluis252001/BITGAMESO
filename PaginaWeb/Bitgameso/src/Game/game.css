@@ -1074,6 +1074,44 @@ body {
    ==== */
 
 /* Grid de mascotas — 3 columnas, sin scroll propio */
+/* ====   MODAL MASCOTAS — rediseño pastel
+   ==== */
+
+/* Borde amarillo en el modal de mascotas */
+#modal-mascota .modal-box {
+    border-color: #FFF5BA;
+    box-shadow: 5px 5px 0px #FFF5BA;
+}
+#modal-mascota .modal-box h3 {
+    color: #CBA6F7;
+}
+
+/* Botón Cancelar/Cerrar del modal mascotas — morado */
+#modal-mascota .btn-modal-close {
+    background: #CBA6F7;
+    color: #FFFFFF;
+    border-color: #CBA6F7;
+}
+#modal-mascota .btn-modal-close:hover {
+    background: #b48ded;
+    border-color: #b48ded;
+}
+
+/* Borde amarillo en modal info de mascota */
+#modal-pet-info .modal-box {
+    border-color: #FFF5BA;
+    box-shadow: 5px 5px 0px #FFF5BA;
+}
+#modal-pet-info .btn-modal-close {
+    background: #CBA6F7;
+    color: #FFFFFF;
+    border-color: #CBA6F7;
+}
+#modal-pet-info .btn-modal-close:hover {
+    background: #b48ded;
+    border-color: #b48ded;
+}
+
 .pet-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1088,17 +1126,17 @@ body {
     gap: 5px;
     padding: 10px 8px;
     border-radius: 14px;
-    border: 2px solid #eee;
+    border: 2px solid #FFF5BA;
     font-size: 10px;
     transition: .15s;
     background: white;
 }
 
-.pet-option:hover    { border-color: var(--primary); background: #fdf7ff; }
-.pet-selected        { border-color: var(--primary) !important; background: #f0e7ff !important; }
+.pet-option:hover    { border-color: #CBA6F7; background: #fdf7ff; }
+.pet-selected        { border-color: #CBA6F7 !important; background: #f0e7ff !important; }
 .pet-locked          { opacity: .55; filter: grayscale(60%); }
 
-.pet-label { font-weight: 700; font-size: 11px; text-align: center; }
+.pet-label { font-weight: 700; font-size: 11px; text-align: center; color: #CBA6F7; }
 
 /* Corazones en la grid de mascotas */
 .pet-grid-hearts { display: flex; gap: 2px; justify-content: center; }
@@ -1110,12 +1148,12 @@ body {
     border-radius: 10px; text-align: center;
 }
 .pet-badge.active { background: #B2F2BB; color: #5a9e6f; }
-.pet-badge.locked { background: #f0f0f0; color: #aaa; }
+.pet-badge.locked { background: #f0e7ff; color: #CBA6F7; }
 
 /* Botones en grid de mascotas */
 .btn-pet-select {
     padding: 5px 12px; border-radius: 10px;
-    background: var(--primary); color: white;
+    background: #CBA6F7; color: white;
     border: none; font-weight: 700; font-size: 10px;
     cursor: pointer; transition: .15s;
     font-family: 'Poppins', sans-serif;
@@ -1124,19 +1162,19 @@ body {
 
 .btn-pet-unlock {
     padding: 5px 10px; border-radius: 10px;
-    background: #ffd700; color: #333;
-    border: none; font-weight: 700; font-size: 10px;
+    background: #FFF5BA; color: #CBA6F7;
+    border: 2px solid #CBA6F7; font-weight: 700; font-size: 10px;
     cursor: pointer; transition: .15s;
     font-family: 'Poppins', sans-serif;
 }
-.btn-pet-unlock:hover { opacity: .85; transform: scale(1.05); }
+.btn-pet-unlock:hover { background: #CBA6F7; color: white; transform: scale(1.05); }
 
-/* Área de habilidad activa en la tarjeta de mascota */
+/* Area de habilidad activa */
 .pet-ability-area { width: 100%; margin-bottom: 8px; }
 
 .btn-pet-ability {
     width: 100%; padding: 9px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #CBA6F7, #b48ded);
     color: white; border: none; border-radius: 12px;
     font-weight: 700; font-size: 12px;
     cursor: pointer; transition: .2s;
@@ -1152,22 +1190,22 @@ body {
 }
 
 @keyframes pulse-ability {
-    0%,100% { box-shadow: 0 0 0 0 rgba(102,126,234,0.4); }
-    50%      { box-shadow: 0 0 0 8px rgba(102,126,234,0); }
+    0%,100% { box-shadow: 0 0 0 0 rgba(203,166,247,0.4); }
+    50%      { box-shadow: 0 0 0 8px rgba(203,166,247,0); }
 }
 
 /* Botón de mascotas siempre visible */
 .btn-change-pet {
     width: 100%; padding: 10px;
-    background: var(--pink-light);
-    color: var(--primary-dk);
-    border: 2px solid var(--primary);
+    background: #f9f0ff;
+    color: #CBA6F7;
+    border: 2px solid #CBA6F7;
     border-radius: 12px;
     font-weight: 700; font-size: 12px;
     cursor: pointer; transition: .2s;
     font-family: 'Poppins', sans-serif;
 }
-.btn-change-pet:hover { background: var(--primary); color: white; }
+.btn-change-pet:hover { background: #CBA6F7; color: white; }
 
 /* ====   MODAL INFO DE MASCOTA
    ==== */
@@ -1184,12 +1222,11 @@ body {
 }
 
 .pet-info-hero-img {
-    width: 80px;
-    height: 80px;
+    width: 80px; height: 80px;
     object-fit: contain;
-    background: var(--pink-light);
+    background: #f9f0ff;
     border-radius: 16px;
-    border: 2px solid var(--primary);
+    border: 2px solid #CBA6F7;
     padding: 6px;
     flex-shrink: 0;
 }
@@ -1204,14 +1241,13 @@ body {
     font-family: 'Fredoka', sans-serif;
     font-size: 1.4rem;
     margin: 0;
-    color: var(--text);
+    color: #CBA6F7;
 }
 
 .pet-info-cost {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--primary-dk);
-    background: var(--pink-light);
+    font-size: 12px; font-weight: 700;
+    color: #CBA6F7;
+    background: #f9f0ff;
     padding: 3px 10px;
     border-radius: 10px;
     display: inline-block;
@@ -1219,20 +1255,21 @@ body {
 
 .pet-info-desc {
     font-size: 11px;
-    color: #888;
+    color: #CBA6F7;
+    opacity: .75;
     margin: 0 0 10px;
     font-style: italic;
 }
 
 .pet-info-divider {
-    border-top: 2px dashed #eee;
+    border-top: 2px dashed #FFF5BA;
     margin: 10px 0;
 }
 
 .pet-info-section-title {
     font-weight: 700;
     font-size: 12px;
-    color: var(--text);
+    color: #CBA6F7;
     margin: 0 0 8px;
 }
 
@@ -1247,23 +1284,22 @@ body {
     align-items: flex-start;
     gap: 8px;
     font-size: 12px;
-    color: var(--text);
-    background: #fafafa;
+    color: #CBA6F7;
+    background: #f9f0ff;
     border-radius: 10px;
     padding: 8px 10px;
-    border: 1px solid #eee;
+    border: 1px solid #f0e7ff;
 }
 
 .pet-info-dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
-    background: var(--primary);
+    background: #CBA6F7;
     flex-shrink: 0;
     margin-top: 3px;
 }
 
-/* Botón info en grid de mascotas */
+/* Botón info en grid */
 .pet-card-header {
     position: relative;
     width: 100%;
@@ -1273,67 +1309,66 @@ body {
 }
 
 .btn-pet-info {
-    position: absolute;
-    top: -4px;
-    right: -4px;
+    position: absolute; top: -4px; right: -4px;
     background: white;
-    border: 2px solid var(--primary);
+    border: 2px solid #CBA6F7;
     border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: .15s;
-    z-index: 2;
+    width: 22px; height: 22px;
+    padding: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: .15s; z-index: 2;
 }
+.btn-pet-info:hover { background: #CBA6F7; transform: scale(1.1); }
+.btn-pet-info:hover .pet-info-icon { filter: brightness(10); }
 
-.btn-pet-info:hover {
-    background: var(--primary);
-    transform: scale(1.1);
-}
-
-.btn-pet-info:hover .pet-info-icon {
-    filter: brightness(10);
-}
-
-.pet-info-icon {
-    width: 13px;
-    height: 13px;
-    object-fit: contain;
-}
+.pet-info-icon { width: 13px; height: 13px; object-fit: contain; }
 
 /* Botón info en tarjeta activa */
 .btn-pet-info-active {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    padding: 7px 12px;
-    margin-top: 6px;
+    display: flex; align-items: center; gap: 6px;
+    width: 100%; padding: 7px 12px; margin-top: 6px;
     border-radius: 10px;
-    border: 2px solid #eee;
+    border: 2px solid #FFF5BA;
     background: white;
-    color: var(--text);
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: .15s;
+    color: #CBA6F7;
+    font-size: 11px; font-weight: 700;
+    cursor: pointer; transition: .15s;
     font-family: 'Poppins', sans-serif;
 }
-
 .btn-pet-info-active:hover {
-    border-color: var(--primary);
-    background: var(--pink-light);
-    color: var(--primary-dk);
+    border-color: #CBA6F7;
+    background: #f9f0ff;
 }
 
-.pet-info-icon-sm {
-    width: 16px;
-    height: 16px;
-    object-fit: contain;
+.pet-info-icon-sm { width: 16px; height: 16px; object-fit: contain; }
+
+/* Secciones dorada y diamante */
+.pet-grid-gold-section {
+    margin-top: 16px;
+    border-top: 2px dashed #FFF5BA;
+    padding-top: 12px;
+    grid-column: 1 / -1;
+}
+.pet-grid-gold-section h4 {
+    color: #CBA6F7;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+    margin: 0 0 10px;
+    text-align: center;
+}
+
+.pet-grid-diamond-section {
+    margin-top: 16px;
+    border-top: 2px dashed #A0E7E5;
+    padding-top: 12px;
+    grid-column: 1 / -1;
+}
+.pet-grid-diamond-section h4 {
+    color: #CBA6F7;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+    margin: 0 0 10px;
+    text-align: center;
 }
 
 /* ====   RESPONSIVE — MÓVIL
@@ -1887,42 +1922,12 @@ body {
     box-shadow: 0 0 8px rgba(100, 200, 255, 0.6);
 }
 
-.pet-grid-gold-section {
-    margin-top: 16px;
-    border-top: 2px dashed #ffd700;
-    padding-top: 12px;
-    grid-column: 1 / -1;
-}
-
-.pet-grid-gold-section h4 {
-    color: #b8860b;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 1.1rem;
-    margin: 0 0 10px;
-    text-align: center;
-}
-
-/* Sección diamante */
-.pet-grid-diamond-section {
-    margin-top: 16px;
-    border-top: 2px dashed #6ec6ff;
-    padding-top: 12px;
-    grid-column: 1 / -1;
-}
-.pet-grid-diamond-section h4 {
-    color: #003d80;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 1.1rem;
-    margin: 0 0 10px;
-    text-align: center;
-    text-shadow: 0 0 8px rgba(100, 200, 255, 0.6);
-}
 
 /* Tarjeta diamante */
 .pet-diamond {
-    border: 2px solid #a8d8ff !important;
-    box-shadow: 0 0 12px rgba(100, 200, 255, 0.4) !important;
-    background: linear-gradient(135deg, #f0f8ff, #e8f4ff) !important;
+    border: 2px solid #A0E7E5 !important;
+    box-shadow: 0 0 12px rgba(160, 231, 229, 0.4) !important;
+    background: linear-gradient(135deg, #f0ffff, #e8fffd) !important;
 }
 
 /* ============================================================
