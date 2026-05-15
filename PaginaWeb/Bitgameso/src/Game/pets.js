@@ -1042,14 +1042,15 @@ window.closePetInfo = () => {
 
 const buildPetCard = (id, golden = false, diamond = false) => {
     const def  = PET_DEFS[id];
+    if (!def) return '';
     const data = state.petData.get(id) || { health: 0, unlocked: false };
     const isActive   = id === state.currentPet;
     const isUnlocked = data.unlocked;
     const canUnlock  = diamond ? canUnlockDiamondPet(id)
                      : golden  ? canUnlockGoldenPet(id)
                      : canUnlockPet(id);
-    const cost       = def.cost;
-    const imgId      = def.baseId || id;
+    const cost  = def.cost;
+    const imgId = def.baseId || id;
 
     // Estilos visuales según tipo
     const goldenStyle  = golden  ? 'filter:sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25);border:2px solid gold;box-shadow:0 0 10px rgba(255,200,0,0.6);' : '';
@@ -1062,9 +1063,7 @@ const buildPetCard = (id, golden = false, diamond = false) => {
     } else if (isUnlocked) {
         btnHtml = `<button class="btn-pet-select" onclick="selectPet('${id}','${def.label}')">Seleccionar</button>`;
     } else if (canUnlock) {
-        btnHtml = `<button class="btn-pet-unlock" onclick="unlockPet('${id}')">
-            ${cost.toLocaleString()}
-        </button>`;
+        btnHtml = `<button class="btn-pet-unlock" onclick="unlockPet('${id}')">${cost.toLocaleString()}</button>`;
     } else {
         const reason = diamond && !state.diamondVictoryAchieved ? 'Requiere Victoria Diamante'
                      : golden  && !state.victoryAchieved        ? 'Requiere Victoria'
@@ -1077,9 +1076,8 @@ const buildPetCard = (id, golden = false, diamond = false) => {
         `<img src="../assets/Hearts/${heartImg[t]}.png" class="pet-grid-heart">`
     ).join('');
 
-    // Badge de tipo
-    const badge = diamond ? `<span class="pet-badge-type diamond">DIAMANTE x3</span>`
-                : golden  ? `<span class="pet-badge-type golden">DORADA x2</span>`
+    const badge = diamond ? `<span class="pet-golden-badge" style="background:linear-gradient(135deg,#a8d8ff,#6ec6ff);color:#003366;">DIAMANTE x3</span>`
+                : golden  ? `<span class="pet-golden-badge">DORADA x2</span>`
                 : '';
 
     return `
@@ -1091,7 +1089,7 @@ const buildPetCard = (id, golden = false, diamond = false) => {
             </button>
         </div>
         ${badge}
-        <p class="pet-name">${def.label}</p>
+        <span class="pet-label">${def.label}</span>
         <div class="pet-grid-hearts">${heartHtml}</div>
         ${btnHtml}
     </div>`;

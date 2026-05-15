@@ -1,1198 +1,1943 @@
 // ============================================================
-//  BITGAMESO — pets.js  (cargado ANTES de game.js)
-//  Getters seguros para variables de game.js
+//  BITGAMESO — game.js  v5
+//  Inflación de comida x2 | Bonificaciones por sector
+//  50 mensajes de mascota | Efectos acumulativos con countdown
 // ============================================================
-// Local speed constants (mirrors game.js)
-const PETS_SPEED_NORMAL = 3000;
-const PETS_SPEED_FAST   = 1000;
 
-const petSpeed  = (mult) => {
-    // Convierte multiplicador a ms de intervalo
-    if (mult >= 4)   return 750;
-    if (mult >= 3)   return 1000;
-    if (mult >= 2)   return 1500;
-    if (mult >= 1.5) return 2000;
-    return 3000;
+// ============================================================
+//  ESTADO GLOBAL
+// ============================================================
+const state = {
+    monedas:      1000.00,
+    saludMascota: 75,
+    currentPet:   'Bunny-Pink-128',
+    market:       new Map(),
+    portfolio:    new Map(),
+    inventory:    new Map(),
+    foodInflation: new Map(),   // foodId → cantidad comprada (precio x2 por compra)
+    sectorBonus:   new Map(),   // type → bonusApplied (bool) cuando llega a 3 acciones
+    effectsTime: {
+        marketFast:   0,
+        doubleProfit: 0,
+        futureVision: 0,
+    },
+    selectedFood: null,
+    petData: null,              // Map<petId, {health, unlocked}> — gestionado por pets.js
+    marketSpeedEnabled: true,   // false = fuerza velocidad normal aunque la mascota tenga pasivo de velocidad
+    victoryAchieved:   false,   // true cuando todas las mascotas normales llegan a 100 de salud
+    diamondVictoryAchieved: false, // true cuando todas las doradas llegan a 100 de salud
 };
 
-const _getStartMarket  = () => typeof startMarket  === 'function' ? startMarket  : ()=>{};
-const _getShowToast    = () => typeof showToast    === 'function' ? showToast    : ()=>{};
-const _getFmt          = () => typeof fmt          === 'function' ? fmt          : (v)=>v.toFixed(2);
-const _getSaveGame     = () => typeof saveGame     === 'function' ? saveGame     : ()=>{};
-const _getChangePH     = () => typeof changePetHealth === 'function' ? changePetHealth : ()=>{};
-const _getCheckGO      = () => typeof checkGameOver  === 'function' ? checkGameOver  : ()=>{};
-const _getRenderMarket = () => typeof renderMarket   === 'function' ? renderMarket   : ()=>{};
-const _getLogEvent     = () => typeof logEvent       === 'function' ? logEvent       : ()=>{};
-const _getUpdateUI     = () => typeof updateUI       === 'function' ? updateUI       : ()=>{};
+const refs = {};
+const MAX_FOOD_QTY   = 99;  // Límite máximo para comida normal
+const MAX_FOOD_MISC  = 5;   // Límite para categoría "otros"
+const MISC_COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 horas en ms
 
-
-// ============================================================
-//  DEFINICIÓN DE MASCOTAS
-// ============================================================
-const PET_DEFS = {
-    'Bear-100': {
-        id: 'Bear-100', label: 'Oso', cost: 0, order: 0,
-        marketSpeed: 2,
-        passive: 'bear',
-        desc: ' Velocidad x2 | Dulces -10% | Penalización en ventas negativas',
-        passiveDesc: [
-            ' Mercado x2 permanente',
-            ' Dulces con 10% descuento',
-            ' Ventas negativas penalizan proporcionalmente'
-        ]
-    },
-    'Bird-128': {
-        id: 'Bird-128', label: 'Pájaro', cost: 0, order: 1,
-        marketSpeed: 3,
-        passive: 'bird',
-        desc: ' Velocidad x3 | +1 moneda/2s | Comida x4 precio | Pausa al operar',
-        passiveDesc: [
-            ' Mercado x3 permanente',
-            ' +1 moneda cada 2 segundos',
-            ' Toda la comida cuesta x4',
-            ' La moneda se pausa al comprar/vender'
-        ]
-    },
-    'Bunny-Pink-128': {
-        id: 'Bunny-Pink-128', label: 'Conejito', cost: 0, order: 2,
-        marketSpeed: 1,
-        passive: 'bunny',
-        desc: ' Habilidad: Turbo x4 por 30s (cooldown 3 min)',
-        passiveDesc: [
-            ' Botón Turbo: mercado x4 por 30s',
-            ' Cooldown de 3 minutos'
-        ]
-    },
-    'Cat-Beige-128': {
-        id: 'Cat-Beige-128', label: 'Gato Beige', cost: 100, order: 3,
-        marketSpeed: 2,
-        passive: 'cat_beige',
-        desc: ' Velocidad x2 | Dulces/Pescado duran x4 | -1% salud/20s',
-        passiveDesc: [
-            ' Mercado x2 permanente',
-            ' Dulces y Pescado duran 4x más',
-            ' -1% salud cada 20 segundos'
-        ]
-    },
-    'Cat-Blue-128': {
-        id: 'Cat-Blue-128', label: 'Gato Azul', cost: 100, order: 4,
-        marketSpeed: 2,
-        passive: 'cat_blue',
-        desc: ' Velocidad x2 | Dulces/Pescado duran x5 | -5% salud/20s',
-        passiveDesc: [
-            ' Mercado x2 permanente',
-            ' Dulces y Pescado duran 5x más',
-            ' -5% salud cada 20 segundos'
-        ]
-    },
-    'Cat-Pink-128': {
-        id: 'Cat-Pink-128', label: 'Gato Rosa', cost: 100, order: 5,
-        marketSpeed: 2,
-        passive: 'cat_pink',
-        desc: ' Velocidad x2 | Dulces/Pescado duran x6 | -7% salud/25s',
-        passiveDesc: [
-            ' Mercado x2 permanente',
-            ' Dulces y Pescado duran 6x más',
-            ' -7% salud cada 25 segundos'
-        ]
-    },
-    'Cat-Tiger-128': {
-        id: 'Cat-Tiger-128', label: 'Gato Tigre', cost: 1000, order: 6,
-        marketSpeed: 2,
-        passive: 'cat_tiger',
-        desc: ' Velocidad x2 | Dulces/Pescado duran x7 | -9% salud/30s',
-        passiveDesc: [
-            ' Mercado x2 permanente',
-            ' Dulces y Pescado duran 7x más',
-            ' -9% salud cada 30 segundos'
-        ]
-    },
-    'Cat-Tiger-Beige-128': {
-        id: 'Cat-Tiger-Beige-128', label: 'Tigre Beige', cost: 1000, order: 7,
-        marketSpeed: 3,
-        passive: 'tiger_beige',
-        desc: ' Velocidad x3 | Proteínas duran x15 | Sin inflación en proteínas',
-        passiveDesc: [
-            ' Mercado x3 permanente',
-            ' Carne/Huevo/Pescado duran 15x más',
-            ' Sin inflación en proteínas'
-        ]
-    },
-    'Cat-Tiger-Rose-128': {
-        id: 'Cat-Tiger-Rose-128', label: 'Tigre Rosa', cost: 1000, order: 8,
-        marketSpeed: 3,
-        passive: 'tiger_rose',
-        desc: ' Velocidad x3 | Proteínas x25 duración | Dulces sin inflación',
-        passiveDesc: [
-            ' Mercado x3 permanente',
-            ' Proteínas duran 25x más',
-            ' Dulces sin inflación',
-            ' Sin inflación en proteínas'
-        ]
-    },
-    'Cat-White-128': {
-        id: 'Cat-White-128', label: 'Gato Blanco', cost: 10000, order: 9,
-        marketSpeed: 2,
-        passive: 'cat_white',
-        desc: ' Velocidad x2 | Bono sector +12% | Pescado/Dulces x20 duración sin inflación',
-        passiveDesc: [
-            ' Mercado x2 permanente',
-            ' Bono de sector = +12% (incluye el 3%)',
-            ' Pescado y Dulces duran 20x más',
-            ' Pescado y Dulces sin inflación'
-        ]
-    },
-    'Chicken-White-128': {
-        id: 'Chicken-White-128', label: 'Pollito', cost: 10000, order: 10,
-        marketSpeed: 1.5,
-        passive: 'chicken_white',
-        desc: ' Velocidad x1.5 | Resetea inflación (excepto proteínas) | Proteínas x100% precio +250% inflación',
-        passiveDesc: [
-            ' Mercado x1.5 permanente',
-            ' Resetea inflación de frutas/verduras/dulces/misc',
-            ' Proteínas cuestan x2 y su inflación suma +250%'
-        ]
-    },
-    'Chicken-Yellow-128': {
-        id: 'Chicken-Yellow-128', label: 'Pollito Amarillo', cost: 10000, order: 11,
-        marketSpeed: 1.5,
-        passive: 'chicken_yellow',
-        desc: ' Velocidad x1.5 | Reset inflación | Proteínas x150% +450% inflación | 50% bonus al vender',
-        passiveDesc: [
-            ' Mercado x1.5 permanente',
-            ' Resetea inflación de frutas/verduras/dulces/misc',
-            ' Proteínas cuestan x2.5 y su inflación +450%',
-            ' 50% de probabilidad de ganar lo que pagaste al vender'
-        ]
-    },
-    'Cow-128': {
-        id: 'Cow-128', label: 'Vaca', cost: 100000, order: 12,
-        marketSpeed: 1,
-        passive: 'cow',
-        desc: ' Compras -50% | Ventas x150% ganancia | -11% salud/30s',
-        passiveDesc: [
-            ' Todas las compras del mercado cuestan -50%',
-            ' Ganancias en ventas x150%',
-            ' -11% salud cada 30 segundos'
-        ]
-    },
-    'Frog-128': {
-        id: 'Frog-128', label: 'Rana', cost: 100000, order: 13,
-        marketSpeed: 1,
-        passive: 'frog',
-        desc: ' Con 3+ acciones del mismo sector: predicción 100% por 30s (cooldown 1min)',
-        passiveDesc: [
-            ' Habilidad: predicción perfecta 30s',
-            ' Requiere 3+ acciones del mismo sector',
-            ' Cooldown 1 minuto'
-        ]
-    },
-    'Penguin-128': {
-        id: 'Penguin-128', label: 'Pingüino', cost: 100000, order: 14,
-        marketSpeed: 1,
-        passive: 'penguin',
-        desc: ' Pescado gratis | +50% ganancia ventas | +3% interés | 35% repetir acción | +1000/2min | Hambre',
-        passiveDesc: [
-            ' Pescado 100% gratis',
-            ' +50% ganancia en cada venta',
-            ' +3% interés adicional',
-            ' 35% de repetir acción al vender',
-            ' +1000 monedas cada 2 minutos',
-            ' Compra en rojo = salud -30% | -12% salud/50s'
-        ]
-    },
-    'Penguin-Pink-128': {
-        id: 'Penguin-Pink-128', label: 'Pingüino Rosa', cost: 1000000, order: 15,
-        marketSpeed: 1,
-        passive: 'penguin_pink',
-        desc: ' Pescado gratis | +70% ganancia | +8% interés | 75% repetir acción | +1500/2min | Hambre',
-        passiveDesc: [
-            ' Pescado 100% gratis',
-            ' +70% ganancia en cada venta',
-            ' +8% interés adicional',
-            ' 75% de repetir acción al vender',
-            ' +1500 monedas cada 2 minutos',
-            ' Compra en rojo = salud -40% | -12% salud/50s'
-        ]
-    },
-    'Shark-128': {
-        id: 'Shark-128', label: 'Tiburón', cost: 1000000, order: 16,
-        marketSpeed: 2,
-        passive: 'shark',
-        desc: ' Velocidad x2 | Reset inflación | Ventas x8 | 3+ mismo sector = +15% bono +30% extra | -15%/2min',
-        passiveDesc: [
-            ' Mercado x2 permanente',
-            ' Resetea toda la inflación de comida',
-            ' Ventas multiplicadas x8',
-            ' Con 3+ del mismo sector: +15% bono adicional',
-            ' Con 3+ del mismo sector: +30% de lo pagado',
-            ' -15% salud cada 2 minutos'
-        ]
-    },
-    'Sheep-128': {
-        id: 'Sheep-128', label: 'Oveja', cost: 1000000, order: 17,
-        marketSpeed: 2,
-        passive: 'sheep',
-        desc: ' Velocidad x2 | Tienda gratis (sin inflación) | +1700/30s | Al vender: +25% ganancia, 50% repetir, 100% predicción 35s, 25% +2500',
-        passiveDesc: [
-            ' Mercado x2 permanente',
-            ' Tienda gratis si no hay inflación',
-            ' Si pierdes dinero, tienda se triplica',
-            ' +1700 monedas cada 30 segundos',
-            ' Al vender: +25% ganancia',
-            ' 50% repetir acción',
-            ' 100% predicción de una acción por 35s',
-            ' 25% de ganar 2500 monedas extra'
-        ]
-    },
+const getMiscCooldownKey = (foodId) => {
+    const u = localStorage.getItem('bitgameso_sesion_activa') || 'invitado';
+    return `bitgameso_misc_cd_${foodId}_${u}`;
 };
 
-// Orden de desbloqueo
-const PET_ORDER = [
-    'Bear-100','Bird-128','Bunny-Pink-128',
-    'Cat-Beige-128','Cat-Blue-128','Cat-Pink-128',
-    'Cat-Tiger-128','Cat-Tiger-Beige-128','Cat-Tiger-Rose-128',
-    'Cat-White-128','Chicken-White-128','Chicken-Yellow-128',
-    'Cow-128','Frog-128','Penguin-128',
-    'Penguin-Pink-128','Shark-128','Sheep-128',
+const getMiscCooldownRemaining = (foodId) => {
+    const lastBuy = parseInt(localStorage.getItem(getMiscCooldownKey(foodId)) || '0');
+    return Math.max(0, MISC_COOLDOWN_MS - (Date.now() - lastBuy));
+};
+
+const formatCooldown = (ms) => {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+};
+
+// ============================================================
+//  150+ ACTIVOS
+// ============================================================
+const assetDatabase = [
+    // IA
+    { symbol:'AIGEN',  name:'AI Genesis',         type:'IA',        basePrice:45    },
+    { symbol:'NVDA',   name:'NVIDIA Corp',         type:'IA',        basePrice:800   },
+    { symbol:'NRLN',   name:'Neuralink AI',        type:'IA',        basePrice:320   },
+    { symbol:'OPNX',   name:'OpenMind X',          type:'IA',        basePrice:210   },
+    { symbol:'DPLY',   name:'DeepLayer',           type:'IA',        basePrice:95    },
+    { symbol:'SYNT',   name:'Synthos AI',          type:'IA',        basePrice:145   },
+    { symbol:'COGN',   name:'Cognify Systems',     type:'IA',        basePrice:88    },
+    { symbol:'VXAI',   name:'VexAI Corp',          type:'IA',        basePrice:420   },
+    { symbol:'MLNX',   name:'MindLinx',            type:'IA',        basePrice:63    },
+    { symbol:'PLSX',   name:'PulseAI',             type:'IA',        basePrice:175   },
+    { symbol:'QTAI',   name:'Quantum AI Labs',     type:'IA',        basePrice:510   },
+    { symbol:'NXGN',   name:'NexGen Mind',         type:'IA',        basePrice:290   },
+    { symbol:'ZETA',   name:'Zeta Intelligence',   type:'IA',        basePrice:380   },
+    { symbol:'LMNAI',  name:'LumaAI',              type:'IA',        basePrice:55    },
+    { symbol:'DFNT',   name:'Defiant AI',          type:'IA',        basePrice:130   },
+    // BLUECHIP
+    { symbol:'MSFT',   name:'Microsoft',           type:'Bluechip',  basePrice:390   },
+    { symbol:'APLX',   name:'Apex Tech',           type:'Bluechip',  basePrice:580   },
+    { symbol:'GOOGX',  name:'Googlex Corp',        type:'Bluechip',  basePrice:175   },
+    { symbol:'AMZN',   name:'Amazora Inc',         type:'Bluechip',  basePrice:190   },
+    { symbol:'META',   name:'MetaSphere',          type:'Bluechip',  basePrice:520   },
+    { symbol:'TSLA',   name:'Teslovex',            type:'Bluechip',  basePrice:260   },
+    { symbol:'SMSN',   name:'Samsuno Corp',        type:'Bluechip',  basePrice:74    },
+    { symbol:'SONY',   name:'SonyTech',            type:'Bluechip',  basePrice:98    },
+    { symbol:'INTLX',  name:'Intelyx',             type:'Bluechip',  basePrice:43    },
+    { symbol:'ORAC',   name:'Oracle Systems',      type:'Bluechip',  basePrice:122   },
+    { symbol:'SAPS',   name:'SapSoft',             type:'Bluechip',  basePrice:183   },
+    { symbol:'IBMX',   name:'IBM Nexus',           type:'Bluechip',  basePrice:165   },
+    { symbol:'CSCO',   name:'Ciscova',             type:'Bluechip',  basePrice:55    },
+    { symbol:'HPEX',   name:'HP Extended',         type:'Bluechip',  basePrice:37    },
+    { symbol:'DLLX',   name:'Dellux Tech',         type:'Bluechip',  basePrice:128   },
+    // DIGITAL
+    { symbol:'ETH',    name:'Ethereum',            type:'Digital',   basePrice:3400  },
+    { symbol:'BTCX',   name:'BitcoinX',            type:'Digital',   basePrice:68000 },
+    { symbol:'SLNA',   name:'Solana Nova',         type:'Digital',   basePrice:180   },
+    { symbol:'AVAX',   name:'AvalancheCoin',       type:'Digital',   basePrice:38    },
+    { symbol:'BNBX',   name:'BNB Xtreme',          type:'Digital',   basePrice:605   },
+    { symbol:'DOGE2',  name:'DogeTwo',             type:'Digital',   basePrice:0.35  },
+    { symbol:'POLYX',  name:'PolygonX',            type:'Digital',   basePrice:1.1   },
+    { symbol:'LNKX',   name:'ChainLinkX',          type:'Digital',   basePrice:18    },
+    { symbol:'ADAX',   name:'CardanoX',            type:'Digital',   basePrice:0.55  },
+    { symbol:'DOTX',   name:'Polkadot Nova',       type:'Digital',   basePrice:9     },
+    { symbol:'UNSX',   name:'UniswapX',            type:'Digital',   basePrice:12    },
+    { symbol:'LTCX',   name:'LitecoinX',           type:'Digital',   basePrice:95    },
+    { symbol:'XLMX',   name:'StellarX',            type:'Digital',   basePrice:0.14  },
+    { symbol:'ICPX',   name:'InternetCoinX',       type:'Digital',   basePrice:14    },
+    { symbol:'FLRX',   name:'FlareNet',            type:'Digital',   basePrice:0.02  },
+    { symbol:'ARBX',   name:'ArbitrumX',           type:'Digital',   basePrice:1.2   },
+    { symbol:'OPEX',   name:'OptimismX',           type:'Digital',   basePrice:2.8   },
+    { symbol:'INJX',   name:'InjectiveX',          type:'Digital',   basePrice:28    },
+    { symbol:'SEIX',   name:'SeiNetwork',          type:'Digital',   basePrice:0.6   },
+    { symbol:'TIAO',   name:'TiaComet',            type:'Digital',   basePrice:11    },
+    // GAMING
+    { symbol:'SKIN',   name:'Epic Skins',          type:'Gaming',    basePrice:5     },
+    { symbol:'AXSX',   name:'AxieX Shards',        type:'Gaming',    basePrice:0.08  },
+    { symbol:'SNDX',   name:'SandboxX',            type:'Gaming',    basePrice:0.65  },
+    { symbol:'DECX',   name:'DecentralandX',       type:'Gaming',    basePrice:0.5   },
+    { symbol:'GALA',   name:'GalaGames',           type:'Gaming',    basePrice:0.04  },
+    { symbol:'ILVI',   name:'Illuvium',            type:'Gaming',    basePrice:85    },
+    { symbol:'RBLX',   name:'RobloxCoin',          type:'Gaming',    basePrice:45    },
+    { symbol:'VXGM',   name:'VexelGame',           type:'Gaming',    basePrice:12    },
+    { symbol:'PXLX',   name:'PixelRealm',          type:'Gaming',    basePrice:3     },
+    { symbol:'QGLD',   name:'QuestGold',           type:'Gaming',    basePrice:22    },
+    { symbol:'MTRX',   name:'MetrixGame',          type:'Gaming',    basePrice:7     },
+    { symbol:'DRAX',   name:'DragonX Tokens',      type:'Gaming',    basePrice:0.15  },
+    { symbol:'NXPX',   name:'NexPlay',             type:'Gaming',    basePrice:18    },
+    { symbol:'ARCX',   name:'ArcadeX',             type:'Gaming',    basePrice:4     },
+    { symbol:'LEVL',   name:'LevelCoin',           type:'Gaming',    basePrice:0.9   },
+    // NFT
+    { symbol:'BAYC',   name:'Bored Ape Club',      type:'NFT',       basePrice:30000 },
+    { symbol:'PNKS',   name:'Crypto Punks',        type:'NFT',       basePrice:75000 },
+    { symbol:'AZKI',   name:'Azuki Floor',         type:'NFT',       basePrice:8500  },
+    { symbol:'DOOD',   name:'Doodles NFT',         type:'NFT',       basePrice:3200  },
+    { symbol:'CLNX',   name:'CloneX Floor',        type:'NFT',       basePrice:4100  },
+    { symbol:'MOONB',  name:'MoonBirds',           type:'NFT',       basePrice:2800  },
+    { symbol:'WRLD',   name:'Worldwide Webb NFT',  type:'NFT',       basePrice:1500  },
+    { symbol:'MFER',   name:'mfers Collection',    type:'NFT',       basePrice:900   },
+    { symbol:'GOBLN',  name:'Goblin Town',         type:'NFT',       basePrice:450   },
+    { symbol:'NFTX',   name:'NFTX Index',          type:'NFT',       basePrice:23    },
+    { symbol:'PXNFT',  name:'PixelNFT',            type:'NFT',       basePrice:120   },
+    { symbol:'VXNFT',  name:'VoxelNFT',            type:'NFT',       basePrice:380   },
+    { symbol:'GLDNFT', name:'GoldenApe',           type:'NFT',       basePrice:6200  },
+    { symbol:'ROBO',   name:'RoboApe',             type:'NFT',       basePrice:1100  },
+    { symbol:'SKUL',   name:'SkullKidz',           type:'NFT',       basePrice:250   },
+    // METAVERSO
+    { symbol:'MTVX',   name:'MetaVerse X',         type:'Metaverso', basePrice:2.5   },
+    { symbol:'HRZN',   name:'Horizon Lands',       type:'Metaverso', basePrice:0.8   },
+    { symbol:'OVRL',   name:'Overlord World',      type:'Metaverso', basePrice:14    },
+    { symbol:'VSRS',   name:'Verse Realm',         type:'Metaverso', basePrice:5     },
+    { symbol:'XTRS',   name:'XtraSpace',           type:'Metaverso', basePrice:1.2   },
+    { symbol:'NMTV',   name:'Neoverse',            type:'Metaverso', basePrice:3.3   },
+    { symbol:'PLNT',   name:'PlanetSim',           type:'Metaverso', basePrice:0.4   },
+    { symbol:'CRBX',   name:'CyberBox',            type:'Metaverso', basePrice:22    },
+    { symbol:'ARTH',   name:'Artheon VR',          type:'Metaverso', basePrice:9     },
+    { symbol:'VRXS',   name:'VRX Studios',         type:'Metaverso', basePrice:17    },
+    // FINTECH
+    { symbol:'PYPL',   name:'PayLux',              type:'Fintech',   basePrice:65    },
+    { symbol:'STRI',   name:'Stripe Nova',         type:'Fintech',   basePrice:48    },
+    { symbol:'RBHD',   name:'RobinHood X',         type:'Fintech',   basePrice:18    },
+    { symbol:'PLAX',   name:'Plaid X',             type:'Fintech',   basePrice:31    },
+    { symbol:'AFFM',   name:'Affirmo',             type:'Fintech',   basePrice:14    },
+    { symbol:'KLRN',   name:'Klarna Coins',        type:'Fintech',   basePrice:26    },
+    { symbol:'WISEX',  name:'WiseTransfer',        type:'Fintech',   basePrice:9     },
+    { symbol:'SQRX',   name:'SquareX',             type:'Fintech',   basePrice:72    },
+    { symbol:'NXBN',   name:'NexoBank',            type:'Fintech',   basePrice:1.4   },
+    { symbol:'CELSI',  name:'CelsiusX',            type:'Fintech',   basePrice:0.3   },
+    // ENERGÍA
+    { symbol:'SOLR',   name:'SolarBit',            type:'Energía',   basePrice:8     },
+    { symbol:'WNDX',   name:'WindChain',           type:'Energía',   basePrice:5     },
+    { symbol:'GRNE',   name:'GreenEnergy Token',   type:'Energía',   basePrice:2     },
+    { symbol:'NCLX',   name:'NuclearX',            type:'Energía',   basePrice:45    },
+    { symbol:'HYDO',   name:'HydroToken',          type:'Energía',   basePrice:3     },
+    { symbol:'PWRX',   name:'PowerChain',          type:'Energía',   basePrice:11    },
+    { symbol:'FSNX',   name:'FusionX Energy',      type:'Energía',   basePrice:28    },
+    { symbol:'BIOX',   name:'BioFuel Token',       type:'Energía',   basePrice:1.5   },
+    { symbol:'GIDX',   name:'GridX Power',         type:'Energía',   basePrice:7     },
+    { symbol:'VLTX',   name:'VoltageX',            type:'Energía',   basePrice:19    },
+    // BIOTECH
+    { symbol:'DNAIX',  name:'DNAi Labs',           type:'Biotech',   basePrice:120   },
+    { symbol:'CRSP',   name:'CrisprX',             type:'Biotech',   basePrice:45    },
+    { symbol:'NRBT',   name:'NeuroBot Med',        type:'Biotech',   basePrice:88    },
+    { symbol:'GNMX',   name:'GenomicsX',           type:'Biotech',   basePrice:36    },
+    { symbol:'VCCX',   name:'VaccineChain',        type:'Biotech',   basePrice:15    },
+    { symbol:'MDAI',   name:'MedAI Systems',       type:'Biotech',   basePrice:210   },
+    { symbol:'LNGX',   name:'LongevityX',          type:'Biotech',   basePrice:55    },
+    { symbol:'PRTN',   name:'Protenix Bio',        type:'Biotech',   basePrice:29    },
+    { symbol:'SNBIO',  name:'SynBio Corp',         type:'Biotech',   basePrice:67    },
+    { symbol:'HLTH',   name:'HealthToken',         type:'Biotech',   basePrice:4     },
+    // ESPACIO
+    { symbol:'SPXX',   name:'SpaceX Token',        type:'Espacio',   basePrice:430   },
+    { symbol:'LUNR',   name:'LunarCoin',           type:'Espacio',   basePrice:12    },
+    { symbol:'MRSX',   name:'MarsX Colony',        type:'Espacio',   basePrice:78    },
+    { symbol:'ORBT',   name:'OrbitTech',           type:'Espacio',   basePrice:33    },
+    { symbol:'ASTX',   name:'AsteroX Mining',      type:'Espacio',   basePrice:19    },
+    { symbol:'STNX',   name:'StationX',            type:'Espacio',   basePrice:55    },
+    { symbol:'RKTX',   name:'RocketX',             type:'Espacio',   basePrice:145   },
+    { symbol:'GLXY',   name:'Galaxy Ventures',     type:'Espacio',   basePrice:8     },
+    { symbol:'NEBX',   name:'NebulaX',             type:'Espacio',   basePrice:3     },
+    { symbol:'COSM',   name:'CosmosNet',           type:'Espacio',   basePrice:6     },
+    // MEME
+    { symbol:'PEPE',   name:'PepeCoin',            type:'Meme',      basePrice:0.00001 },
+    { symbol:'SHIB',   name:'ShibaX',              type:'Meme',      basePrice:0.00002 },
+    { symbol:'BONK',   name:'BonkCoin',            type:'Meme',      basePrice:0.00003 },
+    { symbol:'WOJAK',  name:'WojakToken',          type:'Meme',      basePrice:0.001  },
+    { symbol:'CHEEMS', name:'CheemsCoin',          type:'Meme',      basePrice:0.0002 },
+    { symbol:'FLOKI',  name:'FlokiX',              type:'Meme',      basePrice:0.0002 },
+    { symbol:'MYRO',   name:'MyroCoin',            type:'Meme',      basePrice:0.15   },
+    { symbol:'BOME',   name:'Book of Meme',        type:'Meme',      basePrice:0.009  },
+    { symbol:'TURBO',  name:'TurboCoin',           type:'Meme',      basePrice:0.006  },
+    { symbol:'NEIRO',  name:'NeiroCoin',           type:'Meme',      basePrice:0.001  },
+    // DEFI
+    { symbol:'AAVEX',  name:'AaveX Protocol',      type:'DeFi',      basePrice:95    },
+    { symbol:'CMPX',   name:'CompoundX',           type:'DeFi',      basePrice:55    },
+    { symbol:'CRVX',   name:'CurveX Finance',      type:'DeFi',      basePrice:0.4   },
+    { symbol:'MKRX',   name:'MakerX',              type:'DeFi',      basePrice:1600  },
+    { symbol:'YDFI',   name:'YearnX Finance',      type:'DeFi',      basePrice:7200  },
+    { symbol:'SSHX',   name:'SushiX',              type:'DeFi',      basePrice:1.2   },
+    { symbol:'BNCX',   name:'BalancerX',           type:'DeFi',      basePrice:4.5   },
+    { symbol:'DYDX',   name:'dYdX Protocol',       type:'DeFi',      basePrice:1.8   },
+    { symbol:'GMXX',   name:'GmxX Perps',          type:'DeFi',      basePrice:28    },
+    { symbol:'PENDL',  name:'PendleX',             type:'DeFi',      basePrice:3.5   },
 ];
 
 // ============================================================
-//  MASCOTAS DORADAS — se desbloquean tras victoria (todas a 100 HP)
-//  golden:true | baseId = imagen base | efectos positivos x2
+//  COMIDA
 // ============================================================
-const GOLDEN_DEFS = (() => {
-    const defs = {};
-    const pairs = [
-        ['Bear-100',         'Bear-100-Gold',         'Oso Dorado',         500000,   'bear'],
-        ['Bird-128',         'Bird-128-Gold',         'Pajaro Dorado',      500000,   'bird'],
-        ['Bunny-Pink-128',   'Bunny-Pink-128-Gold',   'Conejito Dorado',    500000,   'bunny'],
-        ['Cat-Beige-128',    'Cat-Beige-128-Gold',    'Gato Beige Dorado',  10000,    'cat_beige'],
-        ['Cat-Blue-128',     'Cat-Blue-128-Gold',     'Gato Azul Dorado',   10000,    'cat_blue'],
-        ['Cat-Pink-128',     'Cat-Pink-128-Gold',     'Gato Rosa Dorado',   10000,    'cat_pink'],
-        ['Cat-Tiger-128',    'Cat-Tiger-128-Gold',    'Gato Tigre Dorado',  100000,   'cat_tiger'],
-        ['Cat-Tiger-Beige-128','Cat-Tiger-Beige-128-Gold','Tigre Beige Dorado',100000,'tiger_beige'],
-        ['Cat-Tiger-Rose-128','Cat-Tiger-Rose-128-Gold','Tigre Rosa Dorado', 100000,  'tiger_rose'],
-        ['Cat-White-128',    'Cat-White-128-Gold',    'Gato Blanco Dorado', 1000000,  'cat_white'],
-        ['Chicken-White-128','Chicken-White-128-Gold','Pollito Dorado',     1000000,  'chicken_white'],
-        ['Chicken-Yellow-128','Chicken-Yellow-128-Gold','Pollito Amarillo Dorado',1000000,'chicken_yellow'],
-        ['Cow-128',          'Cow-128-Gold',          'Vaca Dorada',        10000000, 'cow'],
-        ['Frog-128',         'Frog-128-Gold',         'Rana Dorada',        10000000, 'frog'],
-        ['Penguin-128',      'Penguin-128-Gold',      'Pinguino Dorado',    10000000, 'penguin'],
-        ['Penguin-Pink-128', 'Penguin-Pink-128-Gold', 'Pinguino Rosa Dorado',100000000,'penguin_pink'],
-        ['Shark-128',        'Shark-128-Gold',        'Tiburon Dorado',     100000000,'shark'],
-        ['Sheep-128',        'Sheep-128-Gold',        'Oveja Dorada',       100000000,'sheep'],
-    ];
-    // Descripciones x2 para mascotas doradas
-    const goldenDescMap = {
-        'bear':          ['⚡ Mercado x4 permanente','🍬 Dulces con 20% descuento','⚠️ Penalización reducida en ventas negativas'],
-        'bird':          ['⚡ Mercado x6 permanente','+2 monedas cada 2 segundos','🍎 Comida cuesta x3 (en vez de x4)','⏸️ Pausa al operar igual'],
-        'bunny':         ['🚀 Turbo x8 por 60s (cooldown 3 min)','⚡ Mercado x8 durante el turbo'],
-        'cat_beige':     ['⚡ Mercado x4 permanente','Dulces y Pescado duran x8','−2% salud cada 20 segundos'],
-        'cat_blue':      ['⚡ Mercado x4 permanente','Dulces y Pescado duran x10','−5% salud cada 20 segundos'],
-        'cat_pink':      ['⚡ Mercado x4 permanente','Dulces y Pescado duran x12','−7% salud cada 25 segundos'],
-        'cat_tiger':     ['⚡ Mercado x4 permanente','Dulces y Pescado duran x14','−9% salud cada 30 segundos'],
-        'tiger_beige':   ['⚡ Mercado x6 permanente','Proteínas duran x30','Sin inflación en proteínas'],
-        'tiger_rose':    ['⚡ Mercado x6 permanente','Proteínas duran x50','Dulces y proteínas sin inflación'],
-        'cat_white':     ['⚡ Mercado x4 permanente','Bono de sector +24%','Pescado y Dulces duran x40 sin inflación'],
-        'chicken_white': ['⚡ Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2 e inflación +250%'],
-        'chicken_yellow':['⚡ Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2.5 e inflación +450%','100% de ganar lo que pagaste al vender'],
-        'cow':           ['Compras en mercado −50%','Ganancias en ventas x300%','−11% salud cada 30 segundos'],
-        'frog':          ['Predicción perfecta de sector por 60s','Requiere 3+ acciones del mismo sector','Cooldown 1 minuto'],
-        'penguin':       ['Pescado 100% gratis','+100% ganancia en ventas','+6% interés adicional','70% de repetir acción al vender','+2000 monedas cada 2 minutos','Compra en rojo = salud −30% | −12%/50s'],
-        'penguin_pink':  ['Pescado 100% gratis','+140% ganancia en ventas','+16% interés adicional','100% de repetir acción al vender','+3000 monedas cada 2 minutos','Compra en rojo = salud −40% | −12%/50s'],
-        'shark':         ['⚡ Mercado x4 permanente','Resetea toda la inflación','Ventas multiplicadas x16','Con 3+ del mismo sector: +30% bono y +60% extra','−15% salud cada 2 minutos'],
-        'sheep':         ['⚡ Mercado x4 permanente','Tienda gratis si no hay inflación','Si pierdes: tienda se triplica','+3400 monedas cada 30 segundos','Al vender: +50% ganancia, 100% repetir, predicción 70s, 50% de ganar 5000 extra'],
-    };
-
-    pairs.forEach(([baseId, id, label, cost, passive], i) => {
-        const base = PET_DEFS[baseId];
-        defs[id] = {
-            id, baseId, label, cost, order: i,
-            marketSpeed: Math.min(base.marketSpeed * 2, 4),
-            passive,
-            golden: true,
-            desc: `✨ DORADA — ${base.desc} (efectos x2)`,
-            passiveDesc: goldenDescMap[passive] || base.passiveDesc.map(l => l + ' (x2)'),
-        };
-    });
-    return defs;
-})();
-
-// Inyectar doradas en PET_DEFS
-Object.assign(PET_DEFS, GOLDEN_DEFS);
-
-const PET_ORDER_GOLDEN = [
-    'Bear-100-Gold','Bird-128-Gold','Bunny-Pink-128-Gold',
-    'Cat-Beige-128-Gold','Cat-Blue-128-Gold','Cat-Pink-128-Gold',
-    'Cat-Tiger-128-Gold','Cat-Tiger-Beige-128-Gold','Cat-Tiger-Rose-128-Gold',
-    'Cat-White-128-Gold','Chicken-White-128-Gold','Chicken-Yellow-128-Gold',
-    'Cow-128-Gold','Frog-128-Gold','Penguin-128-Gold',
-    'Penguin-Pink-128-Gold','Shark-128-Gold','Sheep-128-Gold',
+const foodDatabase = [
+    // FRUTAS 
+    { id:'Apple-128',           name:'Manzana',           cat:'fruta',    health:0,  effectDuration:30 },
+    { id:'Banana-128',          name:'Plátano',           cat:'fruta',    health:0,  effectDuration:30 },
+    { id:'Blueberries-128',     name:'Arándanos',         cat:'fruta',    health:0,  effectDuration:45 },
+    { id:'Cherry-128',          name:'Cereza',            cat:'fruta',    health:0,  effectDuration:40 },
+    { id:'Lemon-128',           name:'Limón',             cat:'fruta',    health:0,  effectDuration:25 },
+    { id:'Orange-128',          name:'Naranja',           cat:'fruta',    health:0,  effectDuration:35 },
+    { id:'Peach-128',           name:'Durazno',           cat:'fruta',    health:0,  effectDuration:35 },
+    { id:'Pear-128',            name:'Pera',              cat:'fruta',    health:0,  effectDuration:30 },
+    { id:'Strawberry-128',      name:'Fresa',             cat:'fruta',    health:0,  effectDuration:40 },
+    { id:'Watermelon-128',      name:'Sandía',            cat:'fruta',    health:0,  effectDuration:50 },
+    // VERDURAS ️
+    { id:'Carrot-128',          name:'Zanahoria',         cat:'verdura',  health:10, effectDuration:0  },
+    { id:'Corn-128',            name:'Maíz',              cat:'verdura',  health:8,  effectDuration:0  },
+    { id:'Grass-128',           name:'Hierba Mágica',     cat:'verdura',  health:5,  effectDuration:0  },
+    { id:'Potato-128',          name:'Papa',              cat:'verdura',  health:7,  effectDuration:0  },
+    { id:'Pumpkin-128',         name:'Calabaza',          cat:'verdura',  health:12, effectDuration:0  },
+    { id:'Tomato-128',          name:'Tomate',            cat:'verdura',  health:9,  effectDuration:0  },
+    { id:'Turnip-128',          name:'Nabo',              cat:'verdura',  health:6,  effectDuration:0  },
+    // PROTEÍNAS 
+    { id:'Egg-128',             name:'Huevo',             cat:'proteina', health:5,  effectDuration:30 },
+    { id:'Fish-128',            name:'Pescado',           cat:'proteina', health:8,  effectDuration:40 },
+    { id:'Meat-128',            name:'Carne',             cat:'proteina', health:10, effectDuration:50 },
+    // DULCES 
+    { id:'Candy-Blue-128',      name:'Dulce Azul',        cat:'dulce',    health:2,  effectDuration:20 },
+    { id:'Candy-Pink-128',      name:'Dulce Rosa',        cat:'dulce',    health:2,  effectDuration:20 },
+    { id:'Cookie-128',          name:'Galleta',           cat:'dulce',    health:4,  effectDuration:30 },
+    { id:'Cupcake-128',         name:'Cupcake',           cat:'dulce',    health:5,  effectDuration:40 },
+    // MISC 
+    { id:'Bread-128',           name:'Pan',               cat:'misc',     health:3,  effectDuration:0  },
+    { id:'Bretzel-128',         name:'Pretzel',           cat:'misc',     health:3,  effectDuration:0  },
+    { id:'Mushroom-128',        name:'Champiñón',         cat:'misc',     health:4,  effectDuration:0  },
+    { id:'Mushroom-Purple-128', name:'Champiñón Púrpura', cat:'misc',     health:6,  effectDuration:0  },
 ];
 
-// ============================================================
-//  MASCOTAS DIAMANTE — se desbloquean cuando TODAS las normales
-//  Y doradas tienen 100 HP. Efectos x3 del dorado. Precio x100.
-// ============================================================
-const DIAMOND_DEFS = (() => {
-    const defs = {};
-    const pairs = [
-        ['Bear-100',          'Bear-100-Diamond',          'Oso Diamante',              50000000,   'bear'],
-        ['Bird-128',          'Bird-128-Diamond',          'Pajaro Diamante',           50000000,   'bird'],
-        ['Bunny-Pink-128',    'Bunny-Pink-128-Diamond',    'Conejito Diamante',         50000000,   'bunny'],
-        ['Cat-Beige-128',     'Cat-Beige-128-Diamond',     'Gato Beige Diamante',       1000000,    'cat_beige'],
-        ['Cat-Blue-128',      'Cat-Blue-128-Diamond',      'Gato Azul Diamante',        1000000,    'cat_blue'],
-        ['Cat-Pink-128',      'Cat-Pink-128-Diamond',      'Gato Rosa Diamante',        1000000,    'cat_pink'],
-        ['Cat-Tiger-128',     'Cat-Tiger-128-Diamond',     'Gato Tigre Diamante',       10000000,   'cat_tiger'],
-        ['Cat-Tiger-Beige-128','Cat-Tiger-Beige-128-Diamond','Tigre Beige Diamante',    10000000,   'tiger_beige'],
-        ['Cat-Tiger-Rose-128','Cat-Tiger-Rose-128-Diamond','Tigre Rosa Diamante',       10000000,   'tiger_rose'],
-        ['Cat-White-128',     'Cat-White-128-Diamond',     'Gato Blanco Diamante',      100000000,  'cat_white'],
-        ['Chicken-White-128', 'Chicken-White-128-Diamond', 'Pollito Diamante',          100000000,  'chicken_white'],
-        ['Chicken-Yellow-128','Chicken-Yellow-128-Diamond','Pollito Amarillo Diamante', 100000000,  'chicken_yellow'],
-        ['Cow-128',           'Cow-128-Diamond',           'Vaca Diamante',             1000000000, 'cow'],
-        ['Frog-128',          'Frog-128-Diamond',          'Rana Diamante',             1000000000, 'frog'],
-        ['Penguin-128',       'Penguin-128-Diamond',       'Pinguino Diamante',         1000000000, 'penguin'],
-        ['Penguin-Pink-128',  'Penguin-Pink-128-Diamond',  'Pinguino Rosa Diamante',    10000000000,'penguin_pink'],
-        ['Shark-128',         'Shark-128-Diamond',         'Tiburon Diamante',          10000000000,'shark'],
-        ['Sheep-128',         'Sheep-128-Diamond',         'Oveja Diamante',            10000000000,'sheep'],
-    ];
+const catLabel = {
+    fruta:    'Mercado rápido',
+    verdura:  '+Salud',
+    proteina: 'Ganancias/Pérdidas x2',
+    dulce:    'Ver futuro del mercado',
+    misc:     'Reventa 0.5x–4x',
+};
+const catClass = { fruta:'fruit', verdura:'veg', proteina:'protein', dulce:'candy', misc:'misc' };
 
-    // Descripciones x3 para mascotas diamante
-    const diamondDescMap = {
-        'bear':          ['Mercado x6 permanente','Dulces con 30% descuento','Penalizacion minima en ventas negativas'],
-        'bird':          ['Mercado x9 permanente','+3 monedas cada 2 segundos','Comida cuesta x2 (en vez de x4)','Pausa al operar igual'],
-        'bunny':         ['Turbo x12 por 90s (cooldown 2 min)','Mercado x12 durante el turbo'],
-        'cat_beige':     ['Mercado x6 permanente','Dulces y Pescado duran x12','−1% salud cada 20 segundos'],
-        'cat_blue':      ['Mercado x6 permanente','Dulces y Pescado duran x15','−3% salud cada 20 segundos'],
-        'cat_pink':      ['Mercado x6 permanente','Dulces y Pescado duran x18','−5% salud cada 25 segundos'],
-        'cat_tiger':     ['Mercado x6 permanente','Dulces y Pescado duran x21','−6% salud cada 30 segundos'],
-        'tiger_beige':   ['Mercado x9 permanente','Proteinas duran x45','Sin inflacion en proteinas ni frutas'],
-        'tiger_rose':    ['Mercado x9 permanente','Proteinas duran x75','Todo sin inflacion'],
-        'cat_white':     ['Mercado x6 permanente','Bono de sector +36%','Toda la comida sin inflacion por siempre'],
-        'chicken_white': ['Mercado x5 permanente','Resetea inflacion cada 30s','Proteinas: precio x1.5'],
-        'chicken_yellow':['Mercado x5 permanente','Resetea inflacion cada 20s','Proteinas gratis','150% de ganar lo que pagaste al vender'],
-        'cow':           ['Compras en mercado −75%','Ganancias en ventas x450%','−8% salud cada 30 segundos'],
-        'frog':          ['Prediccion perfecta permanente sin cooldown','Bonus +15% en sector predicho'],
-        'penguin':       ['Pescado 100% gratis','+150% ganancia en ventas','+10% interes adicional','90% de repetir accion al vender','+5000 monedas cada 2 minutos','Compra en rojo = salud −15%'],
-        'penguin_pink':  ['Pescado 100% gratis','+210% ganancia en ventas','+24% interes adicional','100% de repetir accion al vender','+8000 monedas cada 2 minutos','Sin penalizacion por compra en rojo'],
-        'shark':         ['Mercado x6 permanente','Resetea inflacion','Ventas multiplicadas x24','Con 3+ del mismo sector: +45% bono','−8% salud cada 2 minutos'],
-        'sheep':         ['Mercado x6 permanente','Tienda GRATIS siempre','+10000 monedas cada 30 segundos','Al vender: +75% ganancia, 100% repetir, prediccion 90s, 75% de ganar 15000 extra'],
-    };
+// Iconos de efecto por categoría
+const effectIcons = {
+    marketFast:   '../assets/settings/Ranking-128.png',
+    doubleProfit: '../assets/arrows/Arrow-Up-Green-128.png',
+    futureVision: '../assets/settings/Shop-Balloons-128.png',
+    verdura:      '../assets/Hearts/Heart-Red-128.png',
+    misc:         '../assets/coins/Coins-2-Bag-128.png',
+};
 
-    pairs.forEach(([baseId, id, label, cost, passive], i) => {
-        const base = PET_DEFS[baseId];
-        defs[id] = {
-            id, baseId, label, cost, order: i,
-            marketSpeed: Math.min((base.marketSpeed || 2) * 3, 4),
-            passive,
-            diamond: true,
-            golden:  false,
-            desc: `DIAMANTE — ${base.desc} (efectos x3)`,
-            passiveDesc: diamondDescMap[passive] || base.passiveDesc.map(l => l + ' (x3)'),
-        };
-    });
-    return defs;
-})();
-
-// Inyectar diamantes en PET_DEFS
-Object.assign(PET_DEFS, DIAMOND_DEFS);
-
-const PET_ORDER_DIAMOND = [
-    'Bear-100-Diamond','Bird-128-Diamond','Bunny-Pink-128-Diamond',
-    'Cat-Beige-128-Diamond','Cat-Blue-128-Diamond','Cat-Pink-128-Diamond',
-    'Cat-Tiger-128-Diamond','Cat-Tiger-Beige-128-Diamond','Cat-Tiger-Rose-128-Diamond',
-    'Cat-White-128-Diamond','Chicken-White-128-Diamond','Chicken-Yellow-128-Diamond',
-    'Cow-128-Diamond','Frog-128-Diamond','Penguin-128-Diamond',
-    'Penguin-Pink-128-Diamond','Shark-128-Diamond','Sheep-128-Diamond',
-];
+// petList movido a pets.js como PET_DEFS/PET_ORDER
 
 // ============================================================
-//  VICTORIA — verificar si todas las mascotas normales tienen 100 HP
+//  UTILIDADES
 // ============================================================
-const checkVictory = () => {
-    if (state.victoryAchieved) return;
-    if (!state.petData) return;
-    const allAt100 = PET_ORDER.every(id => {
-        const d = state.petData.get(id);
-        return d && d.unlocked && Math.round(d.health) >= 100;
-    });
-    if (allAt100) {
-        state.victoryAchieved = true;
-        if (typeof saveGame === 'function') saveGame();
-        const modal = document.getElementById('modal-victory');
-        if (modal) modal.style.display = 'flex';
-    }
+const fmt = (v) => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(v);
+
+const getMarketPrices = () => {
+    const prices = Array.from(state.market.values()).map(a=>a.price).filter(p=>p>0);
+    if (!prices.length) return { min:10, max:100, avg:50 };
+    prices.sort((a,b)=>a-b);
+    return { min:prices[0], max:prices[prices.length-1], avg:prices.reduce((s,p)=>s+p,0)/prices.length };
+};
+
+const foodPrice = (food) => {
+    const { min, max, avg } = getMarketPrices();
+    const map = { verdura:min*0.8+10, fruta:avg*0.05, proteina:max*0.002, dulce:avg*0.03, misc:avg*0.04 };
+    return Math.max(5, Math.min(map[food.cat]||avg*0.03, max*0.005+200));
 };
 
 // ============================================================
-//  SEGUNDA VICTORIA DIAMANTE — todas normales Y doradas a 100 HP
+//  GUARDADO
 // ============================================================
-const checkDiamondVictory = () => {
-    if (state.diamondVictoryAchieved) return;
-    if (!state.victoryAchieved) return; // primero necesita victoria normal
-    if (!state.petData) return;
-
-    const allGoldenAt100 = PET_ORDER_GOLDEN.every(id => {
-        const d = state.petData.get(id);
-        return d && d.unlocked && Math.round(d.health) >= 100;
-    });
-
-    if (allGoldenAt100) {
-        state.diamondVictoryAchieved = true;
-        if (typeof saveGame === 'function') saveGame();
-        if (typeof showToast === 'function')
-            showToast('VICTORIA DIAMANTE! Todas las mascotas doradas estan al 100%. Se desbloquearon las mascotas Diamante!');
-        // Mostrar modal de victoria diamante si existe, si no usar el normal
-        const modal = document.getElementById('modal-victory-diamond') || document.getElementById('modal-victory');
-        if (modal) modal.style.display = 'flex';
-    }
+// Clave de guardado única por usuario
+const getSaveKey = () => {
+    const usuario = localStorage.getItem('bitgameso_sesion_activa') || 'invitado';
+    return `bitgameso_save_${usuario}`;
 };
 
-window.closeVictoryModal = () => {
-    const modal = document.getElementById('modal-victory');
-    if (modal) modal.style.display = 'none';
+const saveGame = () => {
+    try {
+        // Sincronizar salud actual al petData antes de guardar
+        if (state.petData && state.petData.has(state.currentPet)) {
+            const d = state.petData.get(state.currentPet);
+            d.health = state.saludMascota;
+            state.petData.set(state.currentPet, d);
+        }
+        const saveData = JSON.stringify({
+            monedas:            state.monedas,
+            saludMascota:       state.saludMascota,
+            currentPet:         state.currentPet,
+            portfolio:          Array.from(state.portfolio.entries()),
+            inventory:          Array.from(state.inventory.entries()),
+            foodInflation:      Array.from(state.foodInflation.entries()),
+            sectorBonus:        Array.from(state.sectorBonus.entries()),
+            effectsTime:        { ...state.effectsTime },
+            petData:            state.petData ? Array.from(state.petData.entries()) : [],
+            victoryAchieved:    state.victoryAchieved || false,
+            diamondVictoryAchieved: state.diamondVictoryAchieved || false,
+            marketSpeedEnabled: state.marketSpeedEnabled !== false,
+        });
+        // Guardar local siempre (rápido)
+        localStorage.setItem(getSaveKey(), saveData);
+        // Marcar que hay cambios para sincronizar con Supabase
+        if (typeof window.markSyncPending === 'function') window.markSyncPending();
+    } catch(e) { console.warn('Error guardando',e); }
 };
 
-// ============================================================
-//  ESTADO DE MASCOTAS (se integra con state)
-// ============================================================
-// state.petData = Map<petId, { health, unlocked }>
-// state.currentPet = petId activo
-
-const initPetData = () => {
-    if (!state.petData) state.petData = new Map();
-    PET_ORDER.forEach((id, i) => {
-        if (!state.petData.has(id)) {
-            // Mascota nueva — asignar valores por defecto
-            // 'everUsed' marca si el jugador ya interactuó con ella
-            const defaultHealth = i < 3 ? 50 : 0;
-            state.petData.set(id, {
-                health:   defaultHealth,
-                unlocked: i < 3,
-                everUsed: false,  // nunca ha sido usada
-            });
-        } else {
-            // Mascota existente — solo corregir a 50% si NUNCA fue usada
-            const existing = state.petData.get(id);
-            if (i < 3 && existing.health === 0 && existing.everUsed !== true) {
-                existing.health = 50;
-                state.petData.set(id, existing);
+const loadGame = () => {
+    try {
+        const raw = localStorage.getItem(getSaveKey());
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        state.monedas       = d.monedas      ?? 1000;
+        state.saludMascota  = d.saludMascota ?? 75;
+        state.currentPet    = d.currentPet   ?? 'Bunny-Pink-128';
+        state.portfolio     = new Map(d.portfolio     || []);
+        state.inventory     = new Map(d.inventory     || []);
+        state.foodInflation = new Map(d.foodInflation || []);
+        state.sectorBonus   = new Map(d.sectorBonus   || []);
+        // Restaurar petData
+        if (d.petData && d.petData.length) {
+            state.petData = new Map(d.petData);
+        }
+        // Sincronizar saludMascota desde petData de la mascota activa
+        if (state.petData && state.petData.has(state.currentPet)) {
+            const activeData = state.petData.get(state.currentPet);
+            if (typeof activeData.health === 'number') {
+                state.saludMascota = activeData.health;
             }
         }
-    });
-    // Asegurar que el conejo siempre esté desbloqueado con al menos 50%
-    const bunny = state.petData.get('Bunny-Pink-128') || { health: 50, unlocked: true };
-    bunny.unlocked = true;
-    if (!bunny.health || bunny.health < 1) bunny.health = 50;
-    state.petData.set('Bunny-Pink-128', bunny);
+        state.victoryAchieved    = d.victoryAchieved    ?? false;
+        state.diamondVictoryAchieved = d.diamondVictoryAchieved ?? false;
+        state.marketSpeedEnabled = d.marketSpeedEnabled ?? true;
 
-    // Inicializar mascotas doradas (bloqueadas por defecto)
-    PET_ORDER_GOLDEN.forEach(id => {
-        if (!state.petData.has(id)) {
-            state.petData.set(id, { health: 0, unlocked: false, everUsed: false });
+        // Restaurar efectos activos — solo los que aún tienen tiempo
+        if (d.effectsTime) {
+            state.effectsTime.marketFast   = Math.max(0, d.effectsTime.marketFast   || 0);
+            state.effectsTime.doubleProfit = Math.max(0, d.effectsTime.doubleProfit || 0);
+            state.effectsTime.futureVision = Math.max(0, d.effectsTime.futureVision || 0);
         }
-    });
-
-    // Inicializar mascotas diamante (bloqueadas por defecto)
-    PET_ORDER_DIAMOND.forEach(id => {
-        if (!state.petData.has(id)) {
-            state.petData.set(id, { health: 0, unlocked: false, everUsed: false });
-        }
-    });
+    } catch(e) { console.warn('Error cargando guardado',e); }
 };
 
-// ============================================================
-//  TIMERS PASIVOS POR MASCOTA
-// ============================================================
-let passiveTimers = {};
-let birdPaused   = false;
-let bunnyTurboCooldown = false;
-let bunnyTurboActive   = false;
-let frogCooldown  = false;
-let petHungerTimer = null;
-
-const clearPassiveTimers = () => {
-    // Only clear pet-specific timers (coins, bird), NOT the market timer
-    Object.values(passiveTimers).forEach(t => clearInterval(t));
-    passiveTimers = {};
-    if (petHungerTimer) { clearInterval(petHungerTimer); petHungerTimer = null; }
-    // NOTE: marketTimer is managed exclusively by game.js startMarket()
-};
-
-const startPassivesForPet = (petId) => {
-    clearPassiveTimers();
-    const def = PET_DEFS[petId];
-
-    // Calcular velocidad de la mascota (doradas duplican la velocidad, max x4)
-    let petNativeSpeed = 3000;
-    if (def) {
-        const effSpeed = def.golden ? Math.min(def.marketSpeed * 2, 4) : def.marketSpeed;
-        if      (effSpeed >= 4)   petNativeSpeed = 750;
-        else if (effSpeed >= 3)   petNativeSpeed = 1000;
-        else if (effSpeed >= 2)   petNativeSpeed = 1500;
-        else if (effSpeed >= 1.5) petNativeSpeed = 2000;
-    }
-
-    // Respetar toggle de velocidad: si está desactivado usar velocidad normal
-    const speedEnabled = (typeof state !== 'undefined' && state.marketSpeedEnabled !== false);
-    const speed = speedEnabled ? petNativeSpeed : 3000;
-
-    if (typeof startMarket === 'function') {
-        startMarket(speed);
-    } else {
-        console.warn('startMarket not available yet');
-    }
-
-    if (!def) return;
-
-    switch(def.passive) {
-        case 'bird': {
-            const birdCoins = def?.golden ? 2 : 1;
-            passiveTimers.bird = setInterval(() => {
-                if (!birdPaused) {
-                    state.monedas += birdCoins;
-                    if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                    _getSaveGame()();
-                }
-            }, 2000);
-            break;
-        }
-
-        case 'cat_beige':
-            petHungerTimer = setInterval(() => { _getChangePH()(-1);  _getCheckGO()(); }, 20000); break;
-        case 'cat_blue':
-            petHungerTimer = setInterval(() => { _getChangePH()(-5);  _getCheckGO()(); }, 20000); break;
-        case 'cat_pink':
-            petHungerTimer = setInterval(() => { _getChangePH()(-7);  _getCheckGO()(); }, 25000); break;
-        case 'cat_tiger':
-            petHungerTimer = setInterval(() => { _getChangePH()(-9);  _getCheckGO()(); }, 30000); break;
-
-        case 'cow':
-            petHungerTimer = setInterval(() => { _getChangePH()(-11); _getCheckGO()(); }, 30000); break;
-
-        case 'penguin':
-        case 'penguin_pink': {
-            const baseAmt = def.passive === 'penguin' ? 1000 : 1500;
-            const amount  = def.golden ? baseAmt * 2 : baseAmt;
-            passiveTimers.coins = setInterval(() => {
-                state.monedas += amount;
-                if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                _getShowToast()(` +${amount} del Pinguino!`);
-                _getSaveGame()();
-            }, 120000);
-            petHungerTimer = setInterval(() => { _getChangePH()(-12); _getCheckGO()(); }, 50000);
-            break;
-        }
-
-        case 'shark':
-            petHungerTimer = setInterval(() => { _getChangePH()(-15); _getCheckGO()(); }, 120000); break;
-
-        case 'sheep': {
-            const sheepCoins = def.golden ? 3400 : 1700;
-            passiveTimers.coins = setInterval(() => {
-                state.monedas += sheepCoins;
-                if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
-                _getShowToast()(` +${sheepCoins} de la Oveja!`);
-                _getSaveGame()();
-            }, 30000);
-            break;
-        }
-
-        case 'chicken_white':
-        case 'chicken_yellow':
-            // Reset inflation on non-protein foods on activation
-            resetNonProteinInflation();
-            break;
-    }
-
-    renderPetAbilityButton();
-};
-
-const resetNonProteinInflation = () => {
-    state.foodInflation.forEach((_, foodId) => {
-        const food = foodDatabase.find(f => f.id === foodId);
-        if (food && food.cat !== 'proteina') {
-            state.foodInflation.delete(foodId);
-        }
-    });
-    _getShowToast()(' Inflación de frutas/verduras/dulces/misc reseteada!');
-};
-
-// ============================================================
-//  MODIFICADORES DE PASIVOS
-// ============================================================
-
-// Obtener multiplicador de duración de efecto según mascota activa y categoría de comida
-const getEffectDurationMultiplier = (foodCat) => {
-    const def = PET_DEFS[state.currentPet];
-    const gm  = def?.golden ? 2 : 1;
-
-    switch(def?.passive) {
-        case 'cat_beige':  return (foodCat === 'dulce' || foodCat === 'proteina') ? 4*gm  : 1;
-        case 'cat_blue':   return (foodCat === 'dulce' || foodCat === 'proteina') ? 5*gm  : 1;
-        case 'cat_pink':   return (foodCat === 'dulce' || foodCat === 'proteina') ? 6*gm  : 1;
-        case 'cat_tiger':  return (foodCat === 'dulce' || foodCat === 'proteina') ? 7*gm  : 1;
-        case 'tiger_beige':return foodCat === 'proteina' ? 15*gm : 1;
-        case 'tiger_rose': return (foodCat === 'proteina' || foodCat === 'dulce') ? 25*gm : 1;
-        case 'cat_white':  return (foodCat === 'dulce' || foodCat === 'proteina') ? 20*gm : 1;
-        default: return 1;
-    }
-};
-
-// ¿La comida está exenta de inflación con esta mascota?
-const isFoodInflationFree = (foodId) => {
-    const food = foodDatabase.find(f => f.id === foodId);
-    if (!food) return false;
-    const pet = PET_DEFS[state.currentPet]?.passive;
-    if (pet === 'tiger_beige' && food.cat === 'proteina') return true;
-    if (pet === 'tiger_rose'  && (food.cat === 'proteina' || food.cat === 'dulce')) return true;
-    if (pet === 'cat_white'   && (food.cat === 'proteina' || food.cat === 'dulce')) return true;
-    if ((pet === 'chicken_white' || pet === 'chicken_yellow' || pet === 'shark') && food.cat !== 'proteina') return true;
-    return false;
-};
-
-// ¿El pescado es gratis?
-const isFishFree = () => {
-    const p = PET_DEFS[state.currentPet]?.passive;
-    return p === 'penguin' || p === 'penguin_pink';
-};
-
-// ¿La oveja hace la tienda gratis (sin inflación)?
-const isSheepFreeShop = (foodId) => {
-    if (PET_DEFS[state.currentPet]?.passive !== 'sheep') return false;
-    const times = state.foodInflation.get(foodId) || 0;
-    return times === 0; // gratis solo si no hay inflación
-};
-
-// Obtener precio modificado por mascota activa
-const getPetFoodPrice = (food, basePrice) => {
-    const def = PET_DEFS[state.currentPet];
-    const pet = def?.passive;
-    const isFish = food.id === 'Fish-128';
-
-    if (isFishFree() && isFish) return 0;
-    if (isSheepFreeShop(food.id)) return 0;
-
-    let price = basePrice;
-
-    // Bear: dulces -10% (dorado -20%, efecto positivo x2)
-    if (pet === 'bear' && food.cat === 'dulce') price *= def?.golden ? 0.8 : 0.9;
-
-    // Bird: toda comida x4 (penalizacion, no cambia)
-    if (pet === 'bird') price *= 4;
-
-    // Pollito: proteinas precio mayor (penalizacion, no cambia)
-    if (pet === 'chicken_white'  && food.cat === 'proteina') price *= 2;
-    if (pet === 'chicken_yellow' && food.cat === 'proteina') price *= 2.5;
-
-    return Math.round(price);
-};
-
-// Inflación especial pollitos para proteínas
-const getProteinInflationRate = () => {
-    const pet = PET_DEFS[state.currentPet]?.passive;
-    if (pet === 'chicken_white')  return 2.5;  // +250% = suma 2.5x
-    if (pet === 'chicken_yellow') return 4.5;  // +450%
-    return 2; // normal x2
-};
-
-// ============================================================
-//  MODIFICADORES EN VENTAS DEL MERCADO
-// ============================================================
-const applyPetSellModifiers = (pos, cur, baseProfit) => {
-    const def = PET_DEFS[state.currentPet];
-    const pet = def?.passive;
-    const gm  = def?.golden ? 2 : 1; // multiplicador para efectos positivos
-    let payout = pos.buyPrice + baseProfit;
-    let extraMsg = '';
-
-    switch(pet) {
-        case 'bear':
-            // Penalizacion negativa, no cambia con dorada
-            if (baseProfit < 0) {
-                const penalty = Math.abs(pos.buyPrice);
-                payout -= penalty;
-                extraMsg += ` | Penalizacion -${_getFmt()(penalty)}`;
-            }
-            break;
-
-        case 'cow':
-            if (baseProfit > 0) {
-                const cowMult = def?.golden ? 3 : 1.5;
-                payout = pos.buyPrice + baseProfit * cowMult;
-                extraMsg += def?.golden ? ' | Ganancia x300%' : ' | Ganancia x150%';
-            }
-            break;
-
-        case 'chicken_yellow': {
-            const ckChance = def?.golden ? 1.0 : 0.5;
-            if (Math.random() < ckChance) {
-                payout += pos.buyPrice;
-                extraMsg += ` | Bonus +${_getFmt()(pos.buyPrice)}`;
-            }
-            break;
-        }
-
-        case 'penguin': {
-            const pgMult   = def?.golden ? 2.0 : 1.5;
-            const pgInt    = def?.golden ? 0.06 : 0.03;
-            const pgRepeat = def?.golden ? 0.70 : 0.35;
-            payout = pos.buyPrice + baseProfit * pgMult + pos.buyPrice * pgInt;
-            extraMsg += def?.golden ? ' | +100% +6%' : ' | +50% +3%';
-            if (Math.random() < pgRepeat) {
-                state.portfolio.set(pos.symbol, { ...pos });
-                extraMsg += ' | Accion repetida!';
-            }
-            break;
-        }
-
-        case 'penguin_pink': {
-            const ppMult   = def?.golden ? 2.4 : 1.7;
-            const ppInt    = def?.golden ? 0.16 : 0.08;
-            const ppRepeat = def?.golden ? 1.0 : 0.75;
-            payout = pos.buyPrice + baseProfit * ppMult + pos.buyPrice * ppInt;
-            extraMsg += def?.golden ? ' | +140% +16%' : ' | +70% +8%';
-            if (Math.random() < ppRepeat) {
-                state.portfolio.set(pos.symbol, { ...pos });
-                extraMsg += ' | Accion repetida!';
-            }
-            break;
-        }
-
-        case 'shark': {
-            const sharkMult = def?.golden ? 16 : 8;
-            payout = pos.buyPrice * sharkMult;
-            extraMsg += def?.golden ? ' | x16' : ' | x8';
-            const counts = countBySector();
-            if ((counts.get(pos.type) || 0) >= 3) {
-                const extra = pos.buyPrice * (0.15 + 0.30) * gm;
-                payout += extra;
-                extraMsg += def?.golden ? ' | Bono sector x2' : ' | +15% +30% extra';
-            }
-            break;
-        }
-
-        case 'cat_white': {
-            if (state.sectorBonus.get(pos.type)) {
-                const bonusPct = def?.golden ? 0.24 : 0.12;
-                const bonusAmt = pos.buyPrice * bonusPct;
-                payout += bonusAmt;
-                extraMsg += def?.golden ? ' | Bono sector +24%' : ' | Bono sector +12%';
-            }
-            break;
-        }
-
-        case 'sheep': {
-            const sheepBonus = pos.buyPrice * (def?.golden ? 0.50 : 0.25);
-            payout += sheepBonus;
-            extraMsg += def?.golden ? ' | +50%' : ' | +25%';
-            const sheepRepeat = def?.golden ? 1.0 : 0.50;
-            if (Math.random() < sheepRepeat) {
-                state.portfolio.set(pos.symbol, { ...pos });
-                extraMsg += ' | Repetida!';
-            }
-            const bonusCoins = def?.golden ? 5000 : 2500;
-            if (Math.random() < 0.25) {
-                state.monedas += bonusCoins;
-                extraMsg += ` | +${bonusCoins} bonus!`;
-            }
-            activateSheepPrediction(pos.symbol);
-            break;
-        }
-    }
-
-    return { payout, extraMsg };
-};
-
-// Predicción de oveja (1 acción por 35s)
-const activateSheepPrediction = (excludeSymbol) => {
-    const assets = Array.from(state.market.values()).filter(a => a.symbol !== excludeSymbol);
-    if (!assets.length) return;
-    const target = assets[Math.floor(Math.random() * assets.length)];
-    target._future = parseFloat((Math.random() * 10 - 5).toFixed(2));
-    state.market.set(target.symbol, target);
-    _getShowToast()(` Predicción: ${target.symbol} ${target._future >= 0 ? '▲' : '▼'} ${Math.abs(target._future)}% por 35s`);
-    _getRenderMarket()();
-    setTimeout(() => {
-        const a = state.market.get(target.symbol);
-        if (a) { const { _future, ...clean } = a; state.market.set(target.symbol, clean); }
-        _getRenderMarket()();
-    }, 35000);
-};
-
-// Modificadores en COMPRA del mercado
-const applyPetBuyModifiers = (assetPrice) => {
-    const def = PET_DEFS[state.currentPet];
-    const pet = def?.passive;
-    if (pet === 'cow') return assetPrice * (def?.golden ? 0.25 : 0.5);  // -50% o -75%
-    return assetPrice;
-};
-
-// Compra en rojo para pingüino
-const applyPenguinBuyPenalty = (asset) => {
-    const pet = PET_DEFS[state.currentPet]?.passive;
-    if (pet !== 'penguin' && pet !== 'penguin_pink') return;
-    if (asset.changePercent < 0) {
-        const factor = pet === 'penguin' ? 0.30 : 0.40;
-        const newHealth = Math.max(0, state.saludMascota - (state.saludMascota * factor));
-        state.saludMascota = Math.round(newHealth);
-        renderPetHealth();
-        _getShowToast()(` Compraste en rojo! Salud -${Math.round(factor*100)}% de su valor actual`);
-        _getCheckGO()();
-    }
-};
-
-// Sheep: si pierdes dinero, triplicar precios base
-let sheepPriceTripled = false;
-const checkSheepPenalty = (profit) => {
-    if (PET_DEFS[state.currentPet]?.passive !== 'sheep') return;
-    if (profit < 0 && !sheepPriceTripled) {
-        sheepPriceTripled = true;
-        _getShowToast()(' ¡Perdiste dinero! Los precios de la tienda se triplicaron ');
-    }
-};
-
-// ============================================================
-//  HABILIDADES ACTIVAS (BOTONES EN MASCOTA)
-// ============================================================
-
-// Conejo: Turbo x4 (dorado x8 por 60s)
-window.activateBunnyTurbo = () => {
-    if (bunnyTurboCooldown) { _getShowToast()(' Turbo en cooldown, espera 3 minutos'); return; }
-    if (bunnyTurboActive)   { _getShowToast()(' Turbo ya activo!'); return; }
-    const isGolden   = PET_DEFS[state.currentPet]?.golden;
-    const turboSpeed = isGolden ? 375 : 750;  // x8 o x4
-    const turboDur   = isGolden ? 60000 : 30000;
-    bunnyTurboActive = true;
-    if (typeof startMarket === 'function') startMarket(turboSpeed);
-    _getShowToast()(isGolden ? ' Turbo x8 activado por 60s!' : ' Turbo x4 activado por 30s!');
-    setTimeout(() => {
-        bunnyTurboActive = false;
-        if (typeof startMarket === 'function') startMarket(3000);
-        _getShowToast()(' Turbo terminado.');
-        bunnyTurboCooldown = true;
-        renderPetAbilityButton();
-        setTimeout(() => {
-            bunnyTurboCooldown = false;
-            renderPetAbilityButton();
-            _getShowToast()(' Turbo disponible de nuevo!');
-        }, 180000); // 3 min (cooldown no cambia)
-    }, turboDur);
-    renderPetAbilityButton();
-};
-
-// Rana: Prediccion perfecta del sector (dorada 60s)
-window.activateFrogPrediction = () => {
-    if (frogCooldown) { _getShowToast()(' Habilidad de Rana en cooldown (1 min)'); return; }
-    const counts = countBySector();
-    let targetSector = null;
-    counts.forEach((c, type) => { if (c >= 3) targetSector = type; });
-    if (!targetSector) { _getShowToast()(' Necesitas 3+ acciones del mismo sector'); return; }
-
-    const isGolden  = PET_DEFS[state.currentPet]?.golden;
-    const predDur   = isGolden ? 60000 : 30000;
-
-    state.market.forEach((a, sym) => {
-        if (a.type === targetSector) {
+// Reactivar efectos que quedaron pendientes tras recargar
+const reactivateEffects = () => {
+    if (state.effectsTime.futureVision > 0) {
+        state.market.forEach((a, sym) => {
             const pred = parseFloat((Math.random() * 10 - 5).toFixed(2));
             state.market.set(sym, { ...a, _future: pred });
-        }
-    });
-    _getRenderMarket()();
-    _getShowToast()(` Prediccion perfecta del sector ${targetSector} por ${isGolden ? '60s' : '30s'}!`);
-    frogCooldown = true;
-    renderPetAbilityButton();
-    setTimeout(() => {
-        state.market.forEach((a, sym) => {
-            if (a.type === targetSector) {
-                const { _future, ...clean } = a;
-                state.market.set(sym, clean);
+        });
+    }
+    renderEffectBadges();
+    // La velocidad real la gestiona startPassivesForPet — no sobreescribir aquí
+};
+
+const clearSave = () => localStorage.removeItem(getSaveKey());
+
+// ============================================================
+//  EFECTOS ACUMULATIVOS CON COUNTDOWN
+// ============================================================
+// Tick global de 1s para restar tiempos
+let effectTickInterval = null;
+
+const startEffectTick = () => {
+    if (effectTickInterval) { clearInterval(effectTickInterval); effectTickInterval = null; }
+    effectTickInterval = setInterval(() => {
+        let changed = false;
+        ['marketFast','doubleProfit','futureVision'].forEach(key => {
+            if (state.effectsTime[key] > 0) {
+                state.effectsTime[key] = Math.max(0, state.effectsTime[key] - 1);
+                changed = true;
+                // Cuando llega a 0 apagar efectos
+                if (state.effectsTime[key] === 0) {
+                    if (key === 'marketFast') startMarket(SPEED_NORMAL);
+                    if (key === 'futureVision') clearFutureVision();
+                    showToast(`️ Efecto terminado: ${effectKeyLabel(key)}`);
+                }
             }
         });
-        _getRenderMarket()();
-        _getShowToast()(' Prediccion de Rana terminada.');
-    }, predDur);
-    setTimeout(() => {
-        frogCooldown = false;
-        renderPetAbilityButton();
-        _getShowToast()(' Habilidad de Rana disponible!');
-    }, 60000);
+        if (changed) renderEffectBadges();
+    }, 1000);
+};
+
+const effectKeyLabel = (key) => ({
+    marketFast:'Mercado Rápido', doubleProfit:'Ganancias x2', futureVision:'Visión del Futuro'
+}[key] || key);
+
+// Sumar tiempo al efecto (acumulativo)
+const addEffect = (key, secs) => {
+    state.effectsTime[key] += secs;
+    // Activar si acaba de encenderse
+    if (key === 'marketFast' && state.effectsTime[key] === secs) startMarket(SPEED_FAST);
+    renderEffectBadges();
+};
+
+const isEffectActive = (key) => state.effectsTime[key] > 0;
+
+const clearFutureVision = () => {
+    state.market.forEach((a,sym) => {
+        const { _future, ...clean } = a;
+        state.market.set(sym, clean);
+    });
+    renderMarket();
 };
 
 // ============================================================
-//  RENDER BOTÓN DE HABILIDAD ACTIVA EN MASCOTA
+//  RENDER BADGES CON COUNTDOWN + ICONOS
 // ============================================================
-// Mascotas con velocidad de mercado pasiva que NO tienen cooldown propio
-const PASSIVE_SPEED_PETS = new Set([
-    'bear','bird','cat_beige','cat_blue','cat_pink','cat_tiger',
-    'cat_tiger_beige','cat_tiger_rose','cat_white',
-    'chicken_white','chicken_yellow','cow','penguin','penguin_pink','shark','sheep'
-]);
+const renderEffectBadges = () => {
+    const el = document.getElementById('active-effects');
+    if (!el) return;
 
-window.toggleMarketSpeed = () => {
-    state.marketSpeedEnabled = !state.marketSpeedEnabled;
-    if (typeof startPassivesForPet === 'function') startPassivesForPet(state.currentPet);
-    renderPetAbilityButton();
-    const pet = PET_DEFS[state.currentPet];
-    const label = pet ? `x${pet.marketSpeed}` : '';
-    _getShowToast()(state.marketSpeedEnabled
-        ? `Velocidad ${label} activada`
-        : 'Velocidad normal activada (x1)');
+    const badges = [];
+
+    if (isEffectActive('marketFast')) {
+        const s = state.effectsTime.marketFast;
+        badges.push(`
+            <div class="effect-badge fast">
+                <img src="${effectIcons.marketFast}" class="eff-icon" alt="">
+                <span>Mercado Rápido</span>
+                <span class="eff-timer">${s}s</span>
+            </div>`);
+    }
+    if (isEffectActive('doubleProfit')) {
+        const s = state.effectsTime.doubleProfit;
+        badges.push(`
+            <div class="effect-badge double">
+                <img src="${effectIcons.doubleProfit}" class="eff-icon" alt="">
+                <img src="../assets/arrows/Arrow-Down-Red-128.png" class="eff-icon" alt="">
+                <span>Ganancia x2</span>
+                <span class="eff-timer">${s}s</span>
+            </div>`);
+    }
+    if (isEffectActive('futureVision')) {
+        const s = state.effectsTime.futureVision;
+        badges.push(`
+            <div class="effect-badge vision">
+                <img src="${effectIcons.futureVision}" class="eff-icon" alt="">
+                <span>Visión Activa</span>
+                <span class="eff-timer">${s}s</span>
+            </div>`);
+    }
+
+    el.innerHTML = badges.join('');
 };
 
-const renderPetAbilityButton = () => {
-    const container = document.getElementById('pet-ability-area');
-    if (!container) return;
-    const pet = PET_DEFS[state.currentPet];
-    if (!pet) { container.innerHTML = ''; return; }
+// ============================================================
+//  MERCADO
+// ============================================================
+let marketTimer = null;
+const SPEED_NORMAL = 3000;
+const SPEED_FAST   = 1000;
 
-    const isGolden = pet.golden === true;
-    let html = '';
-    switch(pet.passive) {
-        case 'bunny':
-            html = `<button class="btn-pet-ability ${bunnyTurboCooldown?'ability-cooldown':''}"
-                        onclick="activateBunnyTurbo()" ${bunnyTurboCooldown?'disabled':''}>
-                        ${isGolden ? 'Turbo x8' : 'Turbo x4'} ${bunnyTurboCooldown ? '(cooldown 3min)' : isGolden ? '(60s)' : '(30s)'}
-                    </button>`;
-            break;
-        case 'frog':
-            html = `<button class="btn-pet-ability ${frogCooldown?'ability-cooldown':''}"
-                        onclick="activateFrogPrediction()" ${frogCooldown?'disabled':''}>
-                        Prediccion ${frogCooldown ? '(cooldown 1min)' : isGolden ? '(60s)' : '(30s)'}
-                    </button>`;
-            break;
-        default: {
-            // Mascotas con velocidad pasiva: mostrar toggle
-            const effSpeed = isGolden ? Math.min(pet.marketSpeed * 2, 4) : pet.marketSpeed;
-            if (PASSIVE_SPEED_PETS.has(pet.passive) && effSpeed > 1) {
-                const on = state.marketSpeedEnabled !== false;
-                html = `<button class="btn-pet-ability ${on ? '' : 'ability-cooldown'}"
-                            onclick="toggleMarketSpeed()">
-                            Velocidad x${effSpeed}: ${on ? 'Activa' : 'Desactivada'}
-                        </button>`;
-            }
+// Auto-healing market loop — usa requestAnimationFrame + setTimeout como fallback
+// Nunca se detiene aunque setInterval falle
+let _marketRunning = false;
+let _marketSpeed   = 3000;
+let _marketTimeout = null;
+
+const _marketLoop = () => {
+    if (!_marketRunning) return;
+    fetchMarket();
+    _marketTimeout = setTimeout(_marketLoop, _marketSpeed);
+};
+
+const fetchMarket = () => {
+    // Aplicar tick de bonos ANTES de actualizar precios volátiles
+    if (typeof window.applyBondTick === 'function') window.applyBondTick();
+    window._lastMarketUpdate = Date.now();
+    assetDatabase.forEach(a => {
+        const old  = state.market.get(a.symbol)?.price || a.basePrice;
+        const vol  = 0.025;
+        const next = Math.max(0.000001, old*(1+(Math.random()*vol*2-vol)));
+        const prevFuture = state.market.get(a.symbol)?._future;
+        const entry = { ...a, price:next, changePercent:((next-old)/old)*100 };
+        if (prevFuture !== undefined) entry._future = prevFuture;
+        state.market.set(a.symbol, entry);
+    });
+    const now = new Date();
+    if (refs.marketUpdated) refs.marketUpdated.textContent = `Actualizado: ${now.toLocaleTimeString()}`;
+    if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
+    renderMarket();
+    renderPortfolio();
+    saveGame();
+};
+
+const startMarket = (speed = SPEED_NORMAL) => {
+    // Parar loop anterior
+    _marketRunning = false;
+    if (_marketTimeout) clearTimeout(_marketTimeout);
+    if (marketTimer)    clearInterval(marketTimer);
+    
+    // Guardar velocidad
+    _marketSpeed   = speed || SPEED_NORMAL;
+    _marketRunning = true;
+    
+    // Iniciar loop auto-curativo con setTimeout (más confiable que setInterval en móvil)
+    _marketTimeout = setTimeout(_marketLoop, _marketSpeed);
+    
+    // También mantener setInterval como respaldo
+    marketTimer = setInterval(fetchMarket, _marketSpeed);
+};
+
+// ============================================================
+//  FILTROS + RENDER MERCADO
+// ============================================================
+let currentFilter = 'Todos';
+window.setFilter = (t) => { currentFilter=t; buildFilterTabs(); renderMarket(); };
+
+const buildFilterTabs = () => {
+    const el = document.getElementById('market-filters');
+    if (!el) return;
+    const types = ['Todos', ...new Set(assetDatabase.map(a=>a.type))];
+    el.innerHTML = types.map(t =>
+        `<button class="filter-tab ${t===currentFilter?'active':''}" onclick="setFilter('${t}')">${t}</button>`
+    ).join('');
+};
+
+const renderMarket = () => {
+    if (!refs.marketList) return;
+    let assets = Array.from(state.market.values());
+    if (currentFilter !== 'Todos') assets = assets.filter(a=>a.type===currentFilter);
+    if (isEffectActive('futureVision')) assets = [...assets].sort((a,b)=>(b._future||0)-(a._future||0));
+
+    refs.marketList.innerHTML = assets.map(a => {
+        const isUp  = a.changePercent >= 0;
+        const owned = state.portfolio.has(a.symbol);
+        const futureTag = isEffectActive('futureVision') && a._future !== undefined
+            ? `<span class="future-tag ${a._future>=0?'up':'down'}">${a._future>=0?'▲':'▼'}${Math.abs(a._future).toFixed(1)}%</span>` : '';
+        const isHighlighted = state._highlightSector === a.type;
+        const hlClass = isHighlighted
+            ? (state._highlightType === 'crash' ? 'row-crash' : 'row-boom')
+            : '';
+        // Badge de tipo: Bono o Acción
+        const catBadge = typeof window.getAssetCategoryLabel === 'function'
+            ? window.getAssetCategoryLabel(a.type) : '';
+        return `
+        <div class="asset-row ${hlClass}">
+            <div class="asset-info">
+                <strong class="asset-symbol">${a.symbol}</strong>
+                <small class="asset-name">${a.name}</small>
+                ${catBadge}
+            </div>
+            <div class="asset-type">${a.type}</div>
+            <div class="asset-price">${fmt(a.price)} ${futureTag}</div>
+            <div class="asset-change ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${Math.abs(a.changePercent).toFixed(2)}%</div>
+            <div class="market-btns">
+                <button class="btn-asset-info" onclick="showAssetFicha('${a.symbol}')" title="Ver ficha técnica">Info</button>
+                <button class="btn-action btn-buy ${owned?'btn-disabled':''}"
+                        onclick="buy('${a.symbol}')"
+                        ${owned?'disabled':''}>Comprar</button>
+            </div>
+        </div>`;
+    }).join('');
+};
+
+// ============================================================
+//  COMPRAR ACCIÓN
+// ============================================================
+window.buy = (symbol) => {
+    if (state.portfolio.has(symbol)) { showToast('️ Ya tienes este activo.'); return; }
+    const a = state.market.get(symbol);
+    if (!a) return;
+    const actualPrice = typeof applyPetBuyModifiers === 'function' ? applyPetBuyModifiers(a.price) : a.price;
+    if (state.monedas >= actualPrice) {
+        state.monedas -= actualPrice;
+        state.portfolio.set(symbol, { symbol:a.symbol, name:a.name, buyPrice:actualPrice, type:a.type });
+        if (typeof applyPenguinBuyPenalty === 'function') applyPenguinBuyPenalty(a);
+        if (typeof birdPaused !== 'undefined') { birdPaused = true; setTimeout(()=>{ birdPaused = false; }, 1000); }
+        const discountMsg = actualPrice < a.price ? ` (descuento: ${fmt(a.price - actualPrice)})` : '';
+        showToast(` Compraste ${a.symbol} por ${fmt(actualPrice)}${discountMsg}`);
+        logEvent('compra', `Compraste ${a.symbol} — ${a.name}`, `Precio: ${fmt(actualPrice)} | Sector: ${a.type}`);
+        updateUI();
+        checkSectorBonus();
+    } else {
+        showToast(' ¡No tienes suficientes monedas!');
+    }
+};
+
+// ============================================================
+//  VENDER ACCIÓN (desde cartera)
+// ============================================================
+window.sellFromPortfolio = (symbol) => {
+    const pos = state.portfolio.get(symbol);
+    const cur = state.market.get(symbol);
+    if (!pos || !cur) return;
+    const baseProfit = cur.price - pos.buyPrice;
+    const dpProfit   = isEffectActive('doubleProfit') ? baseProfit * 2 : baseProfit;
+
+    // Pet modifiers
+    let payout = pos.buyPrice + dpProfit;
+    let petMsg = '';
+    if (typeof applyPetSellModifiers === 'function') {
+        const pm = applyPetSellModifiers(pos, cur, dpProfit);
+        payout = pm.payout;
+        petMsg = pm.extraMsg;
+    } else {
+        const sectorBonusAmt = applySectorBonus(pos.type || '', dpProfit, pos.buyPrice);
+        payout += sectorBonusAmt;
+        if (sectorBonusAmt > 0) petMsg = ` +${fmt(sectorBonusAmt)}`;
+    }
+
+    state.monedas += payout;
+    state.portfolio.delete(symbol);
+    if (typeof birdPaused !== 'undefined') { birdPaused = true; setTimeout(()=>{ birdPaused = false; }, 1000); }
+    if (typeof checkSheepPenalty === 'function') checkSheepPenalty(payout - pos.buyPrice);
+    if (typeof syncPetHealthToData === 'function') syncPetHealthToData();
+
+    const x2tag = isEffectActive('doubleProfit') ? ' (x2)' : '';
+    const realProfit = payout - pos.buyPrice;
+    if (realProfit > 0) {
+        const gain = Math.min(Math.round((realProfit/pos.buyPrice)*20),20);
+        changePetHealth(gain);
+        showToast(` Vendiste ${symbol}! +${fmt(realProfit)}${x2tag}${petMsg} +${gain}️`);
+        logEvent('venta', `Vendiste ${symbol} con GANANCIA`, `+${fmt(realProfit)}${x2tag}${petMsg}`);
+    } else if (realProfit < 0) {
+        const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
+        changePetHealth(-loss);
+        showToast(` Vendiste ${symbol}. ${fmt(Math.abs(realProfit))}${x2tag}${petMsg} -${loss}️`);
+        logEvent('venta', `Vendiste ${symbol} con PÉRDIDA`, `${fmt(Math.abs(realProfit))}${x2tag}${petMsg}`);
+    } else {
+        showToast(`️ Vendiste ${symbol}${petMsg}`);
+    }
+    updateUI();
+    checkGameOver();
+    checkSectorBonus();
+};
+
+// ============================================================
+//  DEPÓSITO
+// ============================================================
+window.openDeposit = () => {
+    // Actualizar UI de las opciones según salud actual
+    const cards = document.querySelectorAll('.deposit-card');
+    cards.forEach(c => c.classList.remove('dep-unavailable'));
+    const s = state.saludMascota;
+    // 1000 necesita >11%, 10000 >41%, 100000 >71%
+    if (s < 11)  { cards[1]?.classList.add('dep-unavailable'); cards[2]?.classList.add('dep-unavailable'); cards[3]?.classList.add('dep-unavailable'); }
+    else if (s < 41) { cards[2]?.classList.add('dep-unavailable'); cards[3]?.classList.add('dep-unavailable'); }
+    else if (s < 71) { cards[3]?.classList.add('dep-unavailable'); }
+    const warn = document.getElementById('deposit-warning');
+    if (warn) warn.style.display = 'none';
+    document.getElementById('modal-depositar').style.display = 'flex';
+};
+
+window.closeDeposit = () => { document.getElementById('modal-depositar').style.display = 'none'; };
+
+window.doDeposit = (amount, costPct) => {
+    const needed = costPct;
+    if (state.saludMascota <= needed) {
+        const warn = document.getElementById('deposit-warning');
+        if (warn) { warn.textContent = `️ Tu mascota necesita más de ${needed}% de salud para este depósito. Salud actual: ${state.saludMascota}%`; warn.style.display='block'; }
+        return;
+    }
+    state.monedas += amount;
+    changePetHealth(-costPct);
+    closeDeposit();
+    showToast(` Depositaste ${amount.toLocaleString()} (-${costPct}% ️)`);
+    logEvent('deposito', `Depositaste ${amount.toLocaleString()}`, `Costo: -${costPct}% de salud de mascota`);
+    updateUI();
+    checkGameOver();
+};
+
+// ============================================================
+//  TIENDA DE COMIDA
+// ============================================================
+window.openFoodShop = () => {
+    const grid = document.getElementById('food-shop-grid');
+    if (!grid) return;
+    grid.innerHTML = foodDatabase.map(f => {
+        const basePrice  = Math.round(foodPrice(f));
+        const timesBought = state.foodInflation.get(f.id) || 0;
+        const inflRate    = (f.cat === 'proteina' && typeof getProteinInflationRate === 'function')
+                            ? getProteinInflationRate() : 2;
+        const priceBeforePet = Math.round(basePrice * Math.pow(inflRate, timesBought));
+        const price = typeof getPetFoodPrice === 'function'
+                      ? getPetFoodPrice(f, priceBeforePet) : priceBeforePet;
+        const currentQty = state.inventory.get(f.id)?.qty || 0;
+        const isMisc = f.cat === 'misc';
+        const maxQty = isMisc ? MAX_FOOD_MISC : MAX_FOOD_QTY;
+        const atLimit = currentQty >= maxQty;
+        const miscCdRemaining = isMisc ? getMiscCooldownRemaining(f.id) : 0;
+        const onCooldown = miscCdRemaining > 0;
+        const canBuy = state.monedas >= price && !atLimit && !onCooldown;
+        const inflTag = timesBought > 0
+            ? `<span class="food-inflation"> x${Math.pow(2,timesBought)} inflación</span>` : '';
+
+        return `
+        <div class="food-item ${catClass[f.cat]}">
+            <img src="../assets/food/${f.id}.png" alt="${f.name}" class="food-img">
+            <span class="food-name">${f.name}</span>
+            <span class="food-eff-tag ${catClass[f.cat]}">${f.cat === 'fruta' ? '<img src="../assets/settings/Stopwatch.png" style="width:12px;height:12px;vertical-align:middle;object-fit:contain;margin-right:3px;" onerror="this.style.display=\'none\'">' : ''}${catLabel[f.cat]}</span>
+            ${f.effectDuration ? `<span class="food-dur">+${f.effectDuration}s</span>` : ''}
+            ${f.health ? `<span class="food-hp">️ +${f.health}</span>` : ''}
+            ${inflTag}
+            <span class="food-price"> ${price.toLocaleString()}</span>
+            <button class="btn-action btn-buy btn-sm ${canBuy?'':'btn-disabled'}"
+                    onclick="buyFood('${f.id}',${price})"
+                    ${canBuy?'':'disabled'}>${atLimit ? ` Máx ${isMisc ? MAX_FOOD_MISC : MAX_FOOD_QTY}` : onCooldown ? ` ${formatCooldown(miscCdRemaining)}` : 'Comprar'}</button>
+        </div>`;
+    }).join('');
+    document.getElementById('modal-food-shop').style.display = 'flex';
+};
+
+window.closeFoodShop = () => { document.getElementById('modal-food-shop').style.display = 'none'; };
+
+window.buyFood = (foodId, price) => {
+    const food = foodDatabase.find(f=>f.id===foodId);
+    if (!food) return;
+    if (state.monedas < price) { showToast(' Monedas insuficientes'); return; }
+    state.monedas -= price;
+    const existing = state.inventory.get(foodId);
+    state.inventory.set(foodId, { ...food, price, qty:(existing?.qty||0)+1 });
+
+    // Inflación: registrar compra para que la próxima cueste x2
+    const timesB = (state.foodInflation.get(foodId) || 0) + 1;
+    state.foodInflation.set(foodId, timesB);
+
+    // Cooldown 2 horas para categoría "otros"
+    if (food.cat === 'misc') {
+        localStorage.setItem(getMiscCooldownKey(food.id), Date.now().toString());
+    }
+
+    const nextPrice = Math.round(price * 2);
+    showToast(` Compraste ${food.name} por ${price} | Próximo precio: ${nextPrice}`);
+    logEvent('comida', `Compraste ${food.name}`, `Precio: ${price} | Efecto: ${catLabel[food.cat]}`);
+    updateUI();
+    closeFoodShop();
+};
+
+// ============================================================
+//  SELECCIÓN DE COMIDA EN INVENTARIO
+// ============================================================
+window.selectFood = (foodId) => {
+    if (state.selectedFood === foodId) {
+        // Deseleccionar
+        state.selectedFood = null;
+    } else {
+        state.selectedFood = foodId;
+    }
+    renderInventory();
+    updateSelectedLabel();
+};
+
+const updateSelectedLabel = () => {
+    const label = document.getElementById('inv-selected-label');
+    if (!label) return;
+    if (state.selectedFood) {
+        const item = state.inventory.get(state.selectedFood);
+        if (item) {
+            label.style.display = 'inline-block';
+            label.textContent = `Seleccionado: ${item.name} — usa Vender o Enviar`;
         }
+    } else {
+        label.style.display = 'none';
+    }
+};
+
+// ============================================================
+//  USAR COMIDA (dar a mascota) — botón "Enviar"
+// ============================================================
+const useFoodOnPet = () => {
+    const foodId = state.selectedFood;
+    if (!foodId) { showToast(' Selecciona un ítem del inventario primero'); return; }
+    const item = state.inventory.get(foodId);
+    if (!item || item.qty <= 0) { showToast(' No tienes ese ítem'); return; }
+
+    switch(item.cat) {
+        case 'verdura':
+            changePetHealth(item.health);
+            showToast(` Diste ${item.name} a tu mascota! +${item.health}️`);
+            logEvent('mascota', `Diste ${item.name} a tu mascota`, `Salud +${item.health}️`);
+            break;
+        case 'fruta':
+            changePetHealth(item.health || 2);
+            const multFruta = typeof getEffectDurationMultiplier === 'function' ? getEffectDurationMultiplier('fruta') : 1;
+            addEffect('marketFast', item.effectDuration * multFruta);
+            showToast(` ${item.name}! +${item.effectDuration}s al Mercado Rápido  (total: ${state.effectsTime.marketFast}s)`);
+            logEvent('efecto', `${item.name} activó Mercado Rápido`, `+${item.effectDuration}s | Total: ${state.effectsTime.marketFast}s`);
+            break;
+        case 'proteina':
+            changePetHealth(item.health);
+            const multProt = typeof getEffectDurationMultiplier === 'function' ? getEffectDurationMultiplier('proteina') : 1;
+            addEffect('doubleProfit', item.effectDuration * multProt);
+            showToast(` ${item.name}! +${item.effectDuration}s a Ganancias x2  (total: ${state.effectsTime.doubleProfit}s)`);
+            logEvent('efecto', `${item.name} activó Ganancias x2`, `+${item.effectDuration}s | Total: ${state.effectsTime.doubleProfit}s`);
+            break;
+        case 'dulce':
+            changePetHealth(item.health);
+            const multDulce = typeof getEffectDurationMultiplier === 'function' ? getEffectDurationMultiplier('dulce') : 1;
+            addEffect('futureVision', item.effectDuration * multDulce);
+            activateFutureVision();
+            showToast(` ${item.name}! +${item.effectDuration}s a Visión del Futuro  (total: ${state.effectsTime.futureVision}s)`);
+            logEvent('efecto', `${item.name} activó Visión del Futuro`, `+${item.effectDuration}s | Total: ${state.effectsTime.futureVision}s`);
+            break;
+        case 'misc':
+            changePetHealth(item.health);
+            showToast(` Diste ${item.name}! +${item.health}️`);
+            break;
     }
 
-    const infoDef = PET_DEFS[state.currentPet];
-    if (infoDef) {
-        html += `<button class="btn-pet-info-active" onclick="openPetInfo('${state.currentPet}')">
-            <img src="../assets/arrows/Exclamation-Mark-128.png" alt="Info" class="pet-info-icon-sm">
-            Ver habilidades de ${infoDef.label}
-        </button>`;
+    consumeItem(foodId);
+    state.selectedFood = null;
+    updateUI();
+    checkGameOver();
+};
+
+// ============================================================
+//  VENDER COMIDA — botón "Vender" del nav
+// ============================================================
+const sellSelectedFood = () => {
+    const foodId = state.selectedFood;
+    if (!foodId) { showToast(' Selecciona un ítem del inventario primero'); return; }
+    const item = state.inventory.get(foodId);
+    if (!item || item.qty <= 0) { showToast(' No tienes ese ítem'); return; }
+
+    let salePrice, saleMsg;
+    if (item.cat === 'misc') {
+        const mult = 0.5 + Math.random()*3.5;
+        salePrice  = Math.round(item.price * mult);
+        const tag  = mult>=3?' ¡JACKPOT!': mult>=2?' Buen precio': mult>=1?'️ Precio justo':' Mala suerte';
+        saleMsg    = ` Vendiste ${item.name} por ${salePrice} (x${mult.toFixed(2)}) ${tag}`;
+    } else {
+        salePrice = Math.round(item.price * 0.5);
+        saleMsg   = ` Vendiste ${item.name} por ${salePrice} (mitad de precio)`;
     }
+
+    state.monedas += salePrice;
+    consumeItem(foodId);
+    state.selectedFood = null;
+    showToast(saleMsg);
+    logEvent('comida', `Vendiste ${item.name}`, `Recibiste ${salePrice}`);
+    updateUI();
+};
+
+const consumeItem = (foodId) => {
+    const item = state.inventory.get(foodId);
+    if (!item) return;
+    if (item.qty <= 1) state.inventory.delete(foodId);
+    else state.inventory.set(foodId, { ...item, qty:item.qty-1 });
+};
+
+// ============================================================
+//  VISIÓN FUTURA
+// ============================================================
+const activateFutureVision = () => {
+    state.market.forEach((a,sym) => {
+        const pred = parseFloat((Math.random()*10-5).toFixed(2));
+        state.market.set(sym, { ...a, _future:pred });
+    });
+    renderMarket();
+    openFutureModal();
+};
+
+const openFutureModal = () => {
+    const list = document.getElementById('future-list');
+    if (!list) return;
+    const assets = Array.from(state.market.values())
+        .filter(a=>a._future!==undefined)
+        .sort((a,b)=>b._future-a._future)
+        .slice(0,20);
+    list.innerHTML = assets.map(a=>`
+        <div class="future-row">
+            <strong>${a.symbol}</strong>
+            <span class="future-name">${a.name}</span>
+            <span class="future-pred ${a._future>=0?'up':'down'}">${a._future>=0?'▲':'▼'}${Math.abs(a._future)}%</span>
+        </div>`).join('');
+    document.getElementById('modal-future').style.display = 'flex';
+};
+
+window.closeFutureModal = () => { document.getElementById('modal-future').style.display = 'none'; };
+
+// ============================================================
+//  SALUD MASCOTA — 5 CORAZONES
+// ============================================================
+const getHeartConfig = (pct) => {
+    // Retorna array de 5 strings: 'red' | 'pink' | 'gray' | 'sad'
+    if (pct === 0) return ['sad','sad','sad','sad','sad'];
+    if (pct <= 10) return ['pink','gray','gray','gray','gray'];
+    if (pct <= 20) return ['pink','pink','gray','gray','gray'];
+    if (pct <= 30) return ['pink','pink','pink','gray','gray'];
+    if (pct <= 40) return ['pink','pink','pink','pink','gray'];
+    if (pct <= 50) return ['pink','pink','pink','pink','pink'];
+    if (pct <= 60) return ['red','pink','pink','pink','pink'];
+    if (pct <= 70) return ['red','red','pink','pink','pink'];
+    if (pct <= 80) return ['red','red','red','pink','pink'];
+    if (pct <= 90) return ['red','red','red','red','pink'];
+    return ['red','red','red','red','red'];
+};
+
+const heartImg = { red:'Heart-Red-128', pink:'Heart-Pink-128', gray:'Heart-Gray-128', sad:'Heart-Sad-128' };
+
+const renderPetHealth = () => {
+    const heartsEl = document.getElementById('pet-hearts');
+    if (heartsEl) {
+        const config = getHeartConfig(state.saludMascota);
+        heartsEl.innerHTML = config.map(type =>
+            `<img src="../assets/Hearts/${heartImg[type]}.png" class="heart-icon" alt="${type}">`
+        ).join('');
+    }
+    if (refs.petHealthValue) refs.petHealthValue.textContent = state.saludMascota;
+    if (refs.petMessage) {
+        const s = state.saludMascota;
+        if (s===100)    refs.petMessage.textContent = '¡Estoy súper feliz! ';
+        else if (s>60)  refs.petMessage.textContent = '¡Todo bajo control! ';
+        else if (s>30)  refs.petMessage.textContent = 'Me siento un poco mal... ';
+        else if (s>0)   refs.petMessage.textContent = '¡Tengo mucha hambre! ';
+        else            refs.petMessage.textContent = '...';
+    }
+    // El botón de mascotas siempre está visible (gestionado por pets.js)
+};
+
+const changePetHealth = (delta) => {
+    state.saludMascota = Math.max(0, Math.min(100, state.saludMascota+delta));
+    renderPetHealth();
+    if (typeof syncPetHealthToData === 'function') syncPetHealthToData();
+};
+
+// ============================================================
+//  MASCOTA SELECTOR — gestionado por pets.js
+// ============================================================
+// openPetSelector, closePetSelector, selectPet están en pets.js
+
+const renderPet = () => {
+    const s = document.getElementById('pet-character');
+    if (!s) return;
+    const def = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet] : null;
+    const imgId = def?.baseId || state.currentPet;
+    s.style.backgroundImage = `url('../assets/pets/${imgId}.png')`;
+    s.style.filter = def?.golden
+        ? 'sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25) drop-shadow(0 0 10px gold)'
+        : '';
+};
+
+// ============================================================
+//  INVENTARIO
+// ============================================================
+const renderInventory = () => {
+    const el = document.getElementById('inventory-bar');
+    if (!el) return;
+    if (state.inventory.size === 0) {
+        el.innerHTML = `<span class="inv-empty">Sin ítems — compra comida con Comprar</span>`;
+        updateSelectedLabel();
+        return;
+    }
+    el.innerHTML = Array.from(state.inventory.values()).map(item => {
+        const isSelected = state.selectedFood === item.id;
+        return `
+        <div class="inv-item ${isSelected?'inv-selected':''}" onclick="selectFood('${item.id}')" title="${item.name} — click para seleccionar">
+            <img src="../assets/food/${item.id}.png" alt="${item.name}" class="inv-img">
+            <span class="inv-qty">x${item.qty}</span>
+            <span class="inv-cat-dot cat-${catClass[item.cat]}"></span>
+        </div>`;
+    }).join('');
+    updateSelectedLabel();
+};
+
+// ============================================================
+//  CARTERA
+// ============================================================
+const renderPortfolio = () => {
+    const container = document.getElementById('portfolio-list');
+    const summary   = document.getElementById('portfolio-summary');
+    const totalEl   = document.getElementById('portfolio-total');
+    if (!container) return;
+
+    if (state.portfolio.size === 0) {
+        container.innerHTML = `<p class="empty-msg">Aún no tienes posiciones.</p>`;
+        if (summary) summary.style.display = 'none';
+        return;
+    }
+
+    let totalVal = 0, html = '';
+    state.portfolio.forEach((pos, symbol) => {
+        const cur   = state.market.get(symbol);
+        const price = cur ? cur.price : pos.buyPrice;
+        const profit= price - pos.buyPrice;
+        const pct   = ((profit/pos.buyPrice)*100).toFixed(2);
+        totalVal   += price;
+        html += `
+        <div class="portfolio-item">
+            <div class="pi-header">
+                <strong>${pos.symbol}</strong>
+                <span class="pi-name">${pos.name}</span>
+                <span class="pi-type-tag">${pos.type || ''}</span>
+            </div>
+            <div class="pi-prices">
+                <span class="pi-label">Compra:</span><span>${fmt(pos.buyPrice)}</span>
+                <span class="pi-label">Actual:</span><span>${fmt(price)}</span>
+            </div>
+            <div class="pi-profit ${profit>=0?'up':'down'}">
+                ${profit>=0?'▲':'▼'} ${fmt(Math.abs(profit))} (${Math.abs(pct)}%)
+                ${isEffectActive('doubleProfit')?'<span class="x2-tag">x2</span>':''}
+                ${state.sectorBonus.get(pos.type||'')?'<span class="bonus-tag"> +3%</span>':''}
+            </div>
+            <button class="btn-action btn-sell" onclick="sellFromPortfolio('${symbol}')">Vender</button>
+        </div>`;
+    });
 
     container.innerHTML = html;
+    if (summary) { summary.style.display='flex'; if(totalEl) totalEl.textContent=fmt(totalVal); }
 };
 
 // ============================================================
-//  SISTEMA DE DESBLOQUEO
+//  GAME OVER
 // ============================================================
-
-// ============================================================
-//  MODAL INFO DE MASCOTA
-// ============================================================
-window.openPetInfo = (petId) => {
-    const def = PET_DEFS[petId];
-    if (!def) return;
-
-    const modal = document.getElementById('modal-pet-info');
-    const title = document.getElementById('pet-info-title');
-    const img   = document.getElementById('pet-info-img');
-    const list  = document.getElementById('pet-info-list');
-    const desc  = document.getElementById('pet-info-desc');
-
-    if (!modal) return;
-
-    title.textContent = def.label;
-    // Para mascotas doradas usar imagen base con filtro dorado
-    const imgSrc = def.golden && def.baseId
-        ? `../assets/pets/${def.baseId}.png`
-        : `../assets/pets/${petId}.png`;
-    img.src = imgSrc;
-    if (def.golden) {
-        img.style.filter = 'sepia(1) saturate(3) hue-rotate(5deg) brightness(1.1)';
-    } else {
-        img.style.filter = '';
+const checkGameOver = () => {
+    if (state.saludMascota <= 0) { triggerGameOver(' Tu mascota murió de hambre...'); return; }
+    if (state.monedas <= 0) {
+        let val=0;
+        state.portfolio.forEach((_,sym) => { const c=state.market.get(sym); if(c) val+=c.price; });
+        if (val===0||(state.monedas+val)<=0) triggerGameOver(' Sin monedas ni activos para recuperarte...');
     }
-    desc.textContent = def.desc;
-
-    list.innerHTML = (def.passiveDesc || []).map(line => `
-        <div class="pet-info-item">
-            <span class="pet-info-dot"></span>
-            <span>${line}</span>
-        </div>`).join('');
-
-    // Cost info
-    const costEl = document.getElementById('pet-info-cost');
-    if (costEl) {
-        costEl.textContent = def.cost === 0
-            ? ' Gratis'
-            : ` Desbloqueo: ${def.cost.toLocaleString()}`;
-    }
-
-    modal.style.display = 'flex';
 };
 
-window.closePetInfo = () => {
-    const modal = document.getElementById('modal-pet-info');
-    if (modal) modal.style.display = 'none';
+const triggerGameOver = (reason) => {
+    logEvent('gameover', ' GAME OVER', reason);
+    clearSave();
+    const m=document.getElementById('modal-gameover');
+    const r=document.getElementById('gameover-reason');
+    if (m) { if(r) r.textContent=reason; m.style.display='flex'; }
 };
 
-const buildPetCard = (id, golden = false, diamond = false) => {
-    const def  = PET_DEFS[id];
-    if (!def) return '';
-    const data = state.petData.get(id) || { health: 0, unlocked: false };
-    const isActive   = id === state.currentPet;
-    const isUnlocked = data.unlocked;
-    const canUnlock  = diamond ? canUnlockDiamondPet(id)
-                     : golden  ? canUnlockGoldenPet(id)
-                     : canUnlockPet(id);
-    const cost  = def.cost;
-    const imgId = def.baseId || id;
+window.resetGame = () => {
+    state.monedas=1000; state.saludMascota=75;
+    state.currentPet='Bunny-Pink-128';
+    state.portfolio.clear(); state.inventory.clear();
+    state.foodInflation.clear(); state.sectorBonus.clear();
+    state.effectsTime = { marketFast:0, doubleProfit:0, futureVision:0 };
+    state.selectedFood = null;
+    state.currentPet = 'Bunny-Pink-128';
+    state.victoryAchieved = false;
+    state.marketSpeedEnabled = true;
+    state.petData = null;
+    if (typeof initPetData === 'function') initPetData();
+    if (typeof sheepPriceTripled !== 'undefined') sheepPriceTripled = false;
+    if (typeof bunnyTurboCooldown !== 'undefined') { bunnyTurboCooldown = false; bunnyTurboActive = false; }
+    if (typeof frogCooldown !== 'undefined') frogCooldown = false;
+    clearSave();
+    document.getElementById('modal-gameover').style.display='none';
+    startMarket(SPEED_NORMAL);
+    renderPet(); renderPetHealth(); renderEffectBadges();
+    updateUI();
+    showToast(' ¡Juego reiniciado!');
+};
 
-    // Estilos visuales según tipo
-    const goldenStyle  = golden  ? 'filter:sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25);border:2px solid gold;box-shadow:0 0 10px rgba(255,200,0,0.6);' : '';
-    const diamondStyle = diamond ? 'filter:saturate(1.5) brightness(1.3) hue-rotate(180deg) contrast(1.2);border:2px solid #a8d8ff;box-shadow:0 0 14px rgba(100,200,255,0.8);' : '';
-    const imgStyle     = diamond ? diamondStyle : goldenStyle;
+// ============================================================
+//  UI GENERAL
+// ============================================================
+const updateUI = () => {
+    if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
+    renderMarket();
+    renderPortfolio();
+    renderPetHealth();
+    renderInventory();
+    renderEffectBadges();
+    // Actualizar panel de balance y diversificación
+    if (typeof window.updateFinanceUI === 'function') window.updateFinanceUI();
+    saveGame();
+};
 
-    let btnHtml = '';
-    if (isActive) {
-        btnHtml = `<span class="pet-badge active">Activa</span>`;
-    } else if (isUnlocked) {
-        btnHtml = `<button class="btn-pet-select" onclick="selectPet('${id}','${def.label}')">Seleccionar</button>`;
-    } else if (canUnlock) {
-        btnHtml = `<button class="btn-pet-unlock" onclick="unlockPet('${id}')">${cost.toLocaleString()}</button>`;
-    } else {
-        const reason = diamond && !state.diamondVictoryAchieved ? 'Requiere Victoria Diamante'
-                     : golden  && !state.victoryAchieved        ? 'Requiere Victoria'
-                     : 'Bloqueado';
-        btnHtml = `<span class="pet-badge locked">${reason}</span>`;
+// ============================================================
+//  AVATAR / LOGOUT
+// ============================================================
+window.toggleSettingsMenu = (e) => {
+    if (e) e.stopPropagation();
+    const m=document.getElementById('settings-dropdown-menu');
+    if (m) m.style.display = m.style.display==='none'?'block':'none';
+};
+
+window.handleAvatarChange = (src) => {
+    const img=document.getElementById('current-avatar-header');
+    if (img) img.src=src;
+    toggleSettingsMenu(null);
+    showToast(' Avatar actualizado');
+    saveGame();
+};
+
+window.handleLogout = () => {
+    localStorage.removeItem('bitgameso_sesion_activa');
+    window.location.href = '../PaginaMenu/index.html';
+};
+
+document.addEventListener('click', (e) => {
+    const m=document.getElementById('settings-dropdown-menu');
+    const t=document.querySelector('.profile-trigger');
+    if (m&&t&&!t.contains(e.target)) m.style.display='none';
+});
+
+// ============================================================
+//  TOAST
+// ============================================================
+const showToast = (msg) => {
+    let t=document.getElementById('toast');
+    if (!t) { t=document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
+    t.textContent=msg;
+    t.classList.add('toast-show');
+    clearTimeout(t._timer);
+    t._timer=setTimeout(()=>t.classList.remove('toast-show'),3500);
+};
+
+
+// ============================================================
+//  50 MENSAJES DE MASCOTA — CONSEJOS DE INVERSIÓN
+// ============================================================
+const petTips = [
+    // IA
+    "¡Psst! Si inviertes en 3 acciones de IA conseguirás un bono del 3% en tus ganancias ",
+    "Los activos de IA están en auge… ¿ya tienes 3? ¡Podría haber una bonificación esperándote! ",
+    "He soñado con chips y algoritmos… quizás debería invertir en IA. ¡Tú también! ",
+    "El sector IA crece cada día. ¡Con 3 acciones de IA obtendrás un bono especial! ",
+    "Dicen que la inteligencia artificial lo dominará todo. ¿Y tus inversiones en IA? ",
+    // BLUECHIP
+    "Las empresas Bluechip son sólidas como una roca  ¡Con 3 acciones tendrás un bono del 3%!",
+    "¿Seguridad o riesgo? Las Bluechip dan estabilidad. ¡Consigue 3 y desbloquea tu bonificación! ",
+    "¡Me encantan las Bluechip! Grandes empresas, grandes resultados. ¡3 acciones = bono asegurado! ",
+    "Los grandes inversores confían en Bluechips. ¿Ya tienes 3? ¡Hay un bono del 3% esperándote! ",
+    "Una cartera sólida siempre tiene Bluechips. ¡Llega a 3 y gana tu bonificación! ",
+    // DIGITAL / CRYPTO
+    "¡Las criptos son el futuro! Invierte en 3 activos Digital y consigue un bono del 3% ",
+    "El mercado Digital nunca duerme… ni yo tampoco esperando que compres 3 criptos ",
+    "Bitcoin, Ethereum… ¡el mundo Digital es enorme! Con 3 acciones Digital obtendrás un bono ",
+    "Las monedas digitales pueden explotar en cualquier momento. ¡3 activos = bonificación del 3%! ",
+    "¿Hodl? ¡Mejor invierte en 3 activos Digital y gana un bono especial! ",
+    // GAMING
+    "¡Me encantan los videojuegos! Si inviertes en 3 acciones Gaming tendrás un bono del 3% ",
+    "El sector Gaming vale billones. ¿Ya tienes 3 acciones? ¡Tu bonificación te espera! ️",
+    "Jugar y ganar: eso hacen los jugadores de Gaming en el mercado. ¡3 acciones = bono! ",
+    "Los gamers saben invertir. ¡Consigue 3 acciones Gaming y desbloquea tu bonificación! ",
+    "¡Level up! Con 3 acciones Gaming conseguirás un bono del 3% en tus próximas ganancias ",
+    // NFT
+    "Los NFT son únicos como yo  ¡Invierte en 3 y consigue un bono del 3%!",
+    "Arte digital, colecciones únicas… ¡3 acciones NFT te dan una bonificación especial! ️",
+    "El mundo de los NFT puede sorprenderte. ¡Con 3 activos NFT obtendrás un bono del 3%! ",
+    "¿Arte o inversión? ¡Los dos! Con 3 acciones NFT ganas una bonificación de inmediato ",
+    "Los coleccionistas de NFT saben algo que tú no… ¡3 acciones y lo descubrirás con un bono! ",
+    // METAVERSO
+    "¡El Metaverso es el futuro! Con 3 acciones Metaverso consigues un bono del 3% ",
+    "Mundos virtuales, oportunidades reales. ¡3 acciones Metaverso = bonificación garantizada! ",
+    "Me imagino corriendo en el Metaverso… ¡y tú ganando un bono con 3 acciones! ",
+    "El Metaverso crece cada día. ¡Con 3 activos tendrás un bono del 3% esperándote! ",
+    "¿Ya exploraste el Metaverso? Invierte en 3 acciones y consigue tu bonificación ",
+    // FINTECH
+    "¡El dinero del futuro está en Fintech! 3 acciones y obtendrás un bono del 3% ",
+    "Las Fintech están revolucionando las finanzas. ¡Con 3 acciones desbloqueas un bono! ",
+    "Pagar, transferir, invertir… ¡las Fintech lo hacen todo! 3 acciones = bono del 3% ",
+    "Me gusta contar monedas y las Fintech también. ¡3 acciones = bonificación especial! ",
+    "El futuro de los pagos es digital. ¡Invierte en 3 Fintech y gana un bono del 3%! ",
+    // ENERGÍA
+    "¡Energía limpia = futuro brillante! 3 acciones de Energía te dan un bono del 3% ",
+    "El planeta necesita energía verde y tú necesitas ese bono. ¡3 acciones Energía! ",
+    "Sol, viento, agua… ¡todo es energía! Con 3 acciones Energía consigues un bono ",
+    "La revolución energética ya comenzó. ¡Invierte en 3 y desbloquea tu bonificación! ",
+    "¡Potencia tu cartera con Energía! 3 acciones del sector = bono del 3% garantizado ",
+    // BIOTECH
+    "¡La ciencia es asombrosa! Con 3 acciones Biotech obtendrás un bono del 3% ",
+    "La Biotech puede salvar vidas y salvar tu cartera. ¡3 acciones = bonificación especial! ",
+    "ADN, genes, salud… ¡el futuro es Biotech! Con 3 acciones ganas un bono del 3% ",
+    "Los laboratorios trabajan 24/7 igual que el mercado. ¡3 acciones Biotech = bono! ",
+    "¡Me cuido mucho y tú deberías cuidar tu cartera con 3 acciones Biotech y un bono! ",
+    // ESPACIO
+    "¡Ad astra! Con 3 acciones del sector Espacio conseguirás un bono del 3% ",
+    "Las estrellas llaman… ¡y tu bono también! Invierte en 3 acciones Espacio ",
+    "El universo es enorme pero el bono es concreto: 3 acciones Espacio = 3% extra ",
+    "¡Sueño con volar a las estrellas! Y tú puedes ganar un bono con 3 acciones Espacio ",
+    // MEME
+    "¡Los Meme coins son locos pero el bono es real! 3 acciones Meme = 3% de bonificación ",
+    // DEFI
+    "¡DeFi es el banco del futuro! Con 3 acciones DeFi obtienes un bono del 3% ",
+];
+
+// Mensajes aleatorios: mostrar cada 20-45 segundos
+let petTipTimer = null;
+let lastTipIndex = -1;
+
+const startPetTips = () => {
+    const scheduleNext = () => {
+        const delay = (20 + Math.random() * 25) * 1000; // 20-45s
+        petTipTimer = setTimeout(() => {
+            showPetTip();
+            scheduleNext();
+        }, delay);
+    };
+    scheduleNext();
+};
+
+const showPetTip = () => {
+    let idx;
+    do { idx = Math.floor(Math.random() * petTips.length); } while (idx === lastTipIndex);
+    lastTipIndex = idx;
+    const msg = document.getElementById('pet-message');
+    if (msg) {
+        msg.textContent = petTips[idx];
+        msg.classList.add('pet-tip-glow');
+        setTimeout(() => msg.classList.remove('pet-tip-glow'), 3000);
+    }
+};
+
+// ============================================================
+//  SISTEMA DE BONIFICACIÓN POR SECTOR
+// ============================================================
+const BONUS_THRESHOLD = 3;    // acciones del mismo sector
+const BONUS_PCT = 0.03;       // 3% sobre el payout al vender
+
+// Contar cuántas acciones del portfolio pertenecen a cada sector
+const countBySector = () => {
+    const counts = new Map();
+    state.portfolio.forEach(pos => {
+        const t = pos.type || '';
+        counts.set(t, (counts.get(t) || 0) + 1);
+    });
+    return counts;
+};
+
+const checkSectorBonus = () => {
+    const counts = countBySector();
+    counts.forEach((count, type) => {
+        if (count >= BONUS_THRESHOLD && !state.sectorBonus.get(type)) {
+            state.sectorBonus.set(type, true);
+            showToast(` ¡BONO DESBLOQUEADO! Tienes 3+ acciones de ${type}. Tus ganancias en este sector suben un 3% `);
+            logEvent('bonus', `Bono de sector ${type} desbloqueado`, `+3% en ganancias del sector ${type}`);
+            // Forzar mensaje de mascota celebrando
+            const msg = document.getElementById('pet-message');
+            if (msg) {
+                msg.textContent = `¡Lo sabía! ¡Bonificación del 3% en ${type} activada! `;
+                msg.classList.add('pet-tip-glow');
+                setTimeout(() => msg.classList.remove('pet-tip-glow'), 4000);
+            }
+        }
+        // Si perdió acciones y ya no llega al umbral, quitar el bono
+        if (count < BONUS_THRESHOLD && state.sectorBonus.get(type)) {
+            state.sectorBonus.set(type, false);
+            showToast(`️ Perdiste el bono de ${type}: ya no tienes 3 acciones en ese sector.`);
+        }
+    });
+    // Revisar sectores que ya no están en cartera
+    state.sectorBonus.forEach((active, type) => {
+        if (active && !counts.has(type)) {
+            state.sectorBonus.set(type, false);
+        }
+    });
+    saveGame();
+};
+
+// Aplicar bono al vender — se llama dentro de sellFromPortfolio
+const applySectorBonus = (type, baseProfit, buyPrice) => {
+    if (!state.sectorBonus.get(type)) return 0;
+    const bonus = Math.abs(baseProfit) >= 0 ? buyPrice * BONUS_PCT : 0;
+    return bonus;
+};
+
+
+// ============================================================
+//  SISTEMA DE EVENTOS DRAMÁTICOS DEL MERCADO
+// ============================================================
+
+const marketEvents = [
+    // CAÍDAS
+    { sector:'IA',        type:'crash', magnitude:[0.10,0.30], warningMsg:'️ ¡ALERTA! Escándalo en el sector IA… ¡todas sus acciones podrían desplomarse pronto!', eventMsg:' ¡CRASH de IA! Todas las acciones de Inteligencia Artificial han caído drásticamente.' },
+    { sector:'Bluechip',  type:'crash', magnitude:[0.10,0.25], warningMsg:'️ ¡ALERTA! Las grandes empresas Bluechip están en problemas… ¡una caída se acerca!', eventMsg:' ¡CRASH Bluechip! Las acciones de las grandes empresas han colapsado.' },
+    { sector:'Digital',   type:'crash', magnitude:[0.15,0.35], warningMsg:'️ ¡ALERTA! Las criptomonedas están en pánico… ¡vienen caídas masivas en Digital!', eventMsg:' ¡CRYPTO CRASH! Todas las monedas digitales se han desplomado.' },
+    { sector:'Gaming',    type:'crash', magnitude:[0.10,0.30], warningMsg:'️ ¡ALERTA! El sector Gaming está en crisis… ¡los precios van a caer pronto!', eventMsg:' ¡GAMING CRASH! Los activos de Gaming han sufrido una caída brutal.' },
+    { sector:'NFT',       type:'crash', magnitude:[0.15,0.30], warningMsg:'️ ¡ALERTA! ¡Los NFT pronto caerán! ¡Todas sus acciones en peligro!', eventMsg:' ¡NFT CRASH! El mercado de NFT se ha hundido por completo.' },
+    { sector:'Metaverso', type:'crash', magnitude:[0.10,0.25], warningMsg:'️ ¡ALERTA! El Metaverso está siendo abandonado… ¡viene una caída brutal!', eventMsg:' ¡METAVERSO CRASH! Las acciones del Metaverso han caído estrepitosamente.' },
+    { sector:'Fintech',   type:'crash', magnitude:[0.10,0.20], warningMsg:'️ ¡ALERTA! Regulaciones nuevas amenazan al Fintech… ¡una crisis se avecina!', eventMsg:' ¡FINTECH CRASH! El sector Fintech ha colapsado por nuevas regulaciones.' },
+    { sector:'Energía',   type:'crash', magnitude:[0.10,0.25], warningMsg:'️ ¡ALERTA! Crisis energética global… ¡las acciones de Energía van a caer!', eventMsg:' ¡ENERGÍA CRASH! El sector energético ha sufrido una caída masiva.' },
+    { sector:'Biotech',   type:'crash', magnitude:[0.10,0.25], warningMsg:'️ ¡ALERTA! Un ensayo clínico falló… ¡el sector Biotech va a desplomarse!', eventMsg:' ¡BIOTECH CRASH! Las farmacéuticas y biotechs han caído en picado.' },
+    { sector:'Espacio',   type:'crash', magnitude:[0.10,0.30], warningMsg:'️ ¡ALERTA! Una misión espacial fracasó… ¡el sector Espacio va a caer pronto!', eventMsg:' ¡ESPACIO CRASH! Los activos espaciales han sufrido una caída enorme.' },
+    { sector:'Meme',      type:'crash', magnitude:[0.20,0.40], warningMsg:'️ ¡ALERTA! ¡Los meme coins van a morir! ¡Vende antes de que sea tarde!', eventMsg:' ¡MEME CRASH! Los meme coins han colapsado completamente. El meme ha muerto.' },
+    { sector:'DeFi',      type:'crash', magnitude:[0.15,0.30], warningMsg:'️ ¡ALERTA! Un exploit masivo en DeFi… ¡todas sus acciones van a caer!', eventMsg:' ¡DeFi CRASH! El sector descentralizado ha sido hackeado. Precios en caída libre.' },
+    // SUBIDAS
+    { sector:'IA',        type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! Un breakthrough de IA revolucionario está por anunciarse… ¡las acciones de IA subirán!', eventMsg:' ¡IA BOOM! Una revolución en inteligencia artificial ha disparado todas sus acciones.' },
+    { sector:'Bluechip',  type:'boom',  magnitude:[0.10,0.30], warningMsg:' ¡NOTICIA! Las grandes empresas reportan ganancias récord… ¡las Bluechip van a subir!', eventMsg:' ¡BLUECHIP BOOM! Las grandes empresas han batido récords históricos de ganancias.' },
+    { sector:'Digital',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Un país ha adoptado las criptomonedas como moneda oficial! ¡Digital va a explotar!', eventMsg:' ¡CRYPTO BOOM! Adopción masiva de criptomonedas. ¡Todos los activos digitales se disparan!' },
+    { sector:'Gaming',    type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! El juego más esperado del año llega mañana… ¡el sector Gaming va a dispararse!', eventMsg:' ¡GAMING BOOM! El lanzamiento del año ha generado ganancias masivas en Gaming.' },
+    { sector:'NFT',       type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Una celebridad mundial acaba de comprar NFTs! ¡Todas las acciones subirán pronto!', eventMsg:' ¡NFT BOOM! El interés masivo en NFTs ha disparado todos sus precios.' },
+    { sector:'Metaverso', type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! Una mega empresa invierte billones en el Metaverso… ¡viene una subida enorme!', eventMsg:' ¡METAVERSO BOOM! Inversión histórica en el Metaverso ha disparado todos sus activos.' },
+    { sector:'Fintech',   type:'boom',  magnitude:[0.10,0.30], warningMsg:' ¡NOTICIA! Nueva regulación favorece al Fintech… ¡sus acciones van a subir pronto!', eventMsg:' ¡FINTECH BOOM! Cambios regulatorios han impulsado enormemente al sector Fintech.' },
+    { sector:'Energía',   type:'boom',  magnitude:[0.15,0.35], warningMsg:' ¡NOTICIA! Nuevo acuerdo climático global… ¡el sector Energía va a beneficiarse mucho!', eventMsg:' ¡ENERGÍA BOOM! El acuerdo climático global ha disparado todos los activos de Energía.' },
+    { sector:'Biotech',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Se ha encontrado la cura de una enfermedad! ¡El sector Biotech va a explotar!', eventMsg:' ¡BIOTECH BOOM! Un descubrimiento médico histórico ha disparado todas las biotechs.' },
+    { sector:'Espacio',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Se ha confirmado vida en otro planeta! ¡El sector Espacio va a la luna!', eventMsg:' ¡ESPACIO BOOM! El descubrimiento del siglo ha disparado todos los activos espaciales.' },
+    { sector:'Meme',      type:'boom',  magnitude:[0.30,0.80], warningMsg:' ¡NOTICIA! ¡Un famoso ha tuiteado sobre los meme coins! ¡Van a explotar completamente!', eventMsg:' ¡MEME BOOM! ¡Un tweet viral ha multiplicado los precios de todos los meme coins!' },
+    { sector:'DeFi',      type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! Un protocolo DeFi ha generado retornos históricos… ¡todo el sector subirá!', eventMsg:' ¡DeFi BOOM! Rendimientos históricos en DeFi han atraído inversión masiva al sector.' },
+];
+
+// Evento activo actualmente (si lo hay)
+let activeEvent = null;  // { sector, type, magnitude, eventMsg, applyAt }
+let eventScheduleTimer = null;
+
+const scheduleNextEvent = () => {
+    // Intervalo aleatorio: 45s a 3min
+    const delay = (45 + Math.random() * 135) * 1000;
+    eventScheduleTimer = setTimeout(() => {
+        triggerMarketEventWarning();
+        scheduleNextEvent();
+    }, delay);
+};
+
+const triggerMarketEventWarning = () => {
+    // Elegir evento aleatorio, diferente al anterior
+    let evt;
+    do { evt = marketEvents[Math.floor(Math.random() * marketEvents.length)]; }
+    while (activeEvent && evt.sector === activeEvent.sector && evt.type === activeEvent.type);
+
+    // Tiempo de advertencia: 30-50 segundos antes del evento real
+    const warningTime = 30 + Math.floor(Math.random() * 21); // 30-50s
+
+    // Mostrar advertencia en mascota
+    const msg = document.getElementById('pet-message');
+    if (msg) {
+        msg.textContent = evt.warningMsg;
+        msg.classList.add(evt.type === 'crash' ? 'pet-warn-crash' : 'pet-warn-boom');
+        setTimeout(() => {
+            msg.classList.remove('pet-warn-crash', 'pet-warn-boom');
+        }, warningTime * 1000);
     }
 
-    const hearts = getHeartConfig(Math.round(data.health));
-    const heartHtml = hearts.map(t =>
-        `<img src="../assets/Hearts/${heartImg[t]}.png" class="pet-grid-heart">`
-    ).join('');
+    // Toast de advertencia
+    showToast(evt.type === 'crash'
+        ? `️ ${evt.sector} — evento de CAÍDA en ${warningTime}s!`
+        : ` ${evt.sector} — evento de SUBIDA en ${warningTime}s!`
+    );
+    logEvent('evento', `️ Alerta: evento ${evt.type === 'crash' ? 'CAÍDA' : 'SUBIDA'} en ${evt.sector}`, `Se aplicará en ${warningTime}s`);
 
-    const badge = diamond ? `<span class="pet-golden-badge" style="background:linear-gradient(135deg,#a8d8ff,#6ec6ff);color:#003366;">DIAMANTE x3</span>`
-                : golden  ? `<span class="pet-golden-badge">DORADA x2</span>`
-                : '';
+    // Resaltar sector en el mercado como advertencia
+    highlightSector(evt.sector, evt.type, warningTime * 1000);
 
-    return `
-    <div class="pet-option ${isActive?'pet-selected':''} ${isUnlocked?'':'pet-locked'} ${diamond?'pet-diamond':''}">
-        <div class="pet-card-header">
-            <div class="pet-preview" style="background-image:url('../assets/pets/${imgId}.png');${imgStyle}"></div>
-            <button class="btn-pet-info" onclick="event.stopPropagation(); openPetInfo('${id}')" title="Ver habilidades">
-                <img src="../assets/arrows/Exclamation-Mark-128.png" alt="Info" class="pet-info-icon">
-            </button>
+    // Programar el evento real
+    activeEvent = evt;
+    setTimeout(() => applyMarketEvent(evt), warningTime * 1000);
+};
+
+const applyMarketEvent = (evt) => {
+    if (!evt) return;
+    const [minMag, maxMag] = evt.magnitude;
+    const magnitude = minMag + Math.random() * (maxMag - minMag);
+    const multiplier = evt.type === 'crash' ? (1 - magnitude) : (1 + magnitude);
+
+    // Aplicar a todos los activos del sector
+    state.market.forEach((a, sym) => {
+        if (a.type === evt.sector) {
+            const newPrice = Math.max(0.000001, a.price * multiplier);
+            state.market.set(sym, { ...a, price: newPrice, changePercent: (multiplier - 1) * 100 });
+        }
+    });
+
+    // Mensaje final en mascota
+    const msg = document.getElementById('pet-message');
+    if (msg) {
+        msg.textContent = evt.eventMsg;
+        msg.classList.add(evt.type === 'crash' ? 'pet-warn-crash' : 'pet-warn-boom');
+        setTimeout(() => msg.classList.remove('pet-warn-crash', 'pet-warn-boom'), 5000);
+    }
+
+    // Toast dramático
+    const pct = (magnitude * 100).toFixed(0);
+    showToast(evt.type === 'crash'
+        ? ` ${evt.sector} cayó un ${pct}%!`
+        : ` ${evt.sector} subió un ${pct}%!`
+    );
+    logEvent('evento', `${evt.type === 'crash' ? ' CRASH' : ' BOOM'} en sector ${evt.sector}`, `${evt.type === 'crash' ? 'Cayó' : 'Subió'} un ${pct}%`);
+
+    // Flash visual del sector
+    highlightSector(evt.sector, evt.type, 4000);
+
+    activeEvent = null;
+    renderMarket();
+    renderPortfolio();
+};
+
+// Resaltar sector en la lista del mercado
+const highlightSector = (sector, type, duration) => {
+    state._highlightSector = sector;
+    state._highlightType   = type;
+    renderMarket();
+    setTimeout(() => {
+        delete state._highlightSector;
+        delete state._highlightType;
+        renderMarket();
+    }, duration);
+};
+
+
+// ============================================================
+//  INFORMACIÓN DE SECTORES DEL MERCADO
+// ============================================================
+const sectorInfo = {
+    'IA': {
+        icon: '',
+        titulo: 'IA — Inteligencia Artificial',
+        que: 'Tecnología que permite a las máquinas "pensar", aprender y resolver problemas como humanos.',
+        porque: 'Es la revolución industrial de nuestra era. Invertir aquí es apostar a que las máquinas harán el trabajo más rápido y eficiente, generando ganancias masivas.',
+        riesgo: 'Alto',
+    },
+    'Bluechip': {
+        icon: '',
+        titulo: 'Bluechip',
+        que: 'Empresas gigantes, estables y con historial impecable (ej. Microsoft o Coca-Cola).',
+        porque: 'Son el "refugio seguro". No te harán millonario de la noche a la mañana, pero es muy difícil que pierdan su valor. Dan estabilidad a tu cartera.',
+        riesgo: 'Bajo',
+    },
+    'Digital': {
+        icon: '',
+        titulo: 'Digital',
+        que: 'Negocios basados 100% en internet: ciberseguridad, almacenamiento en la nube o redes sociales.',
+        porque: 'El mundo vive en la red. Si el tráfico de internet sube, estas empresas ganan.',
+        riesgo: 'Medio',
+    },
+    'Gaming': {
+        icon: '',
+        titulo: 'Gaming',
+        que: 'Empresas de videojuegos, consolas y eSports.',
+        porque: 'Es una de las industrias de entretenimiento que más dinero mueve, superando incluso al cine. Los lanzamientos de nuevos juegos generan picos de ganancias.',
+        riesgo: 'Medio',
+    },
+    'NFT': {
+        icon: '️',
+        titulo: 'NFT — Tokens No Fungibles',
+        que: 'Activos digitales únicos certificados por blockchain (arte, coleccionables, música).',
+        porque: 'Es una inversión de alto riesgo basada en la escasez y el valor artístico. Si un NFT se vuelve "tendencia", su precio puede subir miles de veces.',
+        riesgo: 'Muy Alto',
+    },
+    'Metaverso': {
+        icon: '',
+        titulo: 'Metaverso',
+        que: 'Mundos virtuales donde la gente socializa, trabaja y compra.',
+        porque: 'Es la apuesta al futuro de internet. Invertir aquí es como comprar terrenos en una ciudad que apenas se está construyendo.',
+        riesgo: 'Alto',
+    },
+    'Fintech': {
+        icon: '',
+        titulo: 'Fintech — Financial Technology',
+        que: 'Bancos digitales, apps de pago y préstamos online.',
+        porque: 'Los bancos tradicionales son lentos; las Fintech son rápidas. Inviertes en la modernización del dinero.',
+        riesgo: 'Medio',
+    },
+    'Energía': {
+        icon: '',
+        titulo: 'Energía',
+        que: 'Producción de electricidad, desde petróleo hasta paneles solares y reactores nucleares.',
+        porque: 'Todo lo demás (IA, Gaming, Casas) necesita energía para funcionar. Es la base de la economía mundial.',
+        riesgo: 'Bajo',
+    },
+    'Biotech': {
+        icon: '',
+        titulo: 'Biotech — Biotecnología',
+        que: 'Uso de organismos vivos para crear medicinas, vacunas o mejorar cultivos.',
+        porque: 'Un solo descubrimiento médico (como una cura o vacuna nueva) puede hacer que las acciones se disparen en un día.',
+        riesgo: 'Alto',
+    },
+    'Espacio': {
+        icon: '',
+        titulo: 'Espacio',
+        que: 'Turismo espacial, satélites y minería en asteroides.',
+        porque: 'Es la "última frontera". Es una inversión a largo plazo pensando en que la humanidad saldrá de la Tierra.',
+        riesgo: 'Muy Alto',
+    },
+    'Meme': {
+        icon: '',
+        titulo: 'Meme — Memecoins',
+        que: 'Criptomonedas que nacen de chistes en internet (como Dogecoin).',
+        porque: 'Es pura especulación y diversión. No tienen un valor real sólido, pero si una comunidad se organiza, el precio vuela por los cielos.',
+        riesgo: 'Extremo',
+    },
+    'DeFi': {
+        icon: '',
+        titulo: 'DeFi — Finanzas Descentralizadas',
+        que: 'Sistemas financieros que no necesitan bancos, funcionando con contratos inteligentes.',
+        porque: 'Es eliminar al "intermediario". Tú eres tu propio banco y ganas intereses directamente de otros usuarios.',
+        riesgo: 'Alto',
+    },
+};
+
+const riskColor = { 'Bajo':'#27ae60', 'Medio':'#f39c12', 'Alto':'#e67e22', 'Muy Alto':'#e74c3c', 'Extremo':'#9b59b6' };
+
+window.openSectorGuide = () => {
+    const body = document.getElementById('sector-guide-body');
+    if (!body) return;
+    body.innerHTML = Object.entries(sectorInfo).map(([key, s]) => `
+        <div class="sg-card">
+            <div class="sg-card-header">
+                <span class="sg-icon">${s.icon}</span>
+                <strong class="sg-title">${s.titulo}</strong>
+                <span class="sg-risk" style="background:${riskColor[s.riesgo]}">Riesgo: ${s.riesgo}</span>
+            </div>
+            <p class="sg-que"><b>¿Qué es?</b> ${s.que}</p>
+            <p class="sg-why"><b>¿Por qué invertir?</b> ${s.porque}</p>
         </div>
-        ${badge}
-        <span class="pet-label">${def.label}</span>
-        <div class="pet-grid-hearts">${heartHtml}</div>
-        ${btnHtml}
-    </div>`;
+    `).join('');
+    document.getElementById('modal-sector-guide').style.display = 'flex';
 };
 
-const canUnlockDiamondPet = (id) => {
-    if (!state.diamondVictoryAchieved) return false;
-    const idx = PET_ORDER_DIAMOND.indexOf(id);
-    if (idx < 0) return false;
-    if (idx > 0) {
-        const prevId   = PET_ORDER_DIAMOND[idx - 1];
-        const prevData = state.petData.get(prevId);
-        if (!prevData || !prevData.unlocked) return false;
+window.closeSectorGuide = () => {
+    document.getElementById('modal-sector-guide').style.display = 'none';
+};
+
+
+// ============================================================
+//  MODAL: INFO DE SECTORES
+// ============================================================
+window.openMarketInfo = () => {
+    document.getElementById('modal-market-info').style.display = 'flex';
+};
+window.closeMarketInfo = () => {
+    document.getElementById('modal-market-info').style.display = 'none';
+};
+
+
+// ============================================================
+//  SISTEMA DE HISTORIAL
+// ============================================================
+
+const HISTORIAL_KEY = () => {
+    const u = localStorage.getItem('bitgameso_sesion_activa') || 'invitado';
+    return `bitgameso_historial_${u}`;
+};
+
+const logEvent = (tipo, mensaje, extra = '') => {
+    const historial = JSON.parse(localStorage.getItem(HISTORIAL_KEY()) || '[]');
+    const entrada = {
+        tipo,       // 'compra' | 'venta' | 'comida' | 'deposito' | 'efecto' | 'gameover' | 'bonus' | 'evento'
+        mensaje,
+        extra,
+        hora: new Date().toLocaleTimeString(),
+        fecha: new Date().toLocaleDateString(),
+        monedas: parseFloat(state.monedas).toFixed(2),
+    };
+    historial.unshift(entrada); // más reciente primero
+    // Máximo 200 entradas
+    if (historial.length > 200) historial.length = 200;
+    localStorage.setItem(HISTORIAL_KEY(), JSON.stringify(historial));
+};
+
+const iconByTipo = {
+    compra:   '',
+    venta:    '',
+    comida:   '',
+    deposito: '',
+    efecto:   '',
+    gameover: '',
+    bonus:    '',
+    evento:   '',
+    mascota:  '',
+    sistema:  '️',
+};
+
+const colorByTipo = {
+    compra:   '#27ae60',
+    venta:    '#e74c3c',
+    comida:   '#ff9800',
+    deposito: '#3498db',
+    efecto:   '#9b59b6',
+    gameover: '#c0392b',
+    bonus:    '#f1c40f',
+    evento:   '#e67e22',
+    mascota:  '#e91e63',
+    sistema:  '#95a5a6',
+};
+
+window.openHistorial = () => {
+    renderHistorialList();
+    document.getElementById('modal-historial').style.display = 'flex';
+};
+
+window.closeHistorial = () => {
+    document.getElementById('modal-historial').style.display = 'none';
+};
+
+window.clearHistorial = () => {
+    if (!confirm('¿Seguro que quieres limpiar todo el historial?')) return;
+    localStorage.removeItem(HISTORIAL_KEY());
+    renderHistorialList();
+    showToast('️ Historial limpiado');
+};
+
+const renderHistorialList = () => {
+    const container = document.getElementById('historial-list');
+    if (!container) return;
+    const historial = JSON.parse(localStorage.getItem(HISTORIAL_KEY()) || '[]');
+
+    if (historial.length === 0) {
+        container.innerHTML = `<div class="historial-empty">
+            <span style="font-size:2rem"></span>
+            <p>Aún no hay actividad registrada.<br>¡Empieza a invertir!</p>
+        </div>`;
+        return;
     }
-    return state.monedas >= PET_DEFS[id].cost;
+
+    container.innerHTML = historial.map((e, i) => {
+        const icon  = iconByTipo[e.tipo]  || '•';
+        const color = colorByTipo[e.tipo] || '#666';
+        const isGameOver = e.tipo === 'gameover';
+        return `
+        <div class="historial-item ${isGameOver ? 'historial-gameover' : ''}">
+            <div class="hi-icon" style="background:${color}20; color:${color}">${icon}</div>
+            <div class="hi-body">
+                <span class="hi-msg">${e.mensaje}</span>
+                ${e.extra ? `<span class="hi-extra">${e.extra}</span>` : ''}
+            </div>
+            <div class="hi-meta">
+                <span class="hi-hora">${e.hora}</span>
+                <span class="hi-monedas"> ${e.monedas}</span>
+            </div>
+        </div>`;
+    }).join('');
 };
 
-const canUnlockPet = (id) => {
-    if (PET_ORDER_GOLDEN.includes(id)) return canUnlockGoldenPet(id);
-    const idx = PET_ORDER.indexOf(id);
-    if (idx === 0) return true;
-    const prevId   = PET_ORDER[idx - 1];
-    const prevData = state.petData.get(prevId);
-    if (!prevData || !prevData.unlocked) return false;
-    if (prevData.health < 100) return false;
-    const def = PET_DEFS[id];
-    return state.monedas >= def.cost;
+// Tutorial gestionado por tutorial.js
+// Fallback por si tutorial.js no carga a tiempo
+window.openTutorial = () => {
+    // Esperar hasta 3 segundos a que tutorial.js cargue
+    let attempts = 0;
+    const tryOpen = () => {
+        if (typeof TUTORIAL_STEPS !== 'undefined') {
+            // tutorial.js ya cargó — usar su función real
+            const realOpen = () => {
+                tutorialFirstRun = !localStorage.getItem(TUTORIAL_DONE_KEY());
+                tutorialActive   = true;
+                tutorialStep     = 0;
+                tutorialSelectedAction = null;
+                createTutorialUI();
+                renderTutorialStep();
+            };
+            realOpen();
+        } else if (attempts < 30) {
+            attempts++;
+            setTimeout(tryOpen, 100);
+        } else {
+            showToast('️ Tutorial no disponible. Recarga la página e inténtalo de nuevo.');
+        }
+    };
+    tryOpen();
 };
 
-const canUnlockGoldenPet = (id) => {
-    if (!state.victoryAchieved) return false;
-    const idx = PET_ORDER_GOLDEN.indexOf(id);
-    if (idx < 0) return false;
-    if (idx > 0) {
-        const prevId   = PET_ORDER_GOLDEN[idx - 1];
-        const prevData = state.petData.get(prevId);
-        if (!prevData || !prevData.unlocked) return false;
-        // Sin requisito de salud 100% — solo necesitas tenerla desbloqueada
+
+// ============================================================
+//  SISTEMA DE CÓDIGOS DE RECOMPENSA
+// ============================================================
+const CODIGOS = {
+    'BITGAMESO': {
+        unica: true,   // solo se puede canjear una vez por usuario
+        recompensa: (usuario) => {
+            state.monedas += 1000;
+            logEvent('bonus', 'Código BITGAMESO canjeado', '+1000 monedas');
+            return ' ¡Código válido! +1,000 monedas de bienvenida';
+        }
+    },
+    '1234': {
+        unica: true,  // solo una vez por cuenta
+        recompensa: (usuario) => {
+            state.monedas += 1000000;
+            logEvent('bonus', 'Código 1234 canjeado', '+1,000,000 monedas');
+            return ' ¡Código válido! +1,000,000 monedas';
+        }
+    },
+    'BIENVENIDA': {
+        unica: true,
+        recompensa: (usuario) => {
+            state.monedas += 500;
+            // Añadir comidas respetando límite de 99
+            const addFoodSafe = (id, qty) => {
+                const food = foodDatabase.find(f => f.id === id);
+                if (!food) return 0;
+                const existing = state.inventory.get(id);
+                const currentQty = existing?.qty || 0;
+                const canAdd = Math.min(qty, MAX_FOOD_QTY - currentQty);
+                if (canAdd <= 0) return 0;
+                state.inventory.set(id, { ...food, price: 0, qty: currentQty + canAdd });
+                return canAdd;
+            };
+            const r1 = addFoodSafe('Carrot-128', 2);
+            const r2 = addFoodSafe('Fish-128', 1);
+            const r3 = addFoodSafe('Candy-Blue-128', 3);
+            const r4 = addFoodSafe('Pumpkin-128', 3);
+            logEvent('bonus', 'Código BIENVENIDA canjeado', '+500 monedas + comidas gratis');
+            return ` ¡Código válido! +500 monedas + ${r1} zanahorias, ${r2} pescado, ${r3} dulces, ${r4} calabazas`;
+        }
+    },
+    'JOSELUIS': {
+        unica: true,
+        recompensa: (usuario) => {
+            state.foodInflation.clear();
+            logEvent('bonus', 'Código JOSELUIS canjeado', 'Inflación de comida reseteada');
+            return ' ¡Código válido! Toda la inflación de comida ha sido reseteada';
+        }
+    },
+    'DAVID': {
+        unica: true,
+        recompensa: (usuario) => {
+            state.monedas += 1_000_000_000_000;
+            const calabazaId = 'Pumpkin-128';
+            const existing   = state.inventory.get(calabazaId);
+            if (existing) {
+                existing.qty = Math.min((existing.qty || 1) + 99, 99);
+                state.inventory.set(calabazaId, existing);
+            } else {
+                state.inventory.set(calabazaId, { id: calabazaId, name: 'Calabaza', cat: 'verdura', health: 12, qty: 99 });
+            }
+            if (typeof renderInventory === 'function') renderInventory();
+            logEvent('bonus', 'Código DAVID canjeado', '+1,000,000,000,000 monedas + 99 calabazas');
+            return 'Código válido! +1,000,000,000,000 monedas + 99 calabazas';
+        }
+    },
+    'PRUEBADEV': {
+        unica: true,
+        recompensa: (usuario) => {
+            // +100,000,000,000,000,000,000,000 monedas
+            state.monedas += 1e23;
+
+            // 99 de TODAS las comidas
+            foodDatabase.forEach(food => {
+                const maxQty = food.cat === 'misc' ? 5 : 99;
+                const existing = state.inventory.get(food.id);
+                if (existing) {
+                    existing.qty = maxQty;
+                    state.inventory.set(food.id, existing);
+                } else {
+                    state.inventory.set(food.id, {
+                        id:     food.id,
+                        name:   food.name,
+                        cat:    food.cat,
+                        health: food.health,
+                        qty:    maxQty,
+                    });
+                }
+            });
+
+            if (typeof renderInventory === 'function') renderInventory();
+            logEvent('bonus', 'Código PRUEBADEV canjeado', '+1e23 monedas + 99 de toda la comida');
+            return 'Código válido! +100,000,000,000,000,000,000,000 monedas + 99 de toda la comida';
+        }
+    },
+};
+
+const getCodigoKey = (codigo) => {
+    const usuario = localStorage.getItem('bitgameso_sesion_activa') || 'invitado';
+    return `bitgameso_codigo_${codigo}_${usuario}`;
+};
+
+window.openCodigoModal = () => {
+    const input = document.getElementById('codigo-input');
+    const msg   = document.getElementById('codigo-msg');
+    if (input) input.value = '';
+    if (msg)   msg.textContent = '';
+    if (msg)   msg.style.color = '';
+    document.getElementById('modal-codigo').style.display = 'flex';
+    setTimeout(() => input?.focus(), 100);
+};
+
+window.closeCodigoModal = () => {
+    document.getElementById('modal-codigo').style.display = 'none';
+};
+
+window.canjearCodigo = () => {
+    const input = document.getElementById('codigo-input');
+    const msg   = document.getElementById('codigo-msg');
+    if (!input || !msg) return;
+
+    const codigo = input.value.trim().toUpperCase();
+    if (!codigo) { msg.textContent = '️ Escribe un código primero'; msg.style.color = '#e67e22'; return; }
+
+    const def = CODIGOS[codigo];
+    if (!def) { msg.textContent = ' Código no válido'; msg.style.color = '#e74c3c'; return; }
+
+    // Verificar si ya fue canjeado (solo para códigos únicos)
+    if (def.unica && localStorage.getItem(getCodigoKey(codigo))) {
+        msg.textContent = ' Este código ya fue canjeado por tu cuenta';
+        msg.style.color = '#e74c3c';
+        return;
     }
-    return state.monedas >= PET_DEFS[id].cost;
+
+    // Aplicar recompensa
+    const resultado = def.recompensa(localStorage.getItem('bitgameso_sesion_activa'));
+    msg.textContent = resultado;
+    msg.style.color = '#27ae60';
+
+    // Marcar como canjeado si es único
+    if (def.unica) localStorage.setItem(getCodigoKey(codigo), 'true');
+
+    // Actualizar UI
+    updateUI();
+    input.value = '';
+    showToast(resultado);
+    // El modal queda abierto para que el usuario pueda canjear otro código
 };
 
-window.unlockPet = (id) => {
-    const isDiamond = PET_ORDER_DIAMOND.includes(id);
-    const isGolden  = PET_ORDER_GOLDEN.includes(id);
-    const canUnlock = isDiamond ? canUnlockDiamondPet(id)
-                    : isGolden  ? canUnlockGoldenPet(id)
-                    : canUnlockPet(id);
-    if (!canUnlock) { _getShowToast()('No puedes desbloquear esta mascota aun'); return; }
-    const def  = PET_DEFS[id];
-    const data = state.petData.get(id) || { health: 0, unlocked: false };
-    state.monedas -= def.cost;
-    data.unlocked = true;
-    data.health   = 50;
-    state.petData.set(id, data);
-    _getShowToast()(`Desbloqueaste ${def.label}!`);
-    _getLogEvent()('mascota', `Desbloqueaste ${def.label}`, `Costo: ${def.cost.toLocaleString()}`);
-    _getUpdateUI()();
-    openPetSelector();
-};
-
-window.selectPet = (id, label) => {
-    // Guardar salud de la mascota actual antes de cambiar
-    saveCurPetHealth();
-    state.currentPet = id;
-    // Restaurar salud de la nueva mascota
-    const data = state.petData.get(id);
-    if (data) {
-        state.saludMascota = data.health;
-        // Marcar como usada para que si llega a 0% no se resetee
-        data.everUsed = true;
-        state.petData.set(id, data);
+// También permitir Enter en el input
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('codigo-input');
+    if (input) {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') canjearCodigo();
+        });
     }
+});
+
+// ============================================================
+//  INIT
+// ============================================================
+
+// ============================================================
+//  MOBILE: reiniciar timers al volver al primer plano
+// ============================================================
+let lastTickTime = Date.now();
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        // Guardar antes de ir a segundo plano
+        if (typeof saveCurPetHealth === 'function') saveCurPetHealth();
+        saveGame();
+        lastTickTime = Date.now();
+    } else {
+        // Volvió al primer plano — reiniciar todos los timers
+        const elapsed = Date.now() - lastTickTime;
+        console.log(`Volvió al primer plano tras ${elapsed}ms — reiniciando timers`);
+
+        // Restar tiempo transcurrido de los efectos activos
+        if (elapsed > 0) {
+            const elapsedSecs = Math.floor(elapsed / 1000);
+            ['marketFast','doubleProfit','futureVision'].forEach(k => {
+                if (state.effectsTime[k] > 0) {
+                    state.effectsTime[k] = Math.max(0, state.effectsTime[k] - elapsedSecs);
+                }
+            });
+        }
+
+        // Reiniciar market timer
+        if (typeof startPassivesForPet === 'function') {
+            startPassivesForPet(state.currentPet);
+        } else {
+            startMarket(SPEED_NORMAL);
+        }
+
+        // Reiniciar effect tick
+        if (typeof startEffectTick === 'function') startEffectTick();
+
+        // Forzar fetch inmediato para que los precios se actualicen
+        fetchMarket();
+        renderEffectBadges();
+    }
+});
+
+window.addEventListener('beforeunload', () => {
+    if (typeof saveCurPetHealth === 'function') saveCurPetHealth();
+    saveGame();
+});
+
+// Heartbeat: si el mercado lleva más de 10s sin actualizarse, reiniciarlo
+setInterval(() => {
+    const sinceLastUpdate = Date.now() - (window._lastMarketUpdate || 0);
+    if (sinceLastUpdate > 10000 && document.visibilityState === 'visible') {
+        console.warn('Mercado congelado detectado — reiniciando...');
+        if (typeof startPassivesForPet === 'function') {
+            startPassivesForPet(state.currentPet);
+        } else {
+            startMarket(SPEED_NORMAL);
+        }
+        fetchMarket();
+    }
+}, 10000);
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Verificar que hay una sesión activa
+    const sesionActiva = localStorage.getItem('bitgameso_sesion_activa');
+    if (!sesionActiva) {
+        alert('Debes iniciar sesión para jugar.');
+        window.location.href = '../InicioCuenta/inico.html';
+        return;
+    }
+
+    // Mostrar nombre del usuario en el header
+    const nombreEl = document.getElementById('nombre-usuario');
+    if (nombreEl) nombreEl.textContent = sesionActiva;
+
+    refs.monedasCount   = document.getElementById('monedas-count');
+    refs.marketList     = document.getElementById('lista-activos');
+    refs.marketUpdated  = document.getElementById('market-updated');
+    refs.petHealthValue = document.getElementById('pet-health-value');
+    refs.petMessage     = document.getElementById('pet-message');
+
+    // Cargar progreso: primero nube, luego local
+    if (typeof window.initCloudSync === 'function') {
+        await window.initCloudSync(); // carga desde Supabase si hay guardado más reciente
+    }
+    loadGame(); // carga desde localStorage (ya actualizado por initCloudSync)
+
+    // Actualizar monedas en pantalla inmediatamente tras cargar
+    if (refs.monedasCount) refs.monedasCount.textContent = parseFloat(state.monedas).toFixed(2);
+    if (typeof initPetData === 'function') initPetData();
+
+    // Botones nav
+    document.getElementById('btn-depositar')?.addEventListener('click', openDeposit);
+    document.getElementById('btn-comprar')  ?.addEventListener('click', openFoodShop);
+    document.getElementById('btn-vender')   ?.addEventListener('click', sellSelectedFood);
+    document.getElementById('btn-enviar')   ?.addEventListener('click', useFoodOnPet);
+
     renderPet();
     renderPetHealth();
-    startPassivesForPet(id);
-    closePetSelector();
-    renderPetAbilityButton();
-    _getShowToast()(`🐾 ¡Ahora juegas con ${label}!`);
-    _getLogEvent()('mascota', `Cambiaste a ${label}`, '');
-    _getSaveGame()();
-};
+    renderInventory();
+    renderEffectBadges();
+    buildFilterTabs();
+    fetchMarket();
+    reactivateEffects();
+    if (typeof startPassivesForPet === 'function') startPassivesForPet(state.currentPet);
+    startMarket(state.effectsTime.marketFast > 0 ? SPEED_FAST : SPEED_NORMAL);
+    startEffectTick();
+    startPetTips();
+    scheduleNextEvent();
+    // Inicializar mecánicas financieras realistas
+    if (typeof window.initFinanceMechanics === 'function') window.initFinanceMechanics();
+});
 
-window.closePetSelector = () => {
-    document.getElementById('modal-mascota').style.display = 'none';
-};
-
-const saveCurPetHealth = () => {
-    const data = state.petData.get(state.currentPet) || { health: state.saludMascota, unlocked: true };
-    data.health = state.saludMascota;
-    state.petData.set(state.currentPet, data);
-};
-
-// ============================================================
-//  INTEGRACIÓN CON changePetHealth — sincroniza petData
-// ============================================================
-const _origChangePetHealth = typeof changePetHealth === 'function' ? changePetHealth : null;
-
-// Override para sincronizar barras
-const syncPetHealthToData = () => {
-    const data = state.petData.get(state.currentPet);
-    if (data) { data.health = state.saludMascota; state.petData.set(state.currentPet, data); }
-    // Verificar condicion de victoria cada vez que cambia la salud
-    checkVictory();
-    checkDiamondVictory();
-};
+console.log('BITGAMESO v5 — inflación comida, bonos sector, 50 mensajes mascota. ');
