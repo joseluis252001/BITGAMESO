@@ -1,6 +1,5 @@
 // ============================================================
-//  BITGAMESO — tutorial.js
-//  Tutorial interactivo con overlay, mascota parlante y pasos
+//  BITGAMESO — tutorial.js  (v2 — bloqueo real de interacción)
 // ============================================================
 
 const TUTORIAL_DONE_KEY = () => {
@@ -8,20 +7,18 @@ const TUTORIAL_DONE_KEY = () => {
     return `bitgameso_tutorial_done_${u}`;
 };
 
-let tutorialActive   = false;
-let tutorialStep     = 0;
-let tutorialFirstRun = false;
+let tutorialActive        = false;
+let tutorialStep          = 0;
+let tutorialFirstRun      = false;
 let tutorialSelectedAction = null;
-let _typewriterTimer = null; // rastrea el intervalo activo para cancelarlo si hay uno nuevo
+let _typewriterTimer      = null;
+
+// Elementos que se elevan temporalmente para "romper" el overlay
+let _elevatedEls = [];
 
 // ============================================================
 //  PASOS DEL TUTORIAL
 // ============================================================
-// Cada paso tiene:
-//   target    → selector CSS del elemento a resaltar (null = solo diálogo)
-//   mascot    → texto que dice la mascota
-//   waitFor   → evento que debe ocurrir para avanzar ('click_target' | 'auto' | 'buy' | 'sell' | 'buy_food' | 'use_food' | 'sell_food')
-//   scrollTo  → si debe hacer scroll al elemento
 const TUTORIAL_STEPS = [
     // PASO 0 — Bienvenida
     {
@@ -29,14 +26,14 @@ const TUTORIAL_STEPS = [
         mascot:  'Hola! Soy tu mascota y te voy a ensenar lo basico de BITGAMESO en pocos pasos. Presiona Siguiente para comenzar.',
         waitFor: 'next',
     },
-    // PASO 1 — Monedas + mascota
+    // PASO 1 — Monedas
     {
         target:   '.score-container',
-        mascot:   'Estas son tus monedas. Con ellas inviertes en el mercado y me compras comida para mantenerme con vida. Si mi salud llega a 0, pierdes. Mantenerme sana es tu prioridad.',
+        mascot:   'Estas son tus monedas. Con ellas inviertes en el mercado y me compras comida para mantenerme con vida. Si mi salud llega a 0, pierdes.',
         waitFor:  'next',
         scrollTo: true,
     },
-    // PASO 2 — El mercado
+    // PASO 2 — El mercado (resalta sección completa)
     {
         target:   '.market-main',
         arrowDir: 'up',
@@ -44,46 +41,45 @@ const TUTORIAL_STEPS = [
         waitFor:  'next',
         scrollTo: true,
     },
-    // PASO 3 — Comprar una accion
+    // PASO 3 — Comprar una accion (resalta botón específico)
     {
-        target:   '.market-list',
+        target:   null,   // se asigna dinámicamente en setupBuyTutorial
         mascot:   'Voy a resaltar una accion. Presiona el boton COMPRAR de esa accion para hacer tu primera inversion.',
         waitFor:  'buy_tutorial',
         scrollTo: true,
     },
-    // PASO 4 — Vender con ganancia
+    // PASO 4 — Cartera: vender con ganancia
     {
         target:   '.portfolio-aside',
         mascot:   'Tu inversion esta en la Cartera. Cuando el numero este en VERDE significa ganancia. Presiona VENDER en tu cartera para cobrar.',
         waitFor:  'sell_tutorial',
         scrollTo: true,
     },
-    // PASO 5 — Comprar comida
+    // PASO 5 — Abrir tienda
     {
         target:   '#btn-comprar',
         mascot:   'Bien vendido! Ahora vamos a comprarme comida. Presiona el boton "Comprar" para abrir la tienda.',
         waitFor:  'click_target',
         scrollTo: true,
     },
-    // PASO 6 — Comprar verdura en tienda
+    // PASO 6 — Comprar manzana en tienda
     {
         target:     '.food-shop-grid',
-        mascot:     'Busca una VERDURA (color verde) y comprala. Las verduras me dan salud directamente.',
+        mascot:     'Busca la MANZANA (fruta roja, primera de la lista) y comprala. Las frutas activan el mercado rapido.',
         waitFor:    'buy_food_tutorial',
         scrollTo:   false,
-        highlightVeg: true,
     },
-    // PASO 7 — Seleccionar y enviar comida
+    // PASO 7 — Seleccionar item del inventario
     {
         target:   '.inventory-section',
-        mascot:   'La verdura esta en tu inventario. Haz click en ella para seleccionarla y luego presiona el boton "Enviar" para darmela. Eso me recupera salud.',
+        mascot:   'La manzana esta en tu inventario (barra superior). Haz click en ella para seleccionarla.',
         waitFor:  'select_food_tutorial',
         scrollTo: true,
     },
     // PASO 8 — Enviar comida
     {
-        target:   '.nav-actions',
-        mascot:   'Ahora presiona "Enviar" para darme la comida. Recuerda: "Vender" te da monedas por el item, "Enviar" me da la comida a mi.',
+        target:   '#btn-enviar',
+        mascot:   'Ahora presiona "Enviar" para darme la comida. Recuerda: "Vender" te da monedas, "Enviar" me alimenta a mi.',
         waitFor:  'use_food_tutorial',
         scrollTo: true,
     },
@@ -107,11 +103,10 @@ const TUTORIAL_STEPS = [
 //  INICIAR / CERRAR TUTORIAL
 // ============================================================
 window.openTutorial = () => {
-    tutorialFirstRun = !localStorage.getItem(TUTORIAL_DONE_KEY());
-    tutorialActive   = true;
-    tutorialStep     = 0;
+    tutorialFirstRun       = !localStorage.getItem(TUTORIAL_DONE_KEY());
+    tutorialActive         = true;
+    tutorialStep           = 0;
     tutorialSelectedAction = null;
-
     createTutorialUI();
     renderTutorialStep();
 };
@@ -121,10 +116,10 @@ window.closeTutorial = () => {
     if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
     removeTutorialUI();
     removeHighlight();
+    lowerAllElevated();
 };
 
 const finishTutorial = () => {
-    // Dar monedas solo en el primer tutorial
     if (tutorialFirstRun && !localStorage.getItem(TUTORIAL_DONE_KEY())) {
         state.monedas += 1000;
         if (typeof updateUI === 'function') updateUI();
@@ -132,7 +127,47 @@ const finishTutorial = () => {
     }
     closeTutorial();
     if (typeof showToast === 'function')
-        showToast(tutorialFirstRun ? ' ¡Tutorial completado! +1000 de regalo' : ' ¡Repasaste el tutorial!');
+        showToast(tutorialFirstRun ? '¡Tutorial completado! +1000 de regalo' : '¡Repasaste el tutorial!');
+};
+
+// ============================================================
+//  ELEVACIÓN DE ELEMENTOS (para romper el overlay bloqueante)
+// ============================================================
+
+// Guarda el z-index original y eleva el elemento por encima del overlay
+const elevateElement = (el) => {
+    if (!el) return;
+    // Evitar duplicados
+    if (_elevatedEls.find(e => e.el === el)) return;
+    const prev = el.style.zIndex;
+    const prevPos = el.style.position;
+    _elevatedEls.push({ el, prevZIndex: prev, prevPosition: prevPos });
+    el.style.position = 'relative';
+    el.style.zIndex   = '9993';
+};
+
+// Restaura z-index de todos los elementos elevados
+const lowerAllElevated = () => {
+    _elevatedEls.forEach(({ el, prevZIndex, prevPosition }) => {
+        el.style.zIndex   = prevZIndex;
+        el.style.position = prevPosition;
+    });
+    _elevatedEls = [];
+};
+
+// ============================================================
+//  BLOQUEO GLOBAL — el overlay bloquea TODO
+//  Los elementos elevados (z-index 9993) quedan por encima del overlay (9989)
+//  y la burbuja (9995) queda por encima de todo
+// ============================================================
+const enableOverlayBlock = () => {
+    const overlay = document.getElementById('tutorial-overlay');
+    if (overlay) overlay.style.pointerEvents = 'all'; // BLOQUEA clics
+};
+
+const disableOverlayBlock = () => {
+    const overlay = document.getElementById('tutorial-overlay');
+    if (overlay) overlay.style.pointerEvents = 'none';
 };
 
 // ============================================================
@@ -141,13 +176,11 @@ const finishTutorial = () => {
 const createTutorialUI = () => {
     removeTutorialUI();
 
-    // Overlay oscuro — semi-transparente, no bloquea clicks
     const overlay = document.createElement('div');
     overlay.id = 'tutorial-overlay';
-    overlay.style.pointerEvents = 'none'; // permite interacción libre
+    overlay.style.pointerEvents = 'all'; // BLOQUEANTE por defecto
     document.body.appendChild(overlay);
 
-    // Ventana de mascota
     const bubble = document.createElement('div');
     bubble.id = 'tutorial-bubble';
     bubble.innerHTML = `
@@ -173,7 +206,7 @@ const createTutorialUI = () => {
             <span id="tut-step-counter" class="tut-counter"></span>
             <div class="tut-buttons">
                 <button id="tut-btn-next" class="tut-btn-primary" onclick="tutorialNext()" style="display:none;">Siguiente →</button>
-                <button id="tut-btn-finish" class="tut-btn-finish" onclick="finishTutorial()" style="display:none;"> ¡Terminar!</button>
+                <button id="tut-btn-finish" class="tut-btn-finish" onclick="finishTutorial()" style="display:none;">¡Terminar!</button>
             </div>
         </div>
     `;
@@ -195,17 +228,23 @@ const renderTutorialStep = () => {
     const step = TUTORIAL_STEPS[tutorialStep];
     if (!step) return;
 
-    // Ocultar botones ANTES de iniciar typewriter
+    // Bajar elementos elevados del paso anterior
+    lowerAllElevated();
+
+    // Bloquear overlay por defecto
+    enableOverlayBlock();
+
+    // Ocultar botones mientras escribe
     const btnNextPre   = document.getElementById('tut-btn-next');
     const btnFinishPre = document.getElementById('tut-btn-finish');
     if (btnNextPre)   { btnNextPre.style.opacity = '0.3';   btnNextPre.style.pointerEvents = 'none'; }
     if (btnFinishPre) { btnFinishPre.style.opacity = '0.3'; btnFinishPre.style.pointerEvents = 'none'; }
 
-    // Texto de la mascota con efecto typewriter
+    // Texto con typewriter
     const textEl = document.getElementById('tut-text');
     if (textEl) typewriterEffect(textEl, step.mascot);
 
-    // Contador de pasos
+    // Contador
     const counter = document.getElementById('tut-step-counter');
     if (counter) counter.textContent = `Paso ${tutorialStep + 1} de ${TUTORIAL_STEPS.length}`;
 
@@ -215,29 +254,41 @@ const renderTutorialStep = () => {
     if (btnNext)   btnNext.style.display   = step.waitFor === 'next'   ? 'block' : 'none';
     if (btnFinish) btnFinish.style.display = step.waitFor === 'finish' ? 'block' : 'none';
 
-    // Resaltar elemento
+    // Resaltar elemento (pasos con target fijo)
     if (step.target) {
-        const el = document.querySelector(step.target);
-        if (el) {
-            if (step.scrollTo) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Esperar que scroll termine antes de calcular posición del highlight
-                setTimeout(() => highlightElement(el, step), 600);
-            } else {
-                setTimeout(() => highlightElement(el, step), 400);
+        const doHighlight = () => {
+            const el = document.querySelector(step.target);
+            if (el) {
+                elevateElement(el);
+                highlightElement(el, step);
             }
+        };
+        if (step.scrollTo) {
+            const el = document.querySelector(step.target);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(doHighlight, 700);
+            }
+        } else {
+            setTimeout(doHighlight, 300);
         }
     } else {
         removeHighlight();
     }
 
     // Pasos especiales
-    if (step.waitFor === 'buy_tutorial')       setupBuyTutorial();
-    if (step.waitFor === 'sell_tutorial')      setupSellTutorial();
-    if (step.waitFor === 'click_target')       setupClickTarget(step.target);
-    if (step.waitFor === 'buy_food_tutorial')  setupBuyFoodTutorial();
-    if (step.waitFor === 'select_food_tutorial') setupSelectFoodTutorial();
-    if (step.waitFor === 'use_food_tutorial')  setupUseFoodTutorial();
+    if (step.waitFor === 'buy_tutorial')           setupBuyTutorial();
+    if (step.waitFor === 'sell_tutorial')          setupSellTutorial();
+    if (step.waitFor === 'click_target')           setupClickTarget(step.target);
+    if (step.waitFor === 'buy_food_tutorial')      setupBuyFoodTutorial();
+    if (step.waitFor === 'select_food_tutorial')   setupSelectFoodTutorial();
+    if (step.waitFor === 'use_food_tutorial')      setupUseFoodTutorial();
+
+    // En pasos 'next'/'finish', elevar la burbuja (ya tiene z-index 9995 en CSS)
+    // y también el botón de cerrar si existe
+    if (step.waitFor === 'next' || step.waitFor === 'finish') {
+        // nada extra — la burbuja ya está en z-index 9995
+    }
 };
 
 const tutorialNext = () => {
@@ -246,7 +297,7 @@ const tutorialNext = () => {
     renderTutorialStep();
 };
 
-window.tutorialNext = tutorialNext;
+window.tutorialNext   = tutorialNext;
 window.finishTutorial = finishTutorial;
 
 // ============================================================
@@ -254,10 +305,11 @@ window.finishTutorial = finishTutorial;
 // ============================================================
 const highlightElement = (el, step) => {
     removeHighlight();
+    if (!el) return;
+
     const rect = el.getBoundingClientRect();
     const pad  = 8;
 
-    // Caja de resaltado
     const box = document.createElement('div');
     box.id = 'tutorial-highlight-box';
     const isLarge = rect.width > 500 || rect.height > 300;
@@ -276,7 +328,7 @@ const highlightElement = (el, step) => {
     `;
     document.body.appendChild(box);
 
-    // Dirección de flecha según paso
+    // Flecha
     const dir = step.arrowDir || 'up';
     const arrowMap = {
         'up':    { img: 'Arrow-Complete-Up-128.png',    anim: 'tut-bounce-up' },
@@ -284,15 +336,14 @@ const highlightElement = (el, step) => {
         'left':  { img: 'Arrow-Complete-Left-128.png',  anim: 'tut-bounce-left' },
         'right': { img: 'Arrow-Complete-Right-128.png', anim: 'tut-bounce-right' },
     };
-    const arrowCfg = arrowMap[dir] || arrowMap['up'];
+    const arrowCfg  = arrowMap[dir] || arrowMap['up'];
     const arrowSize = 48;
-    const arrow = document.createElement('div');
-    arrow.id = 'tutorial-arrow';
+    const arrow     = document.createElement('div');
+    arrow.id        = 'tutorial-arrow';
 
-    // Posición de la flecha según dirección
-    let arrowTop, arrowLeft, arrowAnim = arrowCfg.anim;
     const cx = rect.left + rect.width/2;
     const cy = rect.top  + rect.height/2;
+    let arrowTop, arrowLeft;
     if (dir === 'up')    { arrowTop = rect.bottom + pad + 4; arrowLeft = cx - arrowSize/2; }
     if (dir === 'down')  { arrowTop = rect.top - arrowSize - pad - 4; arrowLeft = cx - arrowSize/2; }
     if (dir === 'left')  { arrowTop = cy - arrowSize/2; arrowLeft = rect.right + pad + 4; }
@@ -309,13 +360,12 @@ const highlightElement = (el, step) => {
         height: ${arrowSize}px;
         z-index: 9991;
         pointer-events: none;
-        animation: ${arrowAnim} 0.7s infinite alternate;
+        animation: ${arrowCfg.anim} 0.7s infinite alternate;
         filter: drop-shadow(0 0 6px #CBA6F7);
     `;
     arrow.innerHTML = `<img src="../assets/arrows/${arrowCfg.img}" style="width:100%;height:100%;object-fit:contain;">`;
     document.body.appendChild(arrow);
 
-    // Posicionar burbuja
     positionBubble(rect, dir);
 };
 
@@ -328,16 +378,13 @@ const positionBubble = (rect, dir = 'up') => {
     const wW  = window.innerWidth;
     const pad = 16;
 
-    // Centrar horizontalmente respecto al elemento
     let left = rect.left + rect.width/2 - bW/2;
     let top;
 
     if (dir === 'left' || dir === 'right') {
-        // Burbuja centrada verticalmente, al lado opuesto de la flecha
         top  = rect.top + rect.height/2 - bH/2;
         left = dir === 'left' ? rect.right + 70 : rect.left - bW - 70;
     } else {
-        // up/down: burbuja debajo de la flecha
         top = rect.bottom + 65;
         if (top + bH > wH - pad) top = rect.top - bH - 65;
     }
@@ -368,12 +415,10 @@ const removeActionGlow = () => {
 };
 
 // ============================================================
-//  TYPEWRITER EFFECT
+//  TYPEWRITER
 // ============================================================
 const typewriterEffect = (el, text, onDone) => {
     if (!el || !text) { if (onDone) onDone(); return; }
-
-    // Cancelar cualquier typewriter anterior antes de empezar uno nuevo
     if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
 
     el.textContent = '';
@@ -400,12 +445,11 @@ const typewriterEffect = (el, text, onDone) => {
 };
 
 // ============================================================
-//  SETUP DE PASOS ESPECIALES
+//  SETUP PASO 3 — COMPRAR ACCION
+//  Eleva y resalta solo el botón COMPRAR del activo elegido
 // ============================================================
-
-// Resaltar primera acción del mercado, moverla arriba y esperar que la compre
 const setupBuyTutorial = () => {
-    // Encontrar el primer activo no poseído
+    // Elegir primer activo no poseído
     let targetSymbol = null;
     for (const [sym] of state.market) {
         if (!state.portfolio.has(sym)) { targetSymbol = sym; break; }
@@ -413,7 +457,7 @@ const setupBuyTutorial = () => {
     if (!targetSymbol) { tutorialNext(); return; }
     tutorialSelectedAction = targetSymbol;
 
-    // Mover el activo al inicio del mapa
+    // Mover el activo al inicio del mapa para que aparezca primero
     const targetAsset = state.market.get(targetSymbol);
     state.market.delete(targetSymbol);
     const newMarket = new Map();
@@ -421,17 +465,17 @@ const setupBuyTutorial = () => {
     state.market.forEach((v, k) => newMarket.set(k, v));
     state.market = newMarket;
 
-    // Forzar filtro 'Todos' para que se vea el activo
+    // Forzar filtro 'Todos'
     if (typeof setFilter === 'function') setFilter('Todos');
     if (typeof renderMarket === 'function') renderMarket();
 
-    // Paso 1: scroll al mercado
+    // Scroll al mercado
     const marketEl = document.querySelector('.market-main');
     if (marketEl) marketEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Paso 2: tras scroll, encontrar el botón y resaltarlo
+    // Esperar scroll y luego resaltar el botón correcto
     setTimeout(() => {
-        const highlightTargetBtn = () => {
+        const doHighlightBtn = () => {
             const rows = document.querySelectorAll('.asset-row');
             let targetBtn = null;
             rows.forEach(row => {
@@ -441,197 +485,331 @@ const setupBuyTutorial = () => {
                 }
             });
 
-            if (targetBtn) {
-                // Deshabilitar todos los otros botones comprar temporalmente
-                document.querySelectorAll('.btn-buy').forEach(btn => {
-                    if (btn !== targetBtn) {
-                        btn.style.opacity = '0.3';
-                        btn.style.pointerEvents = 'none';
-                    }
-                });
-
-                // Scroll al botón y resaltar
-                targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => {
-                    const rect = targetBtn.getBoundingClientRect();
-                    highlightElement(targetBtn, { arrowDir: 'up' });
-                    positionBubble(rect, 'up');
-                    addActionGlow(targetBtn);
-
-                    // Actualizar texto de la burbuja
-                    const textEl = document.getElementById('tut-text');
-                    if (textEl) textEl.textContent = 'Presiona COMPRAR en la accion resaltada arriba para hacer tu primera inversion!';
-                }, 500);
+            if (!targetBtn) {
+                // Reintentar si el DOM todavía no se renderizó
+                setTimeout(doHighlightBtn, 400);
+                return;
             }
+
+            // Deshabilitar TODOS los otros botones comprar
+            document.querySelectorAll('.btn-buy').forEach(btn => {
+                if (btn !== targetBtn) {
+                    btn.style.opacity       = '0.3';
+                    btn.style.pointerEvents = 'none';
+                }
+            });
+
+            // Elevar el botón para que quede sobre el overlay
+            elevateElement(targetBtn);
+            // También elevar la fila para que se vea bien
+            const targetRow = targetBtn.closest('.asset-row');
+            if (targetRow) elevateElement(targetRow);
+
+            // Scroll al botón
+            targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            setTimeout(() => {
+                highlightElement(targetBtn, { arrowDir: 'up' });
+                addActionGlow(targetBtn);
+
+                const textEl = document.getElementById('tut-text');
+                if (textEl) textEl.textContent = 'Presiona COMPRAR en la accion resaltada para hacer tu primera inversion.';
+            }, 500);
         };
-        highlightTargetBtn();
+        doHighlightBtn();
     }, 900);
 
-    // Polling: esperar que aparezca en cartera y restaurar botones
+    // Polling: esperar que el activo aparezca en cartera
     const poll = setInterval(() => {
         if (!tutorialActive) {
             clearInterval(poll);
-            document.querySelectorAll('.btn-buy').forEach(btn => {
-                btn.style.opacity = '';
-                btn.style.pointerEvents = '';
-            });
+            restoreBuyBtns();
             return;
         }
         if (state.portfolio.has(targetSymbol)) {
             clearInterval(poll);
-            // Restaurar botones
-            document.querySelectorAll('.btn-buy').forEach(btn => {
-                btn.style.opacity = '';
-                btn.style.pointerEvents = '';
-            });
+            restoreBuyBtns();
+            lowerAllElevated();
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 800);
         }
     }, 500);
 };
 
-// Esperar que venda con ganancia (o mostrar aviso si intenta vender en rojo)
+const restoreBuyBtns = () => {
+    document.querySelectorAll('.btn-buy').forEach(btn => {
+        btn.style.opacity       = '';
+        btn.style.pointerEvents = '';
+    });
+};
+
+// ============================================================
+//  SETUP PASO 4 — VENDER CON GANANCIA
+//  Fuerza el precio en +100% para que siempre esté en verde
+// ============================================================
 const setupSellTutorial = () => {
     if (!tutorialSelectedAction) { tutorialNext(); return; }
     const sym = tutorialSelectedAction;
 
-    // Dar bono x2 automático en tutorial (primera vez)
-    if (tutorialFirstRun) {
-        const pos = state.portfolio.get(sym);
-        if (pos) {
-            const asset = state.market.get(sym);
-            if (asset) {
-                state.market.set(sym, { ...asset, price: pos.buyPrice * 2, changePercent: 100 });
-                if (typeof renderMarket === 'function') renderMarket();
-                if (typeof renderPortfolio === 'function') renderPortfolio();
-            }
+    // Siempre forzar precio x2 (tanto en primera vez como en repetición sin monedas)
+    const pos = state.portfolio.get(sym);
+    if (pos) {
+        const asset = state.market.get(sym);
+        if (asset) {
+            state.market.set(sym, { ...asset, price: pos.buyPrice * 2, changePercent: 100 });
+            if (typeof renderMarket === 'function') renderMarket();
+            if (typeof renderPortfolio === 'function') renderPortfolio();
         }
     }
 
-    // Glow en el botón de vender de la cartera
+    // Scroll a la cartera y resaltar
     setTimeout(() => {
-        const sellBtns = document.querySelectorAll('.portfolio-aside .btn-sell, .portfolio-aside .btn-action');
-        sellBtns.forEach(b => addActionGlow(b));
-    }, 800);
+        const portfolioEl = document.querySelector('.portfolio-aside');
+        if (portfolioEl) {
+            portfolioEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                // Buscar el botón VENDER de este activo en la cartera
+                const sellBtns = document.querySelectorAll('.portfolio-aside .btn-sell, .portfolio-aside [class*="sell"]');
+                sellBtns.forEach(b => {
+                    elevateElement(b);
+                    addActionGlow(b);
+                });
+                // Elevar toda la cartera para verla
+                elevateElement(portfolioEl);
+                highlightElement(portfolioEl, { arrowDir: 'up' });
+            }, 700);
+        }
+    }, 300);
 
-    // Interceptar botón vender en cartera
+    // Actualizar texto según precio en tiempo real
+    const priceCheck = setInterval(() => {
+        if (!tutorialActive || !state.portfolio.has(sym)) { clearInterval(priceCheck); return; }
+        const posNow = state.portfolio.get(sym);
+        const cur    = state.market.get(sym);
+        if (posNow && cur) {
+            const textEl = document.getElementById('tut-text');
+            if (textEl) {
+                textEl.textContent = cur.price >= posNow.buyPrice
+                    ? '¡Esta en verde! Es buen momento para vender. ¡Presiona VENDER en tu cartera!'
+                    : 'Aun esta en rojo, espera un poco mas antes de vender...';
+            }
+        }
+    }, 1500);
+
+    // Polling: detectar que el activo salió de la cartera
     const checkSell = setInterval(() => {
         if (!tutorialActive) { clearInterval(checkSell); return; }
         if (!state.portfolio.has(sym)) {
             clearInterval(checkSell);
+            clearInterval(priceCheck);
+            lowerAllElevated();
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
         }
     }, 400);
-
-    // Avisar si el precio está en rojo (solo orientativo)
-    const priceCheck = setInterval(() => {
-        if (!tutorialActive || !state.portfolio.has(sym)) { clearInterval(priceCheck); return; }
-        const pos = state.portfolio.get(sym);
-        const cur = state.market.get(sym);
-        if (pos && cur) {
-            const textEl = document.getElementById('tut-text');
-            if (textEl) {
-                if (cur.price >= pos.buyPrice) {
-                    textEl.textContent = ' ¡Está en verde! Es buen momento para vender. ¡Presiona VENDER en tu cartera!';
-                } else {
-                    textEl.textContent = ' Aún está en rojo, espera un poco más antes de vender...';
-                }
-            }
-        }
-    }, 1500);
 };
 
-// Esperar click en elemento target
+// ============================================================
+//  SETUP PASO 5 — CLICK EN BOTÓN COMPRAR (tienda)
+// ============================================================
 const setupClickTarget = (selector) => {
     if (!selector) return;
     const el = document.querySelector(selector);
     if (!el) return;
 
+    elevateElement(el);
     addActionGlow(el);
 
     const handler = () => {
         el.removeEventListener('click', handler);
         removeActionGlow();
+        lowerAllElevated();
         setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 400);
     };
     el.addEventListener('click', handler);
 };
 
-// Esperar que compre comida — resaltar verduras en tienda
+// ============================================================
+//  SETUP PASO 6 — COMPRAR MANZANA EN TIENDA
+//  Solo resalta la Manzana, bloquea todo lo demás, sin inflación
+// ============================================================
 const setupBuyFoodTutorial = () => {
-    // Resaltar items de verdura en la tienda
-    setTimeout(() => {
-        const vegItems = document.querySelectorAll('.food-item.veg');
-        vegItems.forEach(item => {
-            item.style.boxShadow = '0 0 0 3px #CBA6F7, 0 0 15px rgba(203,166,247,0.6)';
-            item.style.transform = 'scale(1.05)';
-        });
-    }, 300);
+    const TUTORIAL_FOOD_ID = 'Apple-128'; // Siempre la Manzana
+    const prevInvSize = state.inventory ? state.inventory.size : 0;
+    const prevQty     = state.inventory && state.inventory.has(TUTORIAL_FOOD_ID)
+        ? (state.inventory.get(TUTORIAL_FOOD_ID).qty || 1) : 0;
 
-    const prevInv = state.inventory.size;
-    const check = setInterval(() => {
-        if (!tutorialActive) { clearInterval(check); return; }
-        if (state.inventory.size > prevInv) {
-            clearInterval(check);
-            // Quitar resaltado
-            document.querySelectorAll('.food-item.veg').forEach(item => {
-                item.style.boxShadow = '';
-                item.style.transform = '';
+    const doHighlightApple = () => {
+        // Buscar el item de Manzana en la tienda
+        const allItems = document.querySelectorAll('.food-item');
+        let appleItem  = null;
+
+        allItems.forEach(item => {
+            // Buscar por el nombre o por el data-id
+            const nameEl = item.querySelector('.food-name, [class*="name"]');
+            const dataId = item.getAttribute('data-id') || item.getAttribute('data-food-id') || '';
+            const nameText = nameEl ? nameEl.textContent.trim() : '';
+            if (dataId === TUTORIAL_FOOD_ID || nameText === 'Manzana' || dataId.includes('Apple')) {
+                appleItem = item;
+            }
+        });
+
+        if (!appleItem && allItems.length === 0) {
+            // Tienda aún no abrió, reintentar
+            setTimeout(doHighlightApple, 300);
+            return;
+        }
+
+        if (!appleItem) {
+            // Fallback: buscar por imagen
+            allItems.forEach(item => {
+                const img = item.querySelector('img');
+                if (img && img.src && img.src.includes('Apple')) appleItem = item;
             });
+        }
+
+        // Atenuar toda la tienda
+        document.querySelectorAll('.food-item').forEach(item => {
+            item.style.opacity       = '0.3';
+            item.style.pointerEvents = 'none';
+        });
+
+        if (appleItem) {
+            // Resaltar solo la Manzana
+            appleItem.style.opacity       = '1';
+            appleItem.style.pointerEvents = 'auto';
+            appleItem.style.boxShadow     = '0 0 0 4px #CBA6F7, 0 0 20px rgba(203,166,247,0.8)';
+            appleItem.style.transform     = 'scale(1.08)';
+            appleItem.style.transition    = 'all 0.2s';
+            elevateElement(appleItem);
+        }
+
+        // Elevar el modal/grid de la tienda
+        const shopModal = document.querySelector('.food-shop-modal, #food-shop-modal, .modal-overlay.food');
+        if (shopModal) elevateElement(shopModal);
+        const shopGrid = document.querySelector('.food-shop-grid');
+        if (shopGrid) elevateElement(shopGrid);
+        const modalContainer = document.querySelector('.modal-shop, [id*="shop"]');
+        if (modalContainer) elevateElement(modalContainer);
+
+        // Actualizar texto de la burbuja
+        const textEl = document.getElementById('tut-text');
+        if (textEl) textEl.textContent = 'Compra la MANZANA que esta resaltada. Las frutas activan el mercado rapido.';
+    };
+
+    // Actualizar el paso en TUTORIAL_STEPS para que diga Manzana
+    const stepEl = document.getElementById('tut-text');
+    if (stepEl) stepEl.textContent = 'Presiona el boton "Comprar" para abrir la tienda y busca la Manzana.';
+
+    setTimeout(doHighlightApple, 500);
+
+    // Restaurar tienda
+    const restoreShop = () => {
+        document.querySelectorAll('.food-item').forEach(item => {
+            item.style.opacity       = '';
+            item.style.pointerEvents = '';
+            item.style.boxShadow     = '';
+            item.style.transform     = '';
+        });
+        lowerAllElevated();
+    };
+
+    // Polling: detectar que se compró la Manzana
+    const check = setInterval(() => {
+        if (!tutorialActive) { clearInterval(check); restoreShop(); return; }
+
+        let boughtApple = false;
+        if (state.inventory) {
+            const currentQty = state.inventory.has(TUTORIAL_FOOD_ID)
+                ? (state.inventory.get(TUTORIAL_FOOD_ID).qty || 1) : 0;
+            // Se compró si la cantidad subió o si apareció en el inventario
+            if (currentQty > prevQty || (prevQty === 0 && state.inventory.has(TUTORIAL_FOOD_ID))) {
+                boughtApple = true;
+            }
+            // Fallback: inventario creció (solo hay manzanas disponibles)
+            if (!boughtApple && state.inventory.size > prevInvSize) {
+                boughtApple = true;
+            }
+        }
+
+        if (boughtApple) {
+            clearInterval(check);
+            restoreShop();
+
+            // CANCELAR inflación generada por la compra del tutorial
+            if (state.foodInflation && state.foodInflation.has(TUTORIAL_FOOD_ID)) {
+                state.foodInflation.set(TUTORIAL_FOOD_ID, 0);
+            }
+
             if (typeof closeFoodShop === 'function') closeFoodShop();
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
         }
     }, 400);
 };
 
-// Esperar que seleccione un ítem del inventario
+// ============================================================
+//  SETUP PASO 7 — SELECCIONAR ITEM DEL INVENTARIO
+// ============================================================
 const setupSelectFoodTutorial = () => {
+    // Resaltar el inventario para que el jugador sepa donde clickear
+    const invEl = document.querySelector('.inventory-section');
+    if (invEl) {
+        elevateElement(invEl);
+        addActionGlow(invEl);
+    }
+
     const check = setInterval(() => {
         if (!tutorialActive) { clearInterval(check); return; }
         if (state.selectedFood) {
             clearInterval(check);
+            removeActionGlow();
+            lowerAllElevated();
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 400);
         }
     }, 400);
 };
 
-// Esperar que envíe comida a la mascota (si vende, pedir que compre otra)
+// ============================================================
+//  SETUP PASO 8 — ENVIAR COMIDA
+// ============================================================
 const setupUseFoodTutorial = () => {
     const prevHealth  = state.saludMascota;
-    const prevInvSize = state.inventory.size;
-    let   waitingForAction = false;
-    // Interceptar el botón Enviar para saber exactamente qué pasó
-    let sentFood = false;
+    const prevInvSize = state.inventory ? state.inventory.size : 0;
+    let sentFood      = false;
 
     const btnEnviar = document.getElementById('btn-enviar');
-    addActionGlow(btnEnviar);
-    const enviarHandler = () => { sentFood = true; };
-    if (btnEnviar) btnEnviar.addEventListener('click', enviarHandler, { once: true });
-
     const btnVender = document.getElementById('btn-vender');
+
+    // Elevar solo el botón Enviar
+    if (btnEnviar) {
+        elevateElement(btnEnviar);
+        addActionGlow(btnEnviar);
+    }
+
+    // Registrar si se presionó Enviar o Vender
+    const enviarHandler = () => { sentFood = true; };
     const venderHandler = () => { sentFood = false; };
+    if (btnEnviar) btnEnviar.addEventListener('click', enviarHandler, { once: true });
     if (btnVender) btnVender.addEventListener('click', venderHandler, { once: true });
 
     const check = setInterval(() => {
         if (!tutorialActive) { clearInterval(check); return; }
-        if (waitingForAction) return;
 
-        const currentInvSize = state.inventory.size;
-
-        // Inventario se redujo — verificar si fue enviando o vendiendo
+        const currentInvSize = state.inventory ? state.inventory.size : 0;
         if (currentInvSize < prevInvSize) {
             clearInterval(check);
             if (btnEnviar) btnEnviar.removeEventListener('click', enviarHandler);
             if (btnVender) btnVender.removeEventListener('click', venderHandler);
+            lowerAllElevated();
+            removeActionGlow();
 
             if (sentFood || state.saludMascota >= prevHealth) {
-                //  Envió correctamente (salud igual o mayor, o botón enviar fue presionado)
+                // Envió correctamente
                 setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
             } else {
-                // Vendió la comida
-                waitingForAction = true;
+                // Vendió la comida — pedir que compre otra
                 const textEl = document.getElementById('tut-text');
-                if (textEl) textEl.textContent = ' ¡Ups! Vendiste la comida en vez de enviarla. Compra otra verdura y usa el botón "Enviar". ¡Inténtalo de nuevo!';
+                if (textEl) textEl.textContent = '¡Ups! Vendiste la manzana en vez de enviarla. Compra otra Manzana y usa el boton "Enviar". ¡Intentalo de nuevo!';
                 setTimeout(() => {
+                    // Volver al paso de abrir la tienda
                     const stepIdx = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'click_target' && s.target === '#btn-comprar');
                     tutorialStep = stepIdx >= 0 ? stepIdx : tutorialStep - 3;
                     renderTutorialStep();
@@ -641,17 +819,15 @@ const setupUseFoodTutorial = () => {
     }, 300);
 };
 
-
 // ============================================================
-//  GARANTIZAR QUE tutorial.js GANA sobre cualquier otra versión
-//  Se ejecuta al final de la carga para sobreescribir funciones viejas
+//  AUTO-INICIO
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Sobreescribir cualquier función vieja de tutorial
+    // Sobreescribir funciones globales
     window.openTutorial = () => {
-        tutorialFirstRun = !localStorage.getItem(TUTORIAL_DONE_KEY());
-        tutorialActive   = true;
-        tutorialStep     = 0;
+        tutorialFirstRun       = !localStorage.getItem(TUTORIAL_DONE_KEY());
+        tutorialActive         = true;
+        tutorialStep           = 0;
         tutorialSelectedAction = null;
         createTutorialUI();
         renderTutorialStep();
@@ -659,18 +835,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.closeTutorial = () => {
         tutorialActive = false;
+        if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
         removeTutorialUI();
         removeHighlight();
+        lowerAllElevated();
     };
 
     // Ocultar modal viejo si existe
     const oldModal = document.getElementById('modal-tutorial');
     if (oldModal) oldModal.style.display = 'none';
 
-    // Abrir tutorial automáticamente si el jugador nunca lo ha completado
+    // Abrir automáticamente si es la primera vez
     if (!localStorage.getItem(TUTORIAL_DONE_KEY())) {
         setTimeout(() => window.openTutorial(), 1200);
     }
 
-    console.log('BITGAMESO Tutorial: sistema cargado correctamente ');
+    console.log('BITGAMESO Tutorial v2: bloqueo real de interaccion cargado ✅');
 });

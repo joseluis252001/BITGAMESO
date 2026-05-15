@@ -173,17 +173,19 @@ window.injectBalancePanel = () => {
  const panel = document.createElement('div');
  panel.id = 'balance-panel';
  panel.style.cssText = `
- display: flex;
- gap: 12px;
+ display: inline-flex;
+ gap: 10px;
  align-items: center;
  flex-wrap: wrap;
- padding: 6px 16px;
+ padding: 4px 12px;
  background: rgba(255,255,255,0.85);
  border-radius: 12px;
  font-size: 11px;
  font-family: 'Poppins', sans-serif;
  border: 1px solid #e8e8e8;
  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+ margin-left: 12px;
+ vertical-align: middle;
  `;
  panel.innerHTML = `
  <div class="balance-item">
@@ -207,14 +209,14 @@ window.injectBalancePanel = () => {
  </div>
  `;
 
- // Insertar debajo del score-container (donde están las monedas)
+ // Insertar dentro del score-container junto a las monedas
  const scoreContainer = document.querySelector('.score-container');
- if (scoreContainer && scoreContainer.parentNode) {
- scoreContainer.parentNode.insertBefore(panel, scoreContainer.nextSibling);
+ if (scoreContainer) {
+     scoreContainer.appendChild(panel);
  } else {
- // Fallback: insertar en el nav
- const nav = document.querySelector('.nav-actions');
- if (nav) nav.prepend(panel);
+     // Fallback: insertar en el nav
+     const nav = document.querySelector('.nav-actions');
+     if (nav) nav.prepend(panel);
  }
 };
 
@@ -253,7 +255,7 @@ window.showAssetFicha = (symbol) => {
  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
  <h3 style="margin:0; color:#CBA6F7; font-size:1.2rem;">${ficha.symbol}</h3>
  <button onclick="document.getElementById('modal-ficha-activo').style.display='none'"
- style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;"></button>
+ style="background:#f0e7ff;border:none;font-size:1.2rem;cursor:pointer;color:#CBA6F7;width:32px;height:32px;border-radius:50%;font-weight:700;line-height:1;">X</button>
  </div>
  <p style="margin:0 0 16px; color:#666; font-size:0.85rem;">${ficha.name} · ${ficha.type}</p>
  <div style="
