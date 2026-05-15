@@ -223,7 +223,7 @@ const assetDatabase = [
 //  COMIDA
 // ============================================================
 const foodDatabase = [
-    // FRUTAS ⚡
+    // FRUTAS 
     { id:'Apple-128',           name:'Manzana',           cat:'fruta',    health:0,  effectDuration:30 },
     { id:'Banana-128',          name:'Plátano',           cat:'fruta',    health:0,  effectDuration:30 },
     { id:'Blueberries-128',     name:'Arándanos',         cat:'fruta',    health:0,  effectDuration:45 },
@@ -234,7 +234,7 @@ const foodDatabase = [
     { id:'Pear-128',            name:'Pera',              cat:'fruta',    health:0,  effectDuration:30 },
     { id:'Strawberry-128',      name:'Fresa',             cat:'fruta',    health:0,  effectDuration:40 },
     { id:'Watermelon-128',      name:'Sandía',            cat:'fruta',    health:0,  effectDuration:50 },
-    // VERDURAS ❤️
+    // VERDURAS ️
     { id:'Carrot-128',          name:'Zanahoria',         cat:'verdura',  health:10, effectDuration:0  },
     { id:'Corn-128',            name:'Maíz',              cat:'verdura',  health:8,  effectDuration:0  },
     { id:'Grass-128',           name:'Hierba Mágica',     cat:'verdura',  health:5,  effectDuration:0  },
@@ -242,16 +242,16 @@ const foodDatabase = [
     { id:'Pumpkin-128',         name:'Calabaza',          cat:'verdura',  health:12, effectDuration:0  },
     { id:'Tomato-128',          name:'Tomate',            cat:'verdura',  health:9,  effectDuration:0  },
     { id:'Turnip-128',          name:'Nabo',              cat:'verdura',  health:6,  effectDuration:0  },
-    // PROTEÍNAS 💰
+    // PROTEÍNAS 
     { id:'Egg-128',             name:'Huevo',             cat:'proteina', health:5,  effectDuration:30 },
     { id:'Fish-128',            name:'Pescado',           cat:'proteina', health:8,  effectDuration:40 },
     { id:'Meat-128',            name:'Carne',             cat:'proteina', health:10, effectDuration:50 },
-    // DULCES 🔮
+    // DULCES 
     { id:'Candy-Blue-128',      name:'Dulce Azul',        cat:'dulce',    health:2,  effectDuration:20 },
     { id:'Candy-Pink-128',      name:'Dulce Rosa',        cat:'dulce',    health:2,  effectDuration:20 },
     { id:'Cookie-128',          name:'Galleta',           cat:'dulce',    health:4,  effectDuration:30 },
     { id:'Cupcake-128',         name:'Cupcake',           cat:'dulce',    health:5,  effectDuration:40 },
-    // MISC 💎
+    // MISC 
     { id:'Bread-128',           name:'Pan',               cat:'misc',     health:3,  effectDuration:0  },
     { id:'Bretzel-128',         name:'Pretzel',           cat:'misc',     health:3,  effectDuration:0  },
     { id:'Mushroom-128',        name:'Champiñón',         cat:'misc',     health:4,  effectDuration:0  },
@@ -400,7 +400,7 @@ const startEffectTick = () => {
                 if (state.effectsTime[key] === 0) {
                     if (key === 'marketFast') startMarket(SPEED_NORMAL);
                     if (key === 'futureVision') clearFutureVision();
-                    showToast(`⏱️ Efecto terminado: ${effectKeyLabel(key)}`);
+                    showToast(`️ Efecto terminado: ${effectKeyLabel(key)}`);
                 }
             }
         });
@@ -491,6 +491,8 @@ const _marketLoop = () => {
 };
 
 const fetchMarket = () => {
+    // Aplicar tick de bonos ANTES de actualizar precios volátiles
+    if (typeof window.applyBondTick === 'function') window.applyBondTick();
     window._lastMarketUpdate = Date.now();
     assetDatabase.forEach(a => {
         const old  = state.market.get(a.symbol)?.price || a.basePrice;
@@ -556,16 +558,21 @@ const renderMarket = () => {
         const hlClass = isHighlighted
             ? (state._highlightType === 'crash' ? 'row-crash' : 'row-boom')
             : '';
+        // Badge de tipo: Bono o Acción
+        const catBadge = typeof window.getAssetCategoryLabel === 'function'
+            ? window.getAssetCategoryLabel(a.type) : '';
         return `
         <div class="asset-row ${hlClass}">
             <div class="asset-info">
                 <strong class="asset-symbol">${a.symbol}</strong>
                 <small class="asset-name">${a.name}</small>
+                ${catBadge}
             </div>
             <div class="asset-type">${a.type}</div>
             <div class="asset-price">${fmt(a.price)} ${futureTag}</div>
             <div class="asset-change ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${Math.abs(a.changePercent).toFixed(2)}%</div>
             <div class="market-btns">
+                <button class="btn-asset-info" onclick="showAssetFicha('${a.symbol}')" title="Ver ficha técnica">Info</button>
                 <button class="btn-action btn-buy ${owned?'btn-disabled':''}"
                         onclick="buy('${a.symbol}')"
                         ${owned?'disabled':''}>Comprar</button>
@@ -578,7 +585,7 @@ const renderMarket = () => {
 //  COMPRAR ACCIÓN
 // ============================================================
 window.buy = (symbol) => {
-    if (state.portfolio.has(symbol)) { showToast('⚠️ Ya tienes este activo.'); return; }
+    if (state.portfolio.has(symbol)) { showToast('️ Ya tienes este activo.'); return; }
     const a = state.market.get(symbol);
     if (!a) return;
     const actualPrice = typeof applyPetBuyModifiers === 'function' ? applyPetBuyModifiers(a.price) : a.price;
@@ -588,12 +595,12 @@ window.buy = (symbol) => {
         if (typeof applyPenguinBuyPenalty === 'function') applyPenguinBuyPenalty(a);
         if (typeof birdPaused !== 'undefined') { birdPaused = true; setTimeout(()=>{ birdPaused = false; }, 1000); }
         const discountMsg = actualPrice < a.price ? ` (descuento: ${fmt(a.price - actualPrice)})` : '';
-        showToast(`✅ Compraste ${a.symbol} por ${fmt(actualPrice)}${discountMsg}`);
+        showToast(` Compraste ${a.symbol} por ${fmt(actualPrice)}${discountMsg}`);
         logEvent('compra', `Compraste ${a.symbol} — ${a.name}`, `Precio: ${fmt(actualPrice)} | Sector: ${a.type}`);
         updateUI();
         checkSectorBonus();
     } else {
-        showToast('❌ ¡No tienes suficientes monedas!');
+        showToast(' ¡No tienes suficientes monedas!');
     }
 };
 
@@ -617,7 +624,7 @@ window.sellFromPortfolio = (symbol) => {
     } else {
         const sectorBonusAmt = applySectorBonus(pos.type || '', dpProfit, pos.buyPrice);
         payout += sectorBonusAmt;
-        if (sectorBonusAmt > 0) petMsg = ` +🏆${fmt(sectorBonusAmt)}`;
+        if (sectorBonusAmt > 0) petMsg = ` +${fmt(sectorBonusAmt)}`;
     }
 
     state.monedas += payout;
@@ -631,15 +638,15 @@ window.sellFromPortfolio = (symbol) => {
     if (realProfit > 0) {
         const gain = Math.min(Math.round((realProfit/pos.buyPrice)*20),20);
         changePetHealth(gain);
-        showToast(`🎉 Vendiste ${symbol}! +${fmt(realProfit)}${x2tag}${petMsg} +${gain}❤️`);
+        showToast(` Vendiste ${symbol}! +${fmt(realProfit)}${x2tag}${petMsg} +${gain}️`);
         logEvent('venta', `Vendiste ${symbol} con GANANCIA`, `+${fmt(realProfit)}${x2tag}${petMsg}`);
     } else if (realProfit < 0) {
         const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
         changePetHealth(-loss);
-        showToast(`📉 Vendiste ${symbol}. ${fmt(Math.abs(realProfit))}${x2tag}${petMsg} -${loss}❤️`);
+        showToast(` Vendiste ${symbol}. ${fmt(Math.abs(realProfit))}${x2tag}${petMsg} -${loss}️`);
         logEvent('venta', `Vendiste ${symbol} con PÉRDIDA`, `${fmt(Math.abs(realProfit))}${x2tag}${petMsg}`);
     } else {
-        showToast(`➡️ Vendiste ${symbol}${petMsg}`);
+        showToast(`️ Vendiste ${symbol}${petMsg}`);
     }
     updateUI();
     checkGameOver();
@@ -669,14 +676,14 @@ window.doDeposit = (amount, costPct) => {
     const needed = costPct;
     if (state.saludMascota <= needed) {
         const warn = document.getElementById('deposit-warning');
-        if (warn) { warn.textContent = `⚠️ Tu mascota necesita más de ${needed}% de salud para este depósito. Salud actual: ${state.saludMascota}%`; warn.style.display='block'; }
+        if (warn) { warn.textContent = `️ Tu mascota necesita más de ${needed}% de salud para este depósito. Salud actual: ${state.saludMascota}%`; warn.style.display='block'; }
         return;
     }
     state.monedas += amount;
     changePetHealth(-costPct);
     closeDeposit();
-    showToast(`💳 Depositaste 🪙${amount.toLocaleString()} (-${costPct}% ❤️)`);
-    logEvent('deposito', `Depositaste 🪙${amount.toLocaleString()}`, `Costo: -${costPct}% de salud de mascota`);
+    showToast(` Depositaste ${amount.toLocaleString()} (-${costPct}% ️)`);
+    logEvent('deposito', `Depositaste ${amount.toLocaleString()}`, `Costo: -${costPct}% de salud de mascota`);
     updateUI();
     checkGameOver();
 };
@@ -703,7 +710,7 @@ window.openFoodShop = () => {
         const onCooldown = miscCdRemaining > 0;
         const canBuy = state.monedas >= price && !atLimit && !onCooldown;
         const inflTag = timesBought > 0
-            ? `<span class="food-inflation">🔥 x${Math.pow(2,timesBought)} inflación</span>` : '';
+            ? `<span class="food-inflation"> x${Math.pow(2,timesBought)} inflación</span>` : '';
 
         return `
         <div class="food-item ${catClass[f.cat]}">
@@ -711,12 +718,12 @@ window.openFoodShop = () => {
             <span class="food-name">${f.name}</span>
             <span class="food-eff-tag ${catClass[f.cat]}">${f.cat === 'fruta' ? '<img src="../assets/settings/Stopwatch.png" style="width:12px;height:12px;vertical-align:middle;object-fit:contain;margin-right:3px;" onerror="this.style.display=\'none\'">' : ''}${catLabel[f.cat]}</span>
             ${f.effectDuration ? `<span class="food-dur">+${f.effectDuration}s</span>` : ''}
-            ${f.health ? `<span class="food-hp">❤️ +${f.health}</span>` : ''}
+            ${f.health ? `<span class="food-hp">️ +${f.health}</span>` : ''}
             ${inflTag}
-            <span class="food-price">🪙 ${price.toLocaleString()}</span>
+            <span class="food-price"> ${price.toLocaleString()}</span>
             <button class="btn-action btn-buy btn-sm ${canBuy?'':'btn-disabled'}"
                     onclick="buyFood('${f.id}',${price})"
-                    ${canBuy?'':'disabled'}>${atLimit ? `🔒 Máx ${isMisc ? MAX_FOOD_MISC : MAX_FOOD_QTY}` : onCooldown ? `⏳ ${formatCooldown(miscCdRemaining)}` : 'Comprar'}</button>
+                    ${canBuy?'':'disabled'}>${atLimit ? ` Máx ${isMisc ? MAX_FOOD_MISC : MAX_FOOD_QTY}` : onCooldown ? ` ${formatCooldown(miscCdRemaining)}` : 'Comprar'}</button>
         </div>`;
     }).join('');
     document.getElementById('modal-food-shop').style.display = 'flex';
@@ -727,7 +734,7 @@ window.closeFoodShop = () => { document.getElementById('modal-food-shop').style.
 window.buyFood = (foodId, price) => {
     const food = foodDatabase.find(f=>f.id===foodId);
     if (!food) return;
-    if (state.monedas < price) { showToast('❌ Monedas insuficientes'); return; }
+    if (state.monedas < price) { showToast(' Monedas insuficientes'); return; }
     state.monedas -= price;
     const existing = state.inventory.get(foodId);
     state.inventory.set(foodId, { ...food, price, qty:(existing?.qty||0)+1 });
@@ -742,8 +749,8 @@ window.buyFood = (foodId, price) => {
     }
 
     const nextPrice = Math.round(price * 2);
-    showToast(`🛒 Compraste ${food.name} por 🪙${price} | Próximo precio: 🪙${nextPrice}`);
-    logEvent('comida', `Compraste ${food.name}`, `Precio: 🪙${price} | Efecto: ${catLabel[food.cat]}`);
+    showToast(` Compraste ${food.name} por ${price} | Próximo precio: ${nextPrice}`);
+    logEvent('comida', `Compraste ${food.name}`, `Precio: ${price} | Efecto: ${catLabel[food.cat]}`);
     updateUI();
     closeFoodShop();
 };
@@ -781,28 +788,28 @@ const updateSelectedLabel = () => {
 // ============================================================
 const useFoodOnPet = () => {
     const foodId = state.selectedFood;
-    if (!foodId) { showToast('🎒 Selecciona un ítem del inventario primero'); return; }
+    if (!foodId) { showToast(' Selecciona un ítem del inventario primero'); return; }
     const item = state.inventory.get(foodId);
-    if (!item || item.qty <= 0) { showToast('❌ No tienes ese ítem'); return; }
+    if (!item || item.qty <= 0) { showToast(' No tienes ese ítem'); return; }
 
     switch(item.cat) {
         case 'verdura':
             changePetHealth(item.health);
-            showToast(`🥕 Diste ${item.name} a tu mascota! +${item.health}❤️`);
-            logEvent('mascota', `Diste ${item.name} a tu mascota`, `Salud +${item.health}❤️`);
+            showToast(` Diste ${item.name} a tu mascota! +${item.health}️`);
+            logEvent('mascota', `Diste ${item.name} a tu mascota`, `Salud +${item.health}️`);
             break;
         case 'fruta':
             changePetHealth(item.health || 2);
             const multFruta = typeof getEffectDurationMultiplier === 'function' ? getEffectDurationMultiplier('fruta') : 1;
             addEffect('marketFast', item.effectDuration * multFruta);
-            showToast(`🍎 ${item.name}! +${item.effectDuration}s al Mercado Rápido ⚡ (total: ${state.effectsTime.marketFast}s)`);
+            showToast(` ${item.name}! +${item.effectDuration}s al Mercado Rápido  (total: ${state.effectsTime.marketFast}s)`);
             logEvent('efecto', `${item.name} activó Mercado Rápido`, `+${item.effectDuration}s | Total: ${state.effectsTime.marketFast}s`);
             break;
         case 'proteina':
             changePetHealth(item.health);
             const multProt = typeof getEffectDurationMultiplier === 'function' ? getEffectDurationMultiplier('proteina') : 1;
             addEffect('doubleProfit', item.effectDuration * multProt);
-            showToast(`🥩 ${item.name}! +${item.effectDuration}s a Ganancias x2 💰 (total: ${state.effectsTime.doubleProfit}s)`);
+            showToast(` ${item.name}! +${item.effectDuration}s a Ganancias x2  (total: ${state.effectsTime.doubleProfit}s)`);
             logEvent('efecto', `${item.name} activó Ganancias x2`, `+${item.effectDuration}s | Total: ${state.effectsTime.doubleProfit}s`);
             break;
         case 'dulce':
@@ -810,12 +817,12 @@ const useFoodOnPet = () => {
             const multDulce = typeof getEffectDurationMultiplier === 'function' ? getEffectDurationMultiplier('dulce') : 1;
             addEffect('futureVision', item.effectDuration * multDulce);
             activateFutureVision();
-            showToast(`🍬 ${item.name}! +${item.effectDuration}s a Visión del Futuro 🔮 (total: ${state.effectsTime.futureVision}s)`);
+            showToast(` ${item.name}! +${item.effectDuration}s a Visión del Futuro  (total: ${state.effectsTime.futureVision}s)`);
             logEvent('efecto', `${item.name} activó Visión del Futuro`, `+${item.effectDuration}s | Total: ${state.effectsTime.futureVision}s`);
             break;
         case 'misc':
             changePetHealth(item.health);
-            showToast(`🍄 Diste ${item.name}! +${item.health}❤️`);
+            showToast(` Diste ${item.name}! +${item.health}️`);
             break;
     }
 
@@ -830,26 +837,26 @@ const useFoodOnPet = () => {
 // ============================================================
 const sellSelectedFood = () => {
     const foodId = state.selectedFood;
-    if (!foodId) { showToast('🎒 Selecciona un ítem del inventario primero'); return; }
+    if (!foodId) { showToast(' Selecciona un ítem del inventario primero'); return; }
     const item = state.inventory.get(foodId);
-    if (!item || item.qty <= 0) { showToast('❌ No tienes ese ítem'); return; }
+    if (!item || item.qty <= 0) { showToast(' No tienes ese ítem'); return; }
 
     let salePrice, saleMsg;
     if (item.cat === 'misc') {
         const mult = 0.5 + Math.random()*3.5;
         salePrice  = Math.round(item.price * mult);
-        const tag  = mult>=3?'🤑 ¡JACKPOT!': mult>=2?'😊 Buen precio': mult>=1?'➡️ Precio justo':'😬 Mala suerte';
-        saleMsg    = `💰 Vendiste ${item.name} por 🪙${salePrice} (x${mult.toFixed(2)}) ${tag}`;
+        const tag  = mult>=3?' ¡JACKPOT!': mult>=2?' Buen precio': mult>=1?'️ Precio justo':' Mala suerte';
+        saleMsg    = ` Vendiste ${item.name} por ${salePrice} (x${mult.toFixed(2)}) ${tag}`;
     } else {
         salePrice = Math.round(item.price * 0.5);
-        saleMsg   = `💰 Vendiste ${item.name} por 🪙${salePrice} (mitad de precio)`;
+        saleMsg   = ` Vendiste ${item.name} por ${salePrice} (mitad de precio)`;
     }
 
     state.monedas += salePrice;
     consumeItem(foodId);
     state.selectedFood = null;
     showToast(saleMsg);
-    logEvent('comida', `Vendiste ${item.name}`, `Recibiste 🪙${salePrice}`);
+    logEvent('comida', `Vendiste ${item.name}`, `Recibiste ${salePrice}`);
     updateUI();
 };
 
@@ -921,10 +928,10 @@ const renderPetHealth = () => {
     if (refs.petHealthValue) refs.petHealthValue.textContent = state.saludMascota;
     if (refs.petMessage) {
         const s = state.saludMascota;
-        if (s===100)    refs.petMessage.textContent = '¡Estoy súper feliz! 🎉';
-        else if (s>60)  refs.petMessage.textContent = '¡Todo bajo control! 😊';
-        else if (s>30)  refs.petMessage.textContent = 'Me siento un poco mal... 😟';
-        else if (s>0)   refs.petMessage.textContent = '¡Tengo mucha hambre! 😢';
+        if (s===100)    refs.petMessage.textContent = '¡Estoy súper feliz! ';
+        else if (s>60)  refs.petMessage.textContent = '¡Todo bajo control! ';
+        else if (s>30)  refs.petMessage.textContent = 'Me siento un poco mal... ';
+        else if (s>0)   refs.petMessage.textContent = '¡Tengo mucha hambre! ';
         else            refs.petMessage.textContent = '...';
     }
     // El botón de mascotas siempre está visible (gestionado por pets.js)
@@ -1011,7 +1018,7 @@ const renderPortfolio = () => {
             <div class="pi-profit ${profit>=0?'up':'down'}">
                 ${profit>=0?'▲':'▼'} ${fmt(Math.abs(profit))} (${Math.abs(pct)}%)
                 ${isEffectActive('doubleProfit')?'<span class="x2-tag">x2</span>':''}
-                ${state.sectorBonus.get(pos.type||'')?'<span class="bonus-tag">🏆 +3%</span>':''}
+                ${state.sectorBonus.get(pos.type||'')?'<span class="bonus-tag"> +3%</span>':''}
             </div>
             <button class="btn-action btn-sell" onclick="sellFromPortfolio('${symbol}')">Vender</button>
         </div>`;
@@ -1025,16 +1032,16 @@ const renderPortfolio = () => {
 //  GAME OVER
 // ============================================================
 const checkGameOver = () => {
-    if (state.saludMascota <= 0) { triggerGameOver('😿 Tu mascota murió de hambre...'); return; }
+    if (state.saludMascota <= 0) { triggerGameOver(' Tu mascota murió de hambre...'); return; }
     if (state.monedas <= 0) {
         let val=0;
         state.portfolio.forEach((_,sym) => { const c=state.market.get(sym); if(c) val+=c.price; });
-        if (val===0||(state.monedas+val)<=0) triggerGameOver('💸 Sin monedas ni activos para recuperarte...');
+        if (val===0||(state.monedas+val)<=0) triggerGameOver(' Sin monedas ni activos para recuperarte...');
     }
 };
 
 const triggerGameOver = (reason) => {
-    logEvent('gameover', '💀 GAME OVER', reason);
+    logEvent('gameover', ' GAME OVER', reason);
     clearSave();
     const m=document.getElementById('modal-gameover');
     const r=document.getElementById('gameover-reason');
@@ -1061,7 +1068,7 @@ window.resetGame = () => {
     startMarket(SPEED_NORMAL);
     renderPet(); renderPetHealth(); renderEffectBadges();
     updateUI();
-    showToast('🔄 ¡Juego reiniciado!');
+    showToast(' ¡Juego reiniciado!');
 };
 
 // ============================================================
@@ -1074,6 +1081,8 @@ const updateUI = () => {
     renderPetHealth();
     renderInventory();
     renderEffectBadges();
+    // Actualizar panel de balance y diversificación
+    if (typeof window.updateFinanceUI === 'function') window.updateFinanceUI();
     saveGame();
 };
 
@@ -1090,7 +1099,7 @@ window.handleAvatarChange = (src) => {
     const img=document.getElementById('current-avatar-header');
     if (img) img.src=src;
     toggleSettingsMenu(null);
-    showToast('✅ Avatar actualizado');
+    showToast(' Avatar actualizado');
     saveGame();
 };
 
@@ -1123,68 +1132,68 @@ const showToast = (msg) => {
 // ============================================================
 const petTips = [
     // IA
-    "¡Psst! Si inviertes en 3 acciones de IA conseguirás un bono del 3% en tus ganancias 🤖",
-    "Los activos de IA están en auge… ¿ya tienes 3? ¡Podría haber una bonificación esperándote! 💡",
-    "He soñado con chips y algoritmos… quizás debería invertir en IA. ¡Tú también! 🧠",
-    "El sector IA crece cada día. ¡Con 3 acciones de IA obtendrás un bono especial! ⚡",
-    "Dicen que la inteligencia artificial lo dominará todo. ¿Y tus inversiones en IA? 🤖",
+    "¡Psst! Si inviertes en 3 acciones de IA conseguirás un bono del 3% en tus ganancias ",
+    "Los activos de IA están en auge… ¿ya tienes 3? ¡Podría haber una bonificación esperándote! ",
+    "He soñado con chips y algoritmos… quizás debería invertir en IA. ¡Tú también! ",
+    "El sector IA crece cada día. ¡Con 3 acciones de IA obtendrás un bono especial! ",
+    "Dicen que la inteligencia artificial lo dominará todo. ¿Y tus inversiones en IA? ",
     // BLUECHIP
-    "Las empresas Bluechip son sólidas como una roca 💎 ¡Con 3 acciones tendrás un bono del 3%!",
-    "¿Seguridad o riesgo? Las Bluechip dan estabilidad. ¡Consigue 3 y desbloquea tu bonificación! 🏦",
-    "¡Me encantan las Bluechip! Grandes empresas, grandes resultados. ¡3 acciones = bono asegurado! 💼",
-    "Los grandes inversores confían en Bluechips. ¿Ya tienes 3? ¡Hay un bono del 3% esperándote! 📈",
-    "Una cartera sólida siempre tiene Bluechips. ¡Llega a 3 y gana tu bonificación! 🌟",
+    "Las empresas Bluechip son sólidas como una roca  ¡Con 3 acciones tendrás un bono del 3%!",
+    "¿Seguridad o riesgo? Las Bluechip dan estabilidad. ¡Consigue 3 y desbloquea tu bonificación! ",
+    "¡Me encantan las Bluechip! Grandes empresas, grandes resultados. ¡3 acciones = bono asegurado! ",
+    "Los grandes inversores confían en Bluechips. ¿Ya tienes 3? ¡Hay un bono del 3% esperándote! ",
+    "Una cartera sólida siempre tiene Bluechips. ¡Llega a 3 y gana tu bonificación! ",
     // DIGITAL / CRYPTO
-    "¡Las criptos son el futuro! Invierte en 3 activos Digital y consigue un bono del 3% 🚀",
-    "El mercado Digital nunca duerme… ni yo tampoco esperando que compres 3 criptos 🌙",
-    "Bitcoin, Ethereum… ¡el mundo Digital es enorme! Con 3 acciones Digital obtendrás un bono 💰",
-    "Las monedas digitales pueden explotar en cualquier momento. ¡3 activos = bonificación del 3%! 🔥",
-    "¿Hodl? ¡Mejor invierte en 3 activos Digital y gana un bono especial! 🪙",
+    "¡Las criptos son el futuro! Invierte en 3 activos Digital y consigue un bono del 3% ",
+    "El mercado Digital nunca duerme… ni yo tampoco esperando que compres 3 criptos ",
+    "Bitcoin, Ethereum… ¡el mundo Digital es enorme! Con 3 acciones Digital obtendrás un bono ",
+    "Las monedas digitales pueden explotar en cualquier momento. ¡3 activos = bonificación del 3%! ",
+    "¿Hodl? ¡Mejor invierte en 3 activos Digital y gana un bono especial! ",
     // GAMING
-    "¡Me encantan los videojuegos! Si inviertes en 3 acciones Gaming tendrás un bono del 3% 🎮",
-    "El sector Gaming vale billones. ¿Ya tienes 3 acciones? ¡Tu bonificación te espera! 🕹️",
-    "Jugar y ganar: eso hacen los jugadores de Gaming en el mercado. ¡3 acciones = bono! 🏆",
-    "Los gamers saben invertir. ¡Consigue 3 acciones Gaming y desbloquea tu bonificación! 🎯",
-    "¡Level up! Con 3 acciones Gaming conseguirás un bono del 3% en tus próximas ganancias 🎮",
+    "¡Me encantan los videojuegos! Si inviertes en 3 acciones Gaming tendrás un bono del 3% ",
+    "El sector Gaming vale billones. ¿Ya tienes 3 acciones? ¡Tu bonificación te espera! ️",
+    "Jugar y ganar: eso hacen los jugadores de Gaming en el mercado. ¡3 acciones = bono! ",
+    "Los gamers saben invertir. ¡Consigue 3 acciones Gaming y desbloquea tu bonificación! ",
+    "¡Level up! Con 3 acciones Gaming conseguirás un bono del 3% en tus próximas ganancias ",
     // NFT
-    "Los NFT son únicos como yo 🐾 ¡Invierte en 3 y consigue un bono del 3%!",
-    "Arte digital, colecciones únicas… ¡3 acciones NFT te dan una bonificación especial! 🖼️",
-    "El mundo de los NFT puede sorprenderte. ¡Con 3 activos NFT obtendrás un bono del 3%! 💎",
-    "¿Arte o inversión? ¡Los dos! Con 3 acciones NFT ganas una bonificación de inmediato 🎨",
-    "Los coleccionistas de NFT saben algo que tú no… ¡3 acciones y lo descubrirás con un bono! 🔮",
+    "Los NFT son únicos como yo  ¡Invierte en 3 y consigue un bono del 3%!",
+    "Arte digital, colecciones únicas… ¡3 acciones NFT te dan una bonificación especial! ️",
+    "El mundo de los NFT puede sorprenderte. ¡Con 3 activos NFT obtendrás un bono del 3%! ",
+    "¿Arte o inversión? ¡Los dos! Con 3 acciones NFT ganas una bonificación de inmediato ",
+    "Los coleccionistas de NFT saben algo que tú no… ¡3 acciones y lo descubrirás con un bono! ",
     // METAVERSO
-    "¡El Metaverso es el futuro! Con 3 acciones Metaverso consigues un bono del 3% 🌐",
-    "Mundos virtuales, oportunidades reales. ¡3 acciones Metaverso = bonificación garantizada! 🥽",
-    "Me imagino corriendo en el Metaverso… ¡y tú ganando un bono con 3 acciones! 🐾",
-    "El Metaverso crece cada día. ¡Con 3 activos tendrás un bono del 3% esperándote! 🌍",
-    "¿Ya exploraste el Metaverso? Invierte en 3 acciones y consigue tu bonificación 🚀",
+    "¡El Metaverso es el futuro! Con 3 acciones Metaverso consigues un bono del 3% ",
+    "Mundos virtuales, oportunidades reales. ¡3 acciones Metaverso = bonificación garantizada! ",
+    "Me imagino corriendo en el Metaverso… ¡y tú ganando un bono con 3 acciones! ",
+    "El Metaverso crece cada día. ¡Con 3 activos tendrás un bono del 3% esperándote! ",
+    "¿Ya exploraste el Metaverso? Invierte en 3 acciones y consigue tu bonificación ",
     // FINTECH
-    "¡El dinero del futuro está en Fintech! 3 acciones y obtendrás un bono del 3% 💳",
-    "Las Fintech están revolucionando las finanzas. ¡Con 3 acciones desbloqueas un bono! 🏧",
-    "Pagar, transferir, invertir… ¡las Fintech lo hacen todo! 3 acciones = bono del 3% 💸",
-    "Me gusta contar monedas y las Fintech también. ¡3 acciones = bonificación especial! 🪙",
-    "El futuro de los pagos es digital. ¡Invierte en 3 Fintech y gana un bono del 3%! 📱",
+    "¡El dinero del futuro está en Fintech! 3 acciones y obtendrás un bono del 3% ",
+    "Las Fintech están revolucionando las finanzas. ¡Con 3 acciones desbloqueas un bono! ",
+    "Pagar, transferir, invertir… ¡las Fintech lo hacen todo! 3 acciones = bono del 3% ",
+    "Me gusta contar monedas y las Fintech también. ¡3 acciones = bonificación especial! ",
+    "El futuro de los pagos es digital. ¡Invierte en 3 Fintech y gana un bono del 3%! ",
     // ENERGÍA
-    "¡Energía limpia = futuro brillante! 3 acciones de Energía te dan un bono del 3% ⚡",
-    "El planeta necesita energía verde y tú necesitas ese bono. ¡3 acciones Energía! 🌿",
-    "Sol, viento, agua… ¡todo es energía! Con 3 acciones Energía consigues un bono 🌞",
-    "La revolución energética ya comenzó. ¡Invierte en 3 y desbloquea tu bonificación! 🔋",
-    "¡Potencia tu cartera con Energía! 3 acciones del sector = bono del 3% garantizado ⚡",
+    "¡Energía limpia = futuro brillante! 3 acciones de Energía te dan un bono del 3% ",
+    "El planeta necesita energía verde y tú necesitas ese bono. ¡3 acciones Energía! ",
+    "Sol, viento, agua… ¡todo es energía! Con 3 acciones Energía consigues un bono ",
+    "La revolución energética ya comenzó. ¡Invierte en 3 y desbloquea tu bonificación! ",
+    "¡Potencia tu cartera con Energía! 3 acciones del sector = bono del 3% garantizado ",
     // BIOTECH
-    "¡La ciencia es asombrosa! Con 3 acciones Biotech obtendrás un bono del 3% 🔬",
-    "La Biotech puede salvar vidas y salvar tu cartera. ¡3 acciones = bonificación especial! 🧬",
-    "ADN, genes, salud… ¡el futuro es Biotech! Con 3 acciones ganas un bono del 3% 💉",
-    "Los laboratorios trabajan 24/7 igual que el mercado. ¡3 acciones Biotech = bono! 🏥",
-    "¡Me cuido mucho y tú deberías cuidar tu cartera con 3 acciones Biotech y un bono! 🩺",
+    "¡La ciencia es asombrosa! Con 3 acciones Biotech obtendrás un bono del 3% ",
+    "La Biotech puede salvar vidas y salvar tu cartera. ¡3 acciones = bonificación especial! ",
+    "ADN, genes, salud… ¡el futuro es Biotech! Con 3 acciones ganas un bono del 3% ",
+    "Los laboratorios trabajan 24/7 igual que el mercado. ¡3 acciones Biotech = bono! ",
+    "¡Me cuido mucho y tú deberías cuidar tu cartera con 3 acciones Biotech y un bono! ",
     // ESPACIO
-    "¡Ad astra! Con 3 acciones del sector Espacio conseguirás un bono del 3% 🚀",
-    "Las estrellas llaman… ¡y tu bono también! Invierte en 3 acciones Espacio 🌟",
-    "El universo es enorme pero el bono es concreto: 3 acciones Espacio = 3% extra 🪐",
-    "¡Sueño con volar a las estrellas! Y tú puedes ganar un bono con 3 acciones Espacio 🌙",
+    "¡Ad astra! Con 3 acciones del sector Espacio conseguirás un bono del 3% ",
+    "Las estrellas llaman… ¡y tu bono también! Invierte en 3 acciones Espacio ",
+    "El universo es enorme pero el bono es concreto: 3 acciones Espacio = 3% extra ",
+    "¡Sueño con volar a las estrellas! Y tú puedes ganar un bono con 3 acciones Espacio ",
     // MEME
-    "¡Los Meme coins son locos pero el bono es real! 3 acciones Meme = 3% de bonificación 🐸",
+    "¡Los Meme coins son locos pero el bono es real! 3 acciones Meme = 3% de bonificación ",
     // DEFI
-    "¡DeFi es el banco del futuro! Con 3 acciones DeFi obtienes un bono del 3% 🏦",
+    "¡DeFi es el banco del futuro! Con 3 acciones DeFi obtienes un bono del 3% ",
 ];
 
 // Mensajes aleatorios: mostrar cada 20-45 segundos
@@ -1235,12 +1244,12 @@ const checkSectorBonus = () => {
     counts.forEach((count, type) => {
         if (count >= BONUS_THRESHOLD && !state.sectorBonus.get(type)) {
             state.sectorBonus.set(type, true);
-            showToast(`🏆 ¡BONO DESBLOQUEADO! Tienes 3+ acciones de ${type}. Tus ganancias en este sector suben un 3% 🎉`);
+            showToast(` ¡BONO DESBLOQUEADO! Tienes 3+ acciones de ${type}. Tus ganancias en este sector suben un 3% `);
             logEvent('bonus', `Bono de sector ${type} desbloqueado`, `+3% en ganancias del sector ${type}`);
             // Forzar mensaje de mascota celebrando
             const msg = document.getElementById('pet-message');
             if (msg) {
-                msg.textContent = `¡Lo sabía! ¡Bonificación del 3% en ${type} activada! 🎉`;
+                msg.textContent = `¡Lo sabía! ¡Bonificación del 3% en ${type} activada! `;
                 msg.classList.add('pet-tip-glow');
                 setTimeout(() => msg.classList.remove('pet-tip-glow'), 4000);
             }
@@ -1248,7 +1257,7 @@ const checkSectorBonus = () => {
         // Si perdió acciones y ya no llega al umbral, quitar el bono
         if (count < BONUS_THRESHOLD && state.sectorBonus.get(type)) {
             state.sectorBonus.set(type, false);
-            showToast(`⚠️ Perdiste el bono de ${type}: ya no tienes 3 acciones en ese sector.`);
+            showToast(`️ Perdiste el bono de ${type}: ya no tienes 3 acciones en ese sector.`);
         }
     });
     // Revisar sectores que ya no están en cartera
@@ -1274,31 +1283,31 @@ const applySectorBonus = (type, baseProfit, buyPrice) => {
 
 const marketEvents = [
     // CAÍDAS
-    { sector:'IA',        type:'crash', magnitude:[0.10,0.30], warningMsg:'⚠️ ¡ALERTA! Escándalo en el sector IA… ¡todas sus acciones podrían desplomarse pronto!', eventMsg:'💥 ¡CRASH de IA! Todas las acciones de Inteligencia Artificial han caído drásticamente.' },
-    { sector:'Bluechip',  type:'crash', magnitude:[0.10,0.25], warningMsg:'⚠️ ¡ALERTA! Las grandes empresas Bluechip están en problemas… ¡una caída se acerca!', eventMsg:'💥 ¡CRASH Bluechip! Las acciones de las grandes empresas han colapsado.' },
-    { sector:'Digital',   type:'crash', magnitude:[0.15,0.35], warningMsg:'⚠️ ¡ALERTA! Las criptomonedas están en pánico… ¡vienen caídas masivas en Digital!', eventMsg:'💥 ¡CRYPTO CRASH! Todas las monedas digitales se han desplomado.' },
-    { sector:'Gaming',    type:'crash', magnitude:[0.10,0.30], warningMsg:'⚠️ ¡ALERTA! El sector Gaming está en crisis… ¡los precios van a caer pronto!', eventMsg:'💥 ¡GAMING CRASH! Los activos de Gaming han sufrido una caída brutal.' },
-    { sector:'NFT',       type:'crash', magnitude:[0.15,0.30], warningMsg:'⚠️ ¡ALERTA! ¡Los NFT pronto caerán! ¡Todas sus acciones en peligro!', eventMsg:'💥 ¡NFT CRASH! El mercado de NFT se ha hundido por completo.' },
-    { sector:'Metaverso', type:'crash', magnitude:[0.10,0.25], warningMsg:'⚠️ ¡ALERTA! El Metaverso está siendo abandonado… ¡viene una caída brutal!', eventMsg:'💥 ¡METAVERSO CRASH! Las acciones del Metaverso han caído estrepitosamente.' },
-    { sector:'Fintech',   type:'crash', magnitude:[0.10,0.20], warningMsg:'⚠️ ¡ALERTA! Regulaciones nuevas amenazan al Fintech… ¡una crisis se avecina!', eventMsg:'💥 ¡FINTECH CRASH! El sector Fintech ha colapsado por nuevas regulaciones.' },
-    { sector:'Energía',   type:'crash', magnitude:[0.10,0.25], warningMsg:'⚠️ ¡ALERTA! Crisis energética global… ¡las acciones de Energía van a caer!', eventMsg:'💥 ¡ENERGÍA CRASH! El sector energético ha sufrido una caída masiva.' },
-    { sector:'Biotech',   type:'crash', magnitude:[0.10,0.25], warningMsg:'⚠️ ¡ALERTA! Un ensayo clínico falló… ¡el sector Biotech va a desplomarse!', eventMsg:'💥 ¡BIOTECH CRASH! Las farmacéuticas y biotechs han caído en picado.' },
-    { sector:'Espacio',   type:'crash', magnitude:[0.10,0.30], warningMsg:'⚠️ ¡ALERTA! Una misión espacial fracasó… ¡el sector Espacio va a caer pronto!', eventMsg:'💥 ¡ESPACIO CRASH! Los activos espaciales han sufrido una caída enorme.' },
-    { sector:'Meme',      type:'crash', magnitude:[0.20,0.40], warningMsg:'⚠️ ¡ALERTA! ¡Los meme coins van a morir! ¡Vende antes de que sea tarde!', eventMsg:'💥 ¡MEME CRASH! Los meme coins han colapsado completamente. El meme ha muerto.' },
-    { sector:'DeFi',      type:'crash', magnitude:[0.15,0.30], warningMsg:'⚠️ ¡ALERTA! Un exploit masivo en DeFi… ¡todas sus acciones van a caer!', eventMsg:'💥 ¡DeFi CRASH! El sector descentralizado ha sido hackeado. Precios en caída libre.' },
+    { sector:'IA',        type:'crash', magnitude:[0.10,0.30], warningMsg:'️ ¡ALERTA! Escándalo en el sector IA… ¡todas sus acciones podrían desplomarse pronto!', eventMsg:' ¡CRASH de IA! Todas las acciones de Inteligencia Artificial han caído drásticamente.' },
+    { sector:'Bluechip',  type:'crash', magnitude:[0.10,0.25], warningMsg:'️ ¡ALERTA! Las grandes empresas Bluechip están en problemas… ¡una caída se acerca!', eventMsg:' ¡CRASH Bluechip! Las acciones de las grandes empresas han colapsado.' },
+    { sector:'Digital',   type:'crash', magnitude:[0.15,0.35], warningMsg:'️ ¡ALERTA! Las criptomonedas están en pánico… ¡vienen caídas masivas en Digital!', eventMsg:' ¡CRYPTO CRASH! Todas las monedas digitales se han desplomado.' },
+    { sector:'Gaming',    type:'crash', magnitude:[0.10,0.30], warningMsg:'️ ¡ALERTA! El sector Gaming está en crisis… ¡los precios van a caer pronto!', eventMsg:' ¡GAMING CRASH! Los activos de Gaming han sufrido una caída brutal.' },
+    { sector:'NFT',       type:'crash', magnitude:[0.15,0.30], warningMsg:'️ ¡ALERTA! ¡Los NFT pronto caerán! ¡Todas sus acciones en peligro!', eventMsg:' ¡NFT CRASH! El mercado de NFT se ha hundido por completo.' },
+    { sector:'Metaverso', type:'crash', magnitude:[0.10,0.25], warningMsg:'️ ¡ALERTA! El Metaverso está siendo abandonado… ¡viene una caída brutal!', eventMsg:' ¡METAVERSO CRASH! Las acciones del Metaverso han caído estrepitosamente.' },
+    { sector:'Fintech',   type:'crash', magnitude:[0.10,0.20], warningMsg:'️ ¡ALERTA! Regulaciones nuevas amenazan al Fintech… ¡una crisis se avecina!', eventMsg:' ¡FINTECH CRASH! El sector Fintech ha colapsado por nuevas regulaciones.' },
+    { sector:'Energía',   type:'crash', magnitude:[0.10,0.25], warningMsg:'️ ¡ALERTA! Crisis energética global… ¡las acciones de Energía van a caer!', eventMsg:' ¡ENERGÍA CRASH! El sector energético ha sufrido una caída masiva.' },
+    { sector:'Biotech',   type:'crash', magnitude:[0.10,0.25], warningMsg:'️ ¡ALERTA! Un ensayo clínico falló… ¡el sector Biotech va a desplomarse!', eventMsg:' ¡BIOTECH CRASH! Las farmacéuticas y biotechs han caído en picado.' },
+    { sector:'Espacio',   type:'crash', magnitude:[0.10,0.30], warningMsg:'️ ¡ALERTA! Una misión espacial fracasó… ¡el sector Espacio va a caer pronto!', eventMsg:' ¡ESPACIO CRASH! Los activos espaciales han sufrido una caída enorme.' },
+    { sector:'Meme',      type:'crash', magnitude:[0.20,0.40], warningMsg:'️ ¡ALERTA! ¡Los meme coins van a morir! ¡Vende antes de que sea tarde!', eventMsg:' ¡MEME CRASH! Los meme coins han colapsado completamente. El meme ha muerto.' },
+    { sector:'DeFi',      type:'crash', magnitude:[0.15,0.30], warningMsg:'️ ¡ALERTA! Un exploit masivo en DeFi… ¡todas sus acciones van a caer!', eventMsg:' ¡DeFi CRASH! El sector descentralizado ha sido hackeado. Precios en caída libre.' },
     // SUBIDAS
-    { sector:'IA',        type:'boom',  magnitude:[0.20,0.50], warningMsg:'🚀 ¡NOTICIA! Un breakthrough de IA revolucionario está por anunciarse… ¡las acciones de IA subirán!', eventMsg:'🚀 ¡IA BOOM! Una revolución en inteligencia artificial ha disparado todas sus acciones.' },
-    { sector:'Bluechip',  type:'boom',  magnitude:[0.10,0.30], warningMsg:'🚀 ¡NOTICIA! Las grandes empresas reportan ganancias récord… ¡las Bluechip van a subir!', eventMsg:'🚀 ¡BLUECHIP BOOM! Las grandes empresas han batido récords históricos de ganancias.' },
-    { sector:'Digital',   type:'boom',  magnitude:[0.20,0.50], warningMsg:'🚀 ¡NOTICIA! ¡Un país ha adoptado las criptomonedas como moneda oficial! ¡Digital va a explotar!', eventMsg:'🚀 ¡CRYPTO BOOM! Adopción masiva de criptomonedas. ¡Todos los activos digitales se disparan!' },
-    { sector:'Gaming',    type:'boom',  magnitude:[0.15,0.40], warningMsg:'🚀 ¡NOTICIA! El juego más esperado del año llega mañana… ¡el sector Gaming va a dispararse!', eventMsg:'🚀 ¡GAMING BOOM! El lanzamiento del año ha generado ganancias masivas en Gaming.' },
-    { sector:'NFT',       type:'boom',  magnitude:[0.20,0.50], warningMsg:'🚀 ¡NOTICIA! ¡Una celebridad mundial acaba de comprar NFTs! ¡Todas las acciones subirán pronto!', eventMsg:'🚀 ¡NFT BOOM! El interés masivo en NFTs ha disparado todos sus precios.' },
-    { sector:'Metaverso', type:'boom',  magnitude:[0.15,0.40], warningMsg:'🚀 ¡NOTICIA! Una mega empresa invierte billones en el Metaverso… ¡viene una subida enorme!', eventMsg:'🚀 ¡METAVERSO BOOM! Inversión histórica en el Metaverso ha disparado todos sus activos.' },
-    { sector:'Fintech',   type:'boom',  magnitude:[0.10,0.30], warningMsg:'🚀 ¡NOTICIA! Nueva regulación favorece al Fintech… ¡sus acciones van a subir pronto!', eventMsg:'🚀 ¡FINTECH BOOM! Cambios regulatorios han impulsado enormemente al sector Fintech.' },
-    { sector:'Energía',   type:'boom',  magnitude:[0.15,0.35], warningMsg:'🚀 ¡NOTICIA! Nuevo acuerdo climático global… ¡el sector Energía va a beneficiarse mucho!', eventMsg:'🚀 ¡ENERGÍA BOOM! El acuerdo climático global ha disparado todos los activos de Energía.' },
-    { sector:'Biotech',   type:'boom',  magnitude:[0.20,0.50], warningMsg:'🚀 ¡NOTICIA! ¡Se ha encontrado la cura de una enfermedad! ¡El sector Biotech va a explotar!', eventMsg:'🚀 ¡BIOTECH BOOM! Un descubrimiento médico histórico ha disparado todas las biotechs.' },
-    { sector:'Espacio',   type:'boom',  magnitude:[0.20,0.50], warningMsg:'🚀 ¡NOTICIA! ¡Se ha confirmado vida en otro planeta! ¡El sector Espacio va a la luna!', eventMsg:'🚀 ¡ESPACIO BOOM! El descubrimiento del siglo ha disparado todos los activos espaciales.' },
-    { sector:'Meme',      type:'boom',  magnitude:[0.30,0.80], warningMsg:'🚀 ¡NOTICIA! ¡Un famoso ha tuiteado sobre los meme coins! ¡Van a explotar completamente!', eventMsg:'🚀 ¡MEME BOOM! ¡Un tweet viral ha multiplicado los precios de todos los meme coins!' },
-    { sector:'DeFi',      type:'boom',  magnitude:[0.15,0.40], warningMsg:'🚀 ¡NOTICIA! Un protocolo DeFi ha generado retornos históricos… ¡todo el sector subirá!', eventMsg:'🚀 ¡DeFi BOOM! Rendimientos históricos en DeFi han atraído inversión masiva al sector.' },
+    { sector:'IA',        type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! Un breakthrough de IA revolucionario está por anunciarse… ¡las acciones de IA subirán!', eventMsg:' ¡IA BOOM! Una revolución en inteligencia artificial ha disparado todas sus acciones.' },
+    { sector:'Bluechip',  type:'boom',  magnitude:[0.10,0.30], warningMsg:' ¡NOTICIA! Las grandes empresas reportan ganancias récord… ¡las Bluechip van a subir!', eventMsg:' ¡BLUECHIP BOOM! Las grandes empresas han batido récords históricos de ganancias.' },
+    { sector:'Digital',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Un país ha adoptado las criptomonedas como moneda oficial! ¡Digital va a explotar!', eventMsg:' ¡CRYPTO BOOM! Adopción masiva de criptomonedas. ¡Todos los activos digitales se disparan!' },
+    { sector:'Gaming',    type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! El juego más esperado del año llega mañana… ¡el sector Gaming va a dispararse!', eventMsg:' ¡GAMING BOOM! El lanzamiento del año ha generado ganancias masivas en Gaming.' },
+    { sector:'NFT',       type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Una celebridad mundial acaba de comprar NFTs! ¡Todas las acciones subirán pronto!', eventMsg:' ¡NFT BOOM! El interés masivo en NFTs ha disparado todos sus precios.' },
+    { sector:'Metaverso', type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! Una mega empresa invierte billones en el Metaverso… ¡viene una subida enorme!', eventMsg:' ¡METAVERSO BOOM! Inversión histórica en el Metaverso ha disparado todos sus activos.' },
+    { sector:'Fintech',   type:'boom',  magnitude:[0.10,0.30], warningMsg:' ¡NOTICIA! Nueva regulación favorece al Fintech… ¡sus acciones van a subir pronto!', eventMsg:' ¡FINTECH BOOM! Cambios regulatorios han impulsado enormemente al sector Fintech.' },
+    { sector:'Energía',   type:'boom',  magnitude:[0.15,0.35], warningMsg:' ¡NOTICIA! Nuevo acuerdo climático global… ¡el sector Energía va a beneficiarse mucho!', eventMsg:' ¡ENERGÍA BOOM! El acuerdo climático global ha disparado todos los activos de Energía.' },
+    { sector:'Biotech',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Se ha encontrado la cura de una enfermedad! ¡El sector Biotech va a explotar!', eventMsg:' ¡BIOTECH BOOM! Un descubrimiento médico histórico ha disparado todas las biotechs.' },
+    { sector:'Espacio',   type:'boom',  magnitude:[0.20,0.50], warningMsg:' ¡NOTICIA! ¡Se ha confirmado vida en otro planeta! ¡El sector Espacio va a la luna!', eventMsg:' ¡ESPACIO BOOM! El descubrimiento del siglo ha disparado todos los activos espaciales.' },
+    { sector:'Meme',      type:'boom',  magnitude:[0.30,0.80], warningMsg:' ¡NOTICIA! ¡Un famoso ha tuiteado sobre los meme coins! ¡Van a explotar completamente!', eventMsg:' ¡MEME BOOM! ¡Un tweet viral ha multiplicado los precios de todos los meme coins!' },
+    { sector:'DeFi',      type:'boom',  magnitude:[0.15,0.40], warningMsg:' ¡NOTICIA! Un protocolo DeFi ha generado retornos históricos… ¡todo el sector subirá!', eventMsg:' ¡DeFi BOOM! Rendimientos históricos en DeFi han atraído inversión masiva al sector.' },
 ];
 
 // Evento activo actualmente (si lo hay)
@@ -1335,10 +1344,10 @@ const triggerMarketEventWarning = () => {
 
     // Toast de advertencia
     showToast(evt.type === 'crash'
-        ? `⚠️ ${evt.sector} — evento de CAÍDA en ${warningTime}s!`
-        : `📢 ${evt.sector} — evento de SUBIDA en ${warningTime}s!`
+        ? `️ ${evt.sector} — evento de CAÍDA en ${warningTime}s!`
+        : ` ${evt.sector} — evento de SUBIDA en ${warningTime}s!`
     );
-    logEvent('evento', `⚠️ Alerta: evento ${evt.type === 'crash' ? 'CAÍDA' : 'SUBIDA'} en ${evt.sector}`, `Se aplicará en ${warningTime}s`);
+    logEvent('evento', `️ Alerta: evento ${evt.type === 'crash' ? 'CAÍDA' : 'SUBIDA'} en ${evt.sector}`, `Se aplicará en ${warningTime}s`);
 
     // Resaltar sector en el mercado como advertencia
     highlightSector(evt.sector, evt.type, warningTime * 1000);
@@ -1373,10 +1382,10 @@ const applyMarketEvent = (evt) => {
     // Toast dramático
     const pct = (magnitude * 100).toFixed(0);
     showToast(evt.type === 'crash'
-        ? `💥 ${evt.sector} cayó un ${pct}%!`
-        : `🚀 ${evt.sector} subió un ${pct}%!`
+        ? ` ${evt.sector} cayó un ${pct}%!`
+        : ` ${evt.sector} subió un ${pct}%!`
     );
-    logEvent('evento', `${evt.type === 'crash' ? '💥 CRASH' : '🚀 BOOM'} en sector ${evt.sector}`, `${evt.type === 'crash' ? 'Cayó' : 'Subió'} un ${pct}%`);
+    logEvent('evento', `${evt.type === 'crash' ? ' CRASH' : ' BOOM'} en sector ${evt.sector}`, `${evt.type === 'crash' ? 'Cayó' : 'Subió'} un ${pct}%`);
 
     // Flash visual del sector
     highlightSector(evt.sector, evt.type, 4000);
@@ -1404,84 +1413,84 @@ const highlightSector = (sector, type, duration) => {
 // ============================================================
 const sectorInfo = {
     'IA': {
-        icon: '🤖',
+        icon: '',
         titulo: 'IA — Inteligencia Artificial',
         que: 'Tecnología que permite a las máquinas "pensar", aprender y resolver problemas como humanos.',
         porque: 'Es la revolución industrial de nuestra era. Invertir aquí es apostar a que las máquinas harán el trabajo más rápido y eficiente, generando ganancias masivas.',
         riesgo: 'Alto',
     },
     'Bluechip': {
-        icon: '💎',
+        icon: '',
         titulo: 'Bluechip',
         que: 'Empresas gigantes, estables y con historial impecable (ej. Microsoft o Coca-Cola).',
         porque: 'Son el "refugio seguro". No te harán millonario de la noche a la mañana, pero es muy difícil que pierdan su valor. Dan estabilidad a tu cartera.',
         riesgo: 'Bajo',
     },
     'Digital': {
-        icon: '🌐',
+        icon: '',
         titulo: 'Digital',
         que: 'Negocios basados 100% en internet: ciberseguridad, almacenamiento en la nube o redes sociales.',
         porque: 'El mundo vive en la red. Si el tráfico de internet sube, estas empresas ganan.',
         riesgo: 'Medio',
     },
     'Gaming': {
-        icon: '🎮',
+        icon: '',
         titulo: 'Gaming',
         que: 'Empresas de videojuegos, consolas y eSports.',
         porque: 'Es una de las industrias de entretenimiento que más dinero mueve, superando incluso al cine. Los lanzamientos de nuevos juegos generan picos de ganancias.',
         riesgo: 'Medio',
     },
     'NFT': {
-        icon: '🖼️',
+        icon: '️',
         titulo: 'NFT — Tokens No Fungibles',
         que: 'Activos digitales únicos certificados por blockchain (arte, coleccionables, música).',
         porque: 'Es una inversión de alto riesgo basada en la escasez y el valor artístico. Si un NFT se vuelve "tendencia", su precio puede subir miles de veces.',
         riesgo: 'Muy Alto',
     },
     'Metaverso': {
-        icon: '🥽',
+        icon: '',
         titulo: 'Metaverso',
         que: 'Mundos virtuales donde la gente socializa, trabaja y compra.',
         porque: 'Es la apuesta al futuro de internet. Invertir aquí es como comprar terrenos en una ciudad que apenas se está construyendo.',
         riesgo: 'Alto',
     },
     'Fintech': {
-        icon: '💳',
+        icon: '',
         titulo: 'Fintech — Financial Technology',
         que: 'Bancos digitales, apps de pago y préstamos online.',
         porque: 'Los bancos tradicionales son lentos; las Fintech son rápidas. Inviertes en la modernización del dinero.',
         riesgo: 'Medio',
     },
     'Energía': {
-        icon: '⚡',
+        icon: '',
         titulo: 'Energía',
         que: 'Producción de electricidad, desde petróleo hasta paneles solares y reactores nucleares.',
         porque: 'Todo lo demás (IA, Gaming, Casas) necesita energía para funcionar. Es la base de la economía mundial.',
         riesgo: 'Bajo',
     },
     'Biotech': {
-        icon: '🧬',
+        icon: '',
         titulo: 'Biotech — Biotecnología',
         que: 'Uso de organismos vivos para crear medicinas, vacunas o mejorar cultivos.',
         porque: 'Un solo descubrimiento médico (como una cura o vacuna nueva) puede hacer que las acciones se disparen en un día.',
         riesgo: 'Alto',
     },
     'Espacio': {
-        icon: '🚀',
+        icon: '',
         titulo: 'Espacio',
         que: 'Turismo espacial, satélites y minería en asteroides.',
         porque: 'Es la "última frontera". Es una inversión a largo plazo pensando en que la humanidad saldrá de la Tierra.',
         riesgo: 'Muy Alto',
     },
     'Meme': {
-        icon: '🐸',
+        icon: '',
         titulo: 'Meme — Memecoins',
         que: 'Criptomonedas que nacen de chistes en internet (como Dogecoin).',
         porque: 'Es pura especulación y diversión. No tienen un valor real sólido, pero si una comunidad se organiza, el precio vuela por los cielos.',
         riesgo: 'Extremo',
     },
     'DeFi': {
-        icon: '🏦',
+        icon: '',
         titulo: 'DeFi — Finanzas Descentralizadas',
         que: 'Sistemas financieros que no necesitan bancos, funcionando con contratos inteligentes.',
         porque: 'Es eliminar al "intermediario". Tú eres tu propio banco y ganas intereses directamente de otros usuarios.',
@@ -1550,16 +1559,16 @@ const logEvent = (tipo, mensaje, extra = '') => {
 };
 
 const iconByTipo = {
-    compra:   '📈',
-    venta:    '📉',
-    comida:   '🍎',
-    deposito: '💳',
-    efecto:   '✨',
-    gameover: '💀',
-    bonus:    '🏆',
-    evento:   '⚡',
-    mascota:  '🐾',
-    sistema:  '⚙️',
+    compra:   '',
+    venta:    '',
+    comida:   '',
+    deposito: '',
+    efecto:   '',
+    gameover: '',
+    bonus:    '',
+    evento:   '',
+    mascota:  '',
+    sistema:  '️',
 };
 
 const colorByTipo = {
@@ -1588,7 +1597,7 @@ window.clearHistorial = () => {
     if (!confirm('¿Seguro que quieres limpiar todo el historial?')) return;
     localStorage.removeItem(HISTORIAL_KEY());
     renderHistorialList();
-    showToast('🗑️ Historial limpiado');
+    showToast('️ Historial limpiado');
 };
 
 const renderHistorialList = () => {
@@ -1598,7 +1607,7 @@ const renderHistorialList = () => {
 
     if (historial.length === 0) {
         container.innerHTML = `<div class="historial-empty">
-            <span style="font-size:2rem">📋</span>
+            <span style="font-size:2rem"></span>
             <p>Aún no hay actividad registrada.<br>¡Empieza a invertir!</p>
         </div>`;
         return;
@@ -1617,7 +1626,7 @@ const renderHistorialList = () => {
             </div>
             <div class="hi-meta">
                 <span class="hi-hora">${e.hora}</span>
-                <span class="hi-monedas">🪙 ${e.monedas}</span>
+                <span class="hi-monedas"> ${e.monedas}</span>
             </div>
         </div>`;
     }).join('');
@@ -1644,7 +1653,7 @@ window.openTutorial = () => {
             attempts++;
             setTimeout(tryOpen, 100);
         } else {
-            showToast('⚠️ Tutorial no disponible. Recarga la página e inténtalo de nuevo.');
+            showToast('️ Tutorial no disponible. Recarga la página e inténtalo de nuevo.');
         }
     };
     tryOpen();
@@ -1660,7 +1669,7 @@ const CODIGOS = {
         recompensa: (usuario) => {
             state.monedas += 1000;
             logEvent('bonus', 'Código BITGAMESO canjeado', '+1000 monedas');
-            return '🎉 ¡Código válido! +1,000 monedas de bienvenida';
+            return ' ¡Código válido! +1,000 monedas de bienvenida';
         }
     },
     '1234': {
@@ -1668,7 +1677,7 @@ const CODIGOS = {
         recompensa: (usuario) => {
             state.monedas += 1000000;
             logEvent('bonus', 'Código 1234 canjeado', '+1,000,000 monedas');
-            return '💰 ¡Código válido! +1,000,000 monedas';
+            return ' ¡Código válido! +1,000,000 monedas';
         }
     },
     'BIENVENIDA': {
@@ -1691,7 +1700,7 @@ const CODIGOS = {
             const r3 = addFoodSafe('Candy-Blue-128', 3);
             const r4 = addFoodSafe('Pumpkin-128', 3);
             logEvent('bonus', 'Código BIENVENIDA canjeado', '+500 monedas + comidas gratis');
-            return `🎁 ¡Código válido! +500 monedas + ${r1} zanahorias, ${r2} pescado, ${r3} dulces, ${r4} calabazas`;
+            return ` ¡Código válido! +500 monedas + ${r1} zanahorias, ${r2} pescado, ${r3} dulces, ${r4} calabazas`;
         }
     },
     'JOSELUIS': {
@@ -1699,7 +1708,7 @@ const CODIGOS = {
         recompensa: (usuario) => {
             state.foodInflation.clear();
             logEvent('bonus', 'Código JOSELUIS canjeado', 'Inflación de comida reseteada');
-            return '✨ ¡Código válido! Toda la inflación de comida ha sido reseteada';
+            return ' ¡Código válido! Toda la inflación de comida ha sido reseteada';
         }
     },
 };
@@ -1729,14 +1738,14 @@ window.canjearCodigo = () => {
     if (!input || !msg) return;
 
     const codigo = input.value.trim().toUpperCase();
-    if (!codigo) { msg.textContent = '⚠️ Escribe un código primero'; msg.style.color = '#e67e22'; return; }
+    if (!codigo) { msg.textContent = '️ Escribe un código primero'; msg.style.color = '#e67e22'; return; }
 
     const def = CODIGOS[codigo];
-    if (!def) { msg.textContent = '❌ Código no válido'; msg.style.color = '#e74c3c'; return; }
+    if (!def) { msg.textContent = ' Código no válido'; msg.style.color = '#e74c3c'; return; }
 
     // Verificar si ya fue canjeado (solo para códigos únicos)
     if (def.unica && localStorage.getItem(getCodigoKey(codigo))) {
-        msg.textContent = '⛔ Este código ya fue canjeado por tu cuenta';
+        msg.textContent = ' Este código ya fue canjeado por tu cuenta';
         msg.style.color = '#e74c3c';
         return;
     }
@@ -1880,6 +1889,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     startEffectTick();
     startPetTips();
     scheduleNextEvent();
+    // Inicializar mecánicas financieras realistas
+    if (typeof window.initFinanceMechanics === 'function') window.initFinanceMechanics();
 });
 
-console.log('BITGAMESO v5 — inflación comida, bonos sector, 50 mensajes mascota. 🎮');
+console.log('BITGAMESO v5 — inflación comida, bonos sector, 50 mensajes mascota. ');
