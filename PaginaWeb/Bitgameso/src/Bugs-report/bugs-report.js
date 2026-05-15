@@ -137,16 +137,16 @@ const buildEmailHTML = (desc, ctx, screenshotDataUrl) => `
 <body>
 <div class="card">
   <div class="hdr">
-    <h1> Reporte de Bug — BITGAMESO</h1>
+    <h1>🐛 Reporte de Bug — BITGAMESO</h1>
     <p>${ctx.fecha} &nbsp;·&nbsp; Usuario: <b>${ctx.usuario}</b></p>
   </div>
   <div class="body">
     <div class="sec">
-      <h3> Descripcion</h3>
+      <h3>📝 Descripcion</h3>
       <div class="desc-box">${desc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
     </div>
     <div class="sec">
-      <h3>Captura de pantalla</h3>
+      <h3>📸 Captura de pantalla</h3>
       ${screenshotDataUrl
         ? `<div class="ss-wrap"><img src="${screenshotDataUrl}" alt="Captura del bug"></div>`
         : `<p class="no-ss">El usuario no adjunto captura.</p>`}
@@ -162,7 +162,7 @@ const buildEmailHTML = (desc, ctx, screenshotDataUrl) => `
       </table>
     </div>
     <div class="sec">
-      <h3> Info tecnica</h3>
+      <h3>🖥️ Info tecnica</h3>
       <table>
         <tr><td>Pantalla</td><td>${ctx.pantalla}</td></tr>
         <tr><td>URL</td><td>${ctx.url}</td></tr>
@@ -170,12 +170,12 @@ const buildEmailHTML = (desc, ctx, screenshotDataUrl) => `
       </table>
     </div>
     <div class="sec">
-      <h3> Errores de consola</h3>
+      <h3>⚠️ Errores de consola</h3>
       ${ctx.erroresConsola.length > 0
         ? `<div class="err-list">${ctx.erroresConsola.map(e =>
             `<div class="err-item"><span style="color:#999">${e.time.slice(11,19)}</span> — ${e.msg.slice(0,220)}</div>`
           ).join('')}</div>`
-        : '<p class="no-err"> Sin errores registrados en esta sesion</p>'}
+        : '<p class="no-err">✅ Sin errores registrados en esta sesion</p>'}
     </div>
   </div>
   <div class="footer">Enviado automaticamente desde BITGAMESO · bitgameso.com</div>
@@ -193,7 +193,7 @@ const sendViaResend = async (desc, ctx, screenshotDataUrl) => {
         body: JSON.stringify({
             from:    `BITGAMESO Bugs <${BUG_FROM_EMAIL}>`,
             to:      [BUG_REPORT_TO],
-            subject: ` Bug de ${ctx.usuario} — ${ctx.fecha}`,
+            subject: `🐛 Bug de ${ctx.usuario} — ${ctx.fecha}`,
             html:    buildEmailHTML(desc, ctx, screenshotDataUrl),
         }),
     });
@@ -211,12 +211,15 @@ const injectBugStyles = () => {
     s.textContent = `
     .btn-bug-report {
         display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;
-        background:none;border:none;border-top:1px solid #f0e7ff;
-        color:#e74c3c;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:700;
-        cursor:pointer;text-align:left;border-radius:0 0 12px 12px;transition:background 0.2s;margin:0;
+        background:white;
+        border:2px solid #CBA6F7;
+        border-radius:10px;
+        color:#CBA6F7;
+        font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:700;
+        cursor:pointer;text-align:left;
+        transition:background 0.2s;margin:0;
     }
-    .btn-bug-report:hover{background:#fff5f5;transform:none;}
-    .btn-bug-report img{width:16px;height:16px;object-fit:contain;}
+    .btn-bug-report:hover{background:#f9f0ff;transform:none;}
     #modal-bug-report{
         position:fixed;inset:0;background:rgba(0,0,0,0.48);z-index:10000;
         display:flex;align-items:center;justify-content:center;padding:16px;
@@ -321,7 +324,7 @@ window.openBugReport = () => {
     modal.innerHTML = `
         <div class="bug-modal-box">
             <div class="bug-modal-header">
-                <h3> Reportar Bug</h3>
+                <h3>🐛 Reportar Bug</h3>
                 <button class="bug-modal-close" onclick="closeBugReport()">✕</button>
             </div>
             <div class="bug-modal-body">
@@ -334,13 +337,13 @@ window.openBugReport = () => {
                     placeholder="Ej: Presione Enviar y la manzana desaparecio pero mi mascota no gano salud..."></textarea>
 
                 <label class="bug-field-label">
-                     Captura de pantalla
+                    📸 Captura de pantalla
                     <span style="color:#aaa;font-weight:400">(opcional)</span>
                 </label>
                 <div class="bug-screenshot-area" id="bug-ss-area">
                     <input type="file" id="bug-ss-input" accept="image/*">
                     <div class="bug-ss-placeholder" id="bug-ss-placeholder">
-                        <span></span>
+                        <span>🖼️</span>
                         Haz clic aqui o arrastra una imagen<br>
                         <small style="color:#ccc">PNG, JPG, WEBP · max 5 MB</small>
                     </div>
@@ -365,7 +368,7 @@ window.openBugReport = () => {
             </div>
             <div class="bug-modal-footer">
                 <button id="btn-cancel-bug" onclick="closeBugReport()">Cancelar</button>
-                <button id="btn-send-bug"   onclick="submitBugReport()"> Enviar reporte</button>
+                <button id="btn-send-bug"   onclick="submitBugReport()">📨 Enviar reporte</button>
             </div>
         </div>`;
     document.body.appendChild(modal);
@@ -404,7 +407,7 @@ const processScreenshotFile = async (file) => {
         if (status) { status.textContent = ''; status.className = 'bug-status'; }
     } catch (err) {
         if (status) {
-            status.textContent = ` ${err.message}`;
+            status.textContent = `⚠️ ${err.message}`;
             status.className   = 'bug-status error';
         }
     }
@@ -438,7 +441,7 @@ window.submitBugReport = async () => {
     const btn    = document.getElementById('btn-send-bug');
 
     if (!desc) {
-        status.textContent = 'Por favor describe el bug antes de enviar.';
+        status.textContent = '⚠️ Por favor describe el bug antes de enviar.';
         status.className   = 'bug-status error';
         return;
     }
@@ -473,15 +476,15 @@ window.submitBugReport = async () => {
 
     if (resendOk || supabaseOk) {
         status.textContent = resendOk
-            ? ' Reporte enviado. Gracias por ayudarnos a mejorar BITGAMESO.'
-            : ' Reporte guardado (correo temporalmente no disponible).';
+            ? '✅ Reporte enviado. Gracias por ayudarnos a mejorar BITGAMESO.'
+            : '✅ Reporte guardado (correo temporalmente no disponible).';
         status.className = 'bug-status ok';
         const ta = document.getElementById('bug-description');
         if (ta) ta.value = '';
         resetScreenshot();
         setTimeout(() => closeBugReport(), 3000);
     } else {
-        status.textContent = ' No se pudo enviar. Intenta en un momento.';
+        status.textContent = '❌ No se pudo enviar. Intenta en un momento.';
         status.className   = 'bug-status error';
         btn.disabled = false;
     }
