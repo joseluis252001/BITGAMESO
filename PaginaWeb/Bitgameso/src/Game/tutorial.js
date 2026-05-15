@@ -560,69 +560,96 @@ const restoreBuyBtns = () => {
 
 // ============================================================
 //  SETUP PASO 4 — VENDER CON GANANCIA
-//  Fuerza el precio en +100% para que siempre esté en verde
+//  Secuencia: primero rojo (4s educativo) → luego verde → resaltar VENDER
 // ============================================================
 const setupSellTutorial = () => {
     if (!tutorialSelectedAction) { tutorialNext(); return; }
     const sym = tutorialSelectedAction;
-
-    // Siempre forzar precio x2 (tanto en primera vez como en repetición sin monedas)
     const pos = state.portfolio.get(sym);
-    if (pos) {
-        const asset = state.market.get(sym);
-        if (asset) {
-            state.market.set(sym, { ...asset, price: pos.buyPrice * 2, changePercent: 100 });
+    if (!pos) { tutorialNext(); return; }
+
+    // PASO A: Forzar precio en ROJO primero (precio = 50% del comprado)
+    const asset = state.market.get(sym);
+    if (asset) {
+        state.market.set(sym, { ...asset, price: pos.buyPrice * 0.5, changePercent: -50 });
+        if (typeof renderMarket === 'function') renderMarket();
+        if (typeof renderPortfolio === 'function') renderPortfolio();
+    }
+
+    // Pausar el mercado para que no sobreescriba el precio
+    if (typeof marketTimer !== 'undefined' && marketTimer) {
+        clearInterval(marketTimer);
+        marketTimer = null;
+    }
+
+    // Mostrar mensaje rojo
+    const textEl = document.getElementById('tut-text');
+    if (textEl) {
+        if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
+        typewriterEffect(textEl, 'Mira: la inversion esta en ROJO, significa perdida. Espera a que suba...');
+    }
+
+    // Scroll a la cartera
+    const portfolioEl = document.querySelector('.portfolio-aside');
+    if (portfolioEl) portfolioEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // PASO B: Después de 4 segundos, subir a VERDE
+    setTimeout(() => {
+        if (!tutorialActive) return;
+        const assetNow = state.market.get(sym);
+        if (assetNow) {
+            state.market.set(sym, { ...assetNow, price: pos.buyPrice * 2, changePercent: 100 });
             if (typeof renderMarket === 'function') renderMarket();
             if (typeof renderPortfolio === 'function') renderPortfolio();
         }
-    }
 
-    // Scroll a la cartera y resaltar
-    setTimeout(() => {
-        const portfolioEl = document.querySelector('.portfolio-aside');
-        if (portfolioEl) {
-            portfolioEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => {
-                // Deshabilitar overlay para que el botón VENDER sea clickeable
-                disableOverlayBlock();
-                // Buscar el botón VENDER de este activo en la cartera
-                const sellBtns = document.querySelectorAll('.portfolio-aside .btn-sell, .portfolio-aside [class*="sell"]');
-                sellBtns.forEach(b => {
-                    elevateElement(b);
-                    addActionGlow(b);
-                });
-                // Elevar toda la cartera para verla
-                elevateElement(portfolioEl);
-                highlightElement(portfolioEl, { arrowDir: 'up' });
-            }, 700);
+        // Actualizar texto a verde
+        const textEl2 = document.getElementById('tut-text');
+        if (textEl2) {
+            if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
+            typewriterEffect(textEl2, '¡Ahora esta en VERDE! Es ganancia. Presiona el boton VENDER en tu cartera.');
         }
-    }, 300);
 
-    // Actualizar texto según precio en tiempo real
-    const priceCheck = setInterval(() => {
-        if (!tutorialActive || !state.portfolio.has(sym)) { clearInterval(priceCheck); return; }
-        const posNow = state.portfolio.get(sym);
-        const cur    = state.market.get(sym);
-        if (posNow && cur) {
-            const textEl = document.getElementById('tut-text');
-            if (textEl) {
-                if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-                const msg = cur.price >= posNow.buyPrice
-                    ? '¡Esta en verde! Es buen momento para vender. ¡Presiona VENDER en tu cartera!'
-                    : 'Aun esta en rojo, espera un poco mas antes de vender...';
-                typewriterEffect(textEl, msg);
+        // Resaltar y habilitar el botón VENDER
+        setTimeout(() => {
+            if (!tutorialActive) return;
+            disableOverlayBlock();
+
+            // Buscar botón VENDER — buscar por texto o clase
+            const allBtns = document.querySelectorAll('.portfolio-aside button, .portfolio-aside .btn-sell, .portfolio-aside [class*="sell"], .portfolio-aside [class*="vender"]');
+            let sellBtn = null;
+            allBtns.forEach(b => {
+                const txt = b.textContent.trim().toUpperCase();
+                if (txt === 'VENDER' || b.classList.contains('btn-sell')) sellBtn = b;
+            });
+
+            // Fallback: cualquier botón rojo en la cartera
+            if (!sellBtn) {
+                const redBtns = document.querySelectorAll('.portfolio-aside button');
+                redBtns.forEach(b => { if (b.textContent.trim().toUpperCase().includes('VEND')) sellBtn = b; });
             }
-        }
-    }, 1500);
+
+            if (sellBtn) {
+                sellBtn.style.pointerEvents = 'auto';
+                sellBtn.style.opacity       = '1';
+                addActionGlow(sellBtn);
+                sellBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (portfolioEl) highlightElement(portfolioEl, { arrowDir: 'up' });
+            }
+        }, 800);
+
+    }, 4000); // 4 segundos en rojo
 
     // Polling: detectar que el activo salió de la cartera
     const checkSell = setInterval(() => {
         if (!tutorialActive) { clearInterval(checkSell); return; }
         if (!state.portfolio.has(sym)) {
             clearInterval(checkSell);
-            clearInterval(priceCheck);
             lowerAllElevated();
+            removeActionGlow();
             enableOverlayBlock();
+            // Reanudar mercado
+            if (typeof startMarket === 'function') startMarket(_marketSpeed || 3000);
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
         }
     }, 400);
