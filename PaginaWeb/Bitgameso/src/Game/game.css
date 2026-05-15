@@ -766,11 +766,85 @@ body {
     50%      { opacity: 0.6; }
 }
 
+/* ====   MODAL CANJEAR CÓDIGO — rediseño pastel
+   ==== */
+#modal-codigo .modal-box {
+    background: #FFF5BA;
+    border-color: #CBA6F7;
+    box-shadow: 5px 5px 0px #CBA6F7;
+}
+#modal-codigo .modal-box h3   { color: #CBA6F7; }
+#modal-codigo .modal-subtitle { color: #CBA6F7; opacity: .75; }
+#modal-codigo .btn-modal-close {
+    background: white; color: #CBA6F7; border-color: #CBA6F7;
+}
+#modal-codigo .btn-modal-close:hover { background: #f9f0ff; }
+#modal-codigo #codigo-msg { color: #CBA6F7; }
+
+/* ====   MASCOTA — textos morados
+   ==== */
+.pet-aside h2          { color: #CBA6F7 !important; }
+.pet-health-label      { font-size:11px; color: #CBA6F7; opacity: .7; margin:0 0 6px; }
+#pet-message           { font-size:12px; color: #CBA6F7; margin:0 0 10px; font-style:italic; }
+#pet-health-value      { color: #CBA6F7; }
+
+/* ====   EVENTOS — verde bueno / naranja malo, borde negro parpadeante
+   ==== */
+@keyframes event-boom-pulse {
+    0%,100% {
+        color: #2d8c4e;
+        text-shadow: none;
+        outline: 2px solid #1a5c32;
+        border-radius: 6px;
+    }
+    50% {
+        color: #1db954;
+        text-shadow: 0 0 10px rgba(29,185,84,0.8);
+        outline: 3px solid #000;
+        border-radius: 6px;
+    }
+}
+
+@keyframes event-crash-pulse {
+    0%,100% {
+        color: #e67e22;
+        text-shadow: none;
+        outline: 2px solid #a04000;
+        border-radius: 6px;
+    }
+    50% {
+        color: #f39c12;
+        text-shadow: 0 0 10px rgba(243,156,18,0.8);
+        outline: 3px solid #000;
+        border-radius: 6px;
+    }
+}
+
+.pet-warn-boom {
+    animation: event-boom-pulse .8s ease-in-out infinite !important;
+    font-style: normal !important;
+    font-weight: 700 !important;
+    padding: 2px 4px;
+    display: inline-block;
+}
+
+.pet-warn-crash {
+    animation: event-crash-pulse .8s ease-in-out infinite !important;
+    font-style: normal !important;
+    font-weight: 700 !important;
+    padding: 2px 4px;
+    display: inline-block;
+}
+
+/* ====   CARTERA h2 — morado
+   ==== */
+.portfolio-aside h2 { color: #CBA6F7 !important; }
+
 /* Glow cuando la mascota da un consejo */
 @keyframes tip-glow {
-    0%   { color: var(--text); text-shadow: none; }
-    50%  { color: var(--primary-dk); text-shadow: 0 0 8px rgba(203,166,247,0.8); }
-    100% { color: var(--text); text-shadow: none; }
+    0%   { color: #CBA6F7; text-shadow: none; }
+    50%  { color: #b48ded; text-shadow: 0 0 8px rgba(203,166,247,0.8); }
+    100% { color: #CBA6F7; text-shadow: none; }
 }
 
 .pet-tip-glow {
@@ -995,6 +1069,20 @@ body {
 
 /* ====   MODAL: HISTORIAL
    ==== */
+/* ====   MODAL HISTORIAL — rediseño pastel
+   ==== */
+#modal-historial .modal-box {
+    background: #FFF5BA;
+    border-color: #CBA6F7;
+    box-shadow: 5px 5px 0px #CBA6F7;
+}
+#modal-historial .modal-box h3    { color: #CBA6F7; }
+#modal-historial .modal-subtitle  { color: #CBA6F7; opacity: .75; }
+#modal-historial .btn-modal-close {
+    background: #CBA6F7; color: white; border-color: #CBA6F7;
+}
+#modal-historial .btn-modal-close:hover { background: #b48ded; border-color: #b48ded; }
+
 .historial-list {
     display: flex;
     flex-direction: column;
@@ -1011,100 +1099,65 @@ body {
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    background: #fafafa;
+    background: white;
     border-radius: 12px;
-    border: 1px solid #eee;
+    border: 1px solid #f0e7ff;
     transition: .15s;
 }
-
-.historial-item:hover { background: #f5f0ff; }
+.historial-item:hover { background: #f9f0ff; }
 
 .historial-gameover {
-    background: #fff0f0 !important;
-    border-color: #f5c6cb !important;
+    background: #fff0f3 !important;
+    border-color: #FFB6C1 !important;
 }
 
 .hi-icon {
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+    background: #f0e7ff;
+    color: #CBA6F7;
+    font-weight: 700;
 }
 
-.hi-body {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
+.hi-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 
 .hi-msg {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 12px; font-weight: 700;
+    color: #CBA6F7;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .hi-extra {
-    font-size: 10px;
-    color: #aaa;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 10px; color: #CBA6F7; opacity: .65;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.hi-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-    flex-shrink: 0;
-}
-
-.hi-hora    { font-size: 10px; color: #bbb; }
-.hi-monedas { font-size: 10px; color: var(--primary-dk); font-weight: 700; }
+.hi-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+.hi-hora    { font-size: 10px; color: #CBA6F7; opacity: .6; }
+.hi-monedas { font-size: 10px; color: #CBA6F7; font-weight: 700; }
 
 .historial-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 30px;
-    color: #bbb;
-    text-align: center;
-    font-size: 13px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 10px; padding: 30px;
+    color: #CBA6F7; opacity: .5;
+    text-align: center; font-size: 13px;
 }
 
 .historial-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
 }
 
 .btn-historial-clear {
-    padding: 8px 16px;
-    border-radius: 10px;
-    border: 2px solid var(--danger);
-    background: white;
-    color: var(--danger);
-    font-weight: 700;
-    font-size: .8rem;
-    cursor: pointer;
-    transition: .2s;
+    padding: 8px 16px; border-radius: 10px;
+    border: 2px solid #FFB6C1;
+    background: white; color: #FFB6C1;
+    font-weight: 700; font-size: .8rem;
+    cursor: pointer; transition: .2s;
     font-family: 'Poppins', sans-serif;
 }
-
-.btn-historial-clear:hover {
-    background: var(--danger);
-    color: white;
-}
+.btn-historial-clear:hover { background: #FFB6C1; color: white; }
 
 /* ====   SISTEMA DE MASCOTAS — DESBLOQUEO Y HABILIDADES
    ==== */

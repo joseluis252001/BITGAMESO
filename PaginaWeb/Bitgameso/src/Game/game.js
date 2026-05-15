@@ -1649,29 +1649,29 @@ const logEvent = (tipo, mensaje, extra = '') => {
 };
 
 const iconByTipo = {
-    compra:   '',
-    venta:    '',
-    comida:   '',
-    deposito: '',
-    efecto:   '',
-    gameover: '',
-    bonus:    '',
-    evento:   '',
-    mascota:  '',
-    sistema:  '️',
+    compra:   'C',
+    venta:    'V',
+    comida:   'A',
+    deposito: 'D',
+    efecto:   'E',
+    gameover: 'X',
+    bonus:    'B',
+    evento:   'M',
+    mascota:  'P',
+    sistema:  'S',
 };
 
 const colorByTipo = {
-    compra:   '#27ae60',
-    venta:    '#e74c3c',
-    comida:   '#ff9800',
-    deposito: '#3498db',
-    efecto:   '#9b59b6',
-    gameover: '#c0392b',
-    bonus:    '#f1c40f',
-    evento:   '#e67e22',
-    mascota:  '#e91e63',
-    sistema:  '#95a5a6',
+    compra:   '#B2F2BB',
+    venta:    '#FFB6C1',
+    comida:   '#FFF5BA',
+    deposito: '#A0E7E5',
+    efecto:   '#CBA6F7',
+    gameover: '#FFB6C1',
+    bonus:    '#FFF5BA',
+    evento:   '#CBA6F7',
+    mascota:  '#FFB6C1',
+    sistema:  '#f0e7ff',
 };
 
 window.openHistorial = () => {
@@ -1687,7 +1687,7 @@ window.clearHistorial = () => {
     if (!confirm('¿Seguro que quieres limpiar todo el historial?')) return;
     localStorage.removeItem(HISTORIAL_KEY());
     renderHistorialList();
-    showToast('️ Historial limpiado');
+    showToast('Historial limpiado');
 };
 
 const renderHistorialList = () => {
@@ -1697,26 +1697,25 @@ const renderHistorialList = () => {
 
     if (historial.length === 0) {
         container.innerHTML = `<div class="historial-empty">
-            <span style="font-size:2rem"></span>
-            <p>Aún no hay actividad registrada.<br>¡Empieza a invertir!</p>
+            <p>Aun no hay actividad registrada. Empieza a invertir!</p>
         </div>`;
         return;
     }
 
     container.innerHTML = historial.map((e, i) => {
         const icon  = iconByTipo[e.tipo]  || '•';
-        const color = colorByTipo[e.tipo] || '#666';
+        const color = colorByTipo[e.tipo] || '#f0e7ff';
         const isGameOver = e.tipo === 'gameover';
         return `
         <div class="historial-item ${isGameOver ? 'historial-gameover' : ''}">
-            <div class="hi-icon" style="background:${color}20; color:${color}">${icon}</div>
+            <div class="hi-icon" style="background:${color}; color:#CBA6F7;">${icon}</div>
             <div class="hi-body">
                 <span class="hi-msg">${e.mensaje}</span>
                 ${e.extra ? `<span class="hi-extra">${e.extra}</span>` : ''}
             </div>
             <div class="hi-meta">
                 <span class="hi-hora">${e.hora}</span>
-                <span class="hi-monedas"> ${e.monedas}</span>
+                <span class="hi-monedas">${e.monedas}</span>
             </div>
         </div>`;
     }).join('');
