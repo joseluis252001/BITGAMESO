@@ -55,19 +55,12 @@ const TUTORIAL_STEPS = [
         waitFor:  'sell_tutorial',
         scrollTo: true,
     },
-    // PASO 5 — Abrir tienda
+    // PASO 5 — Abrir tienda Y comprar manzana (un solo paso)
     {
         target:   '#btn-comprar',
-        mascot:   'Bien vendido! Ahora vamos a comprarme comida. Presiona el boton "Comprar" para abrir la tienda.',
-        waitFor:  'click_target',
+        mascot:   'Ahora vamos a comprarme comida. Presiona el boton "Comprar" para abrir la tienda y compra la MANZANA.',
+        waitFor:  'buy_food_tutorial',
         scrollTo: true,
-    },
-    // PASO 6 — Comprar manzana en tienda
-    {
-        target:     '.food-shop-grid',
-        mascot:     'Busca la MANZANA (fruta roja, primera de la lista) y comprala. Las frutas activan el mercado rapido.',
-        waitFor:    'buy_food_tutorial',
-        scrollTo:   false,
     },
     // PASO 7 — Seleccionar item del inventario
     {
@@ -678,8 +671,8 @@ const setupClickTarget = (selector) => {
 };
 
 // ============================================================
-//  SETUP PASO 6 — COMPRAR MANZANA EN TIENDA
-//  Solo resalta la Manzana, sin overlay que tape la tienda
+//  SETUP PASO 5 — ABRIR TIENDA Y COMPRAR MANZANA
+//  Espera que el usuario abra la tienda, luego resalta la manzana
 // ============================================================
 const setupBuyFoodTutorial = () => {
     const TUTORIAL_FOOD_ID = 'Apple-128';
@@ -687,84 +680,52 @@ const setupBuyFoodTutorial = () => {
     const prevQty     = state.inventory && state.inventory.has(TUTORIAL_FOOD_ID)
         ? (state.inventory.get(TUTORIAL_FOOD_ID).qty || 1) : 0;
 
-    // Quitar overlay completamente para este paso
+    // Resaltar y habilitar el botón Comprar
     disableOverlayBlock();
     const overlayEl = document.getElementById('tutorial-overlay');
     if (overlayEl) overlayEl.style.display = 'none';
 
-    // Abrir tienda si no está abierta
-    const shopModal = document.getElementById('modal-food-shop');
-    const shopVisible = shopModal && shopModal.style.display !== 'none' && shopModal.style.display !== '';
-    if (!shopVisible && typeof openFoodShop === 'function') {
-        openFoodShop();
-    }
+    const btnComprar = document.getElementById('btn-comprar');
+    if (btnComprar) addActionGlow(btnComprar);
 
-    const doHighlightApple = () => {
-        // Buscar el item de Manzana en la tienda
+    // Función que resalta la manzana dentro de la tienda
+    const highlightApple = () => {
         const allItems = document.querySelectorAll('.food-item');
         let appleItem  = null;
-
         allItems.forEach(item => {
-            // Buscar por el nombre o por el data-id
-            const nameEl = item.querySelector('.food-name, [class*="name"]');
-            const dataId = item.getAttribute('data-id') || item.getAttribute('data-food-id') || '';
+            const nameEl  = item.querySelector('.food-name, [class*="name"], h3, p, span');
+            const dataId  = item.getAttribute('data-id') || item.getAttribute('data-food-id') || '';
             const nameText = nameEl ? nameEl.textContent.trim() : '';
-            if (dataId === TUTORIAL_FOOD_ID || nameText === 'Manzana' || dataId.includes('Apple')) {
+            const img     = item.querySelector('img');
+            const imgSrc  = img ? img.src : '';
+            if (dataId === TUTORIAL_FOOD_ID || nameText === 'Manzana' ||
+                dataId.includes('Apple') || imgSrc.includes('Apple')) {
                 appleItem = item;
             }
         });
 
-        if (!appleItem && allItems.length === 0) {
-            // Tienda aún no abrió, reintentar
-            setTimeout(doHighlightApple, 300);
-            return;
-        }
-
-        if (!appleItem) {
-            // Fallback: buscar por imagen
-            allItems.forEach(item => {
-                const img = item.querySelector('img');
-                if (img && img.src && img.src.includes('Apple')) appleItem = item;
-            });
-        }
-
-        // Atenuar toda la tienda
+        // Atenuar todo excepto la manzana
         document.querySelectorAll('.food-item').forEach(item => {
-            item.style.opacity       = '0.3';
-            item.style.pointerEvents = 'none';
+            if (item !== appleItem) {
+                item.style.opacity       = '0.3';
+                item.style.pointerEvents = 'none';
+            }
         });
 
         if (appleItem) {
-            // Resaltar solo la Manzana
             appleItem.style.opacity       = '1';
             appleItem.style.pointerEvents = 'auto';
             appleItem.style.boxShadow     = '0 0 0 4px #CBA6F7, 0 0 20px rgba(203,166,247,0.8)';
             appleItem.style.transform     = 'scale(1.08)';
             appleItem.style.transition    = 'all 0.2s';
-            elevateElement(appleItem);
-        }
-
-        // Elevar el modal/grid de la tienda
-        const shopModal = document.querySelector('.food-shop-modal, #food-shop-modal, .modal-overlay.food');
-        if (shopModal) elevateElement(shopModal);
-        const shopGrid = document.querySelector('.food-shop-grid');
-        if (shopGrid) elevateElement(shopGrid);
-        const modalContainer = document.querySelector('.modal-shop, [id*="shop"]');
-        if (modalContainer) elevateElement(modalContainer);
-
-        // Actualizar texto de la burbuja
-        const textEl = document.getElementById('tut-text');
-        if (textEl) {
-            if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-            typewriterEffect(textEl, 'Compra la MANZANA que esta resaltada. Las frutas activan el mercado rapido.');
+            // Actualizar texto
+            const textEl = document.getElementById('tut-text');
+            if (textEl) {
+                if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
+                typewriterEffect(textEl, 'Compra la MANZANA resaltada. Las frutas activan el mercado rapido por un tiempo.');
+            }
         }
     };
-
-    // Actualizar el paso en TUTORIAL_STEPS para que diga Manzana
-    const stepEl = document.getElementById('tut-text');
-    if (stepEl) stepEl.textContent = 'Presiona el boton "Comprar" para abrir la tienda y busca la Manzana.';
-
-    setTimeout(doHighlightApple, 500);
 
     // Restaurar tienda
     const restoreShop = () => {
@@ -774,25 +735,30 @@ const setupBuyFoodTutorial = () => {
             item.style.boxShadow     = '';
             item.style.transform     = '';
         });
-        lowerAllElevated();
     };
 
-    // Polling: detectar que se compró la Manzana
+    // Polling principal
     const check = setInterval(() => {
         if (!tutorialActive) { clearInterval(check); restoreShop(); return; }
 
+        const shopModal   = document.getElementById('modal-food-shop');
+        const shopVisible = shopModal && shopModal.style.display !== 'none' && shopModal.style.display !== '';
+
+        if (shopVisible) {
+            // Tienda abierta — resaltar manzana
+            removeActionGlow();
+            highlightApple();
+        }
+
+        // Detectar compra
         let boughtApple = false;
         if (state.inventory) {
             const currentQty = state.inventory.has(TUTORIAL_FOOD_ID)
                 ? (state.inventory.get(TUTORIAL_FOOD_ID).qty || 1) : 0;
-            // Se compró si la cantidad subió o si apareció en el inventario
             if (currentQty > prevQty || (prevQty === 0 && state.inventory.has(TUTORIAL_FOOD_ID))) {
                 boughtApple = true;
             }
-            // Fallback: inventario creció (solo hay manzanas disponibles)
-            if (!boughtApple && state.inventory.size > prevInvSize) {
-                boughtApple = true;
-            }
+            if (!boughtApple && state.inventory.size > prevInvSize) boughtApple = true;
         }
 
         if (boughtApple) {
@@ -800,15 +766,11 @@ const setupBuyFoodTutorial = () => {
             restoreShop();
 
             // Restaurar overlay
-            const overlayEl = document.getElementById('tutorial-overlay');
-            if (overlayEl) overlayEl.style.display = '';
+            const ov = document.getElementById('tutorial-overlay');
+            if (ov) ov.style.display = '';
             enableOverlayBlock();
 
-            // Restaurar z-index del modal de tienda
-            const modal = document.getElementById('modal-food-shop');
-            if (modal) { modal.style.zIndex = ''; modal.style.position = ''; }
-
-            // CANCELAR inflación generada por la compra del tutorial
+            // Cancelar inflación del tutorial
             if (state.foodInflation && state.foodInflation.has(TUTORIAL_FOOD_ID)) {
                 state.foodInflation.set(TUTORIAL_FOOD_ID, 0);
             }
@@ -816,11 +778,11 @@ const setupBuyFoodTutorial = () => {
             if (typeof closeFoodShop === 'function') closeFoodShop();
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
         }
-    }, 400);
+    }, 500);
 };
 
 // ============================================================
-//  SETUP PASO 7 — SELECCIONAR ITEM DEL INVENTARIO
+//  SETUP PASO 6 — SELECCIONAR ITEM DEL INVENTARIO
 // ============================================================
 const setupSelectFoodTutorial = () => {
     // Quitar overlay para que el inventario sea clickeable
