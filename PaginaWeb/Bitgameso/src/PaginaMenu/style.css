@@ -10,7 +10,7 @@
     --azul-cielo: #A0E7E5;
     --amarillo-suave: #FFF5BA;
     --blanco: #FFFFFF;
-    --texto-oscuro: #4A4A4A;
+    --texto-oscuro: #CBA6F7;
     
     /* Fuentes */
     --fuente-titulos: 'Fredoka', sans-serif;
@@ -82,8 +82,8 @@ button {
 
 #btn-que-es, #btn-productos {
     background-color: transparent;
-    color: var(--texto-oscuro);
-    border: 2px solid var(--azul-cielo);
+    color: var(--morado-suave);
+    border: 2px solid var(--morado-suave);
 }
 
 .btn-login {
@@ -137,7 +137,7 @@ main {
 
 .texto p {
     font-size: 1.1rem;
-    color: #666;
+    color: #CBA6F7;
 }
 
 /* =========================================
