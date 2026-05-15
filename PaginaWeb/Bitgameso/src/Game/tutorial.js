@@ -80,7 +80,7 @@ const TUTORIAL_STEPS = [
     {
         target:   '.pet-aside',
         arrowDir: 'right',
-        mascot:   'Esta soy yo, tu mascota. Cada mascota tiene habilidades unicas que afectan el mercado. Hay mascotas que aceleran el mercado, duplican ganancias o predicen precios. Usa el boton "Mascotas" para ver todas.',
+        mascot:   'Aqui estoy yo, tu mascota. Cada mascota tiene habilidades unicas que afectan el mercado. Hay mascotas que aceleran el mercado, duplican ganancias o predicen precios. Usa el boton "Mascotas" para ver todas.',
         waitFor:  'next',
         scrollTo: true,
     },
