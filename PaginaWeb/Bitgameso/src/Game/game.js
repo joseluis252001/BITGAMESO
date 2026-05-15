@@ -899,8 +899,11 @@ const openFutureModal = () => {
         .slice(0,20);
     list.innerHTML = assets.map(a=>`
         <div class="future-row">
-            <strong>${a.symbol}</strong>
-            <span class="future-name">${a.name}</span>
+            <div class="future-info">
+                <strong class="future-symbol">${a.symbol}</strong>
+                <span class="future-name">${a.name}</span>
+            </div>
+            <span class="future-type">${a.type || ''}</span>
             <span class="future-pred ${a._future>=0?'up':'down'}">${a._future>=0?'▲':'▼'}${Math.abs(a._future)}%</span>
         </div>`).join('');
     document.getElementById('modal-future').style.display = 'flex';

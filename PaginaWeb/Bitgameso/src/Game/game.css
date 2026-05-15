@@ -699,16 +699,43 @@ body {
 /* ====   MODAL: VISIÓN FUTURA
    ==== */
 .future-list {
-    display:flex; flex-direction:column; gap:8px;
-    max-height:320px; overflow-y:auto; margin-bottom:14px;
+    display:flex; flex-direction:column; gap:6px;
+    max-height:340px; overflow-y:auto; margin-bottom:14px;
+    padding-right:4px;
 }
 
 .future-row {
-    display:flex; align-items:center; gap:10px; padding:8px 12px;
-    background:#fafafa; border-radius:10px; font-size:13px;
+    display:grid;
+    grid-template-columns: 1fr auto auto;
+    align-items:center; gap:10px;
+    padding:9px 12px;
+    background:#f9f0ff;
+    border-radius:10px;
+    border:1px solid #f0e7ff;
+    transition:.15s;
 }
-.future-name { flex:1; font-size:11px; color:#aaa; text-align:left; }
-.future-pred { font-weight:700; font-size:14px; }
+.future-row:hover { background:#f0e7ff; }
+
+.future-info {
+    display:flex; flex-direction:column; gap:1px; min-width:0;
+}
+.future-symbol {
+    font-size:13px; font-weight:700; color:#CBA6F7;
+}
+.future-name {
+    font-size:10px; color:#CBA6F7; opacity:.65;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.future-type {
+    font-size:10px; font-weight:700;
+    color:white; background:#CBA6F7;
+    padding:2px 8px; border-radius:8px;
+    white-space:nowrap;
+}
+.future-pred {
+    font-weight:700; font-size:13px;
+    min-width:60px; text-align:right;
+}
 
 /* ====   MODAL: GAME OVER
    ==== */
