@@ -501,9 +501,12 @@ const setupBuyTutorial = () => {
 
             // Elevar el botón para que quede sobre el overlay
             elevateElement(targetBtn);
-            // También elevar la fila para que se vea bien
-            const targetRow = targetBtn.closest('.asset-row');
-            if (targetRow) elevateElement(targetRow);
+            // Elevar toda la cadena de padres hasta el body
+            let parent = targetBtn.parentElement;
+            while (parent && parent !== document.body) {
+                elevateElement(parent);
+                parent = parent.parentElement;
+            }
 
             // Scroll al botón
             targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -516,7 +519,7 @@ const setupBuyTutorial = () => {
                 if (textEl) {
                     // Cancelar typewriter activo antes de sobreescribir
                     if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-                    textEl.textContent = 'Presiona COMPRAR en la accion resaltada para hacer tu primera inversion.';
+                    typewriterEffect(textEl, 'Presiona COMPRAR en la accion resaltada para hacer tu primera inversion.');
                 }
             }, 500);
         };
@@ -593,9 +596,10 @@ const setupSellTutorial = () => {
             const textEl = document.getElementById('tut-text');
             if (textEl) {
                 if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-                textEl.textContent = cur.price >= posNow.buyPrice
+                const msg = cur.price >= posNow.buyPrice
                     ? '¡Esta en verde! Es buen momento para vender. ¡Presiona VENDER en tu cartera!'
                     : 'Aun esta en rojo, espera un poco mas antes de vender...';
+                typewriterEffect(textEl, msg);
             }
         }
     }, 1500);
@@ -699,7 +703,7 @@ const setupBuyFoodTutorial = () => {
         const textEl = document.getElementById('tut-text');
         if (textEl) {
             if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-            textEl.textContent = 'Compra la MANZANA que esta resaltada. Las frutas activan el mercado rapido.';
+            typewriterEffect(textEl, 'Compra la MANZANA que esta resaltada. Las frutas activan el mercado rapido.');
         }
     };
 
