@@ -264,24 +264,24 @@ const PET_ORDER = [
 const GOLDEN_DEFS = (() => {
     const defs = {};
     const pairs = [
-        ['Bear-100',         'Bear-100-Gold',         'Oso Dorado',         500000,   'bear'],
-        ['Bird-128',         'Bird-128-Gold',         'Pajaro Dorado',      500000,   'bird'],
-        ['Bunny-Pink-128',   'Bunny-Pink-128-Gold',   'Conejito Dorado',    500000,   'bunny'],
-        ['Cat-Beige-128',    'Cat-Beige-128-Gold',    'Gato Beige Dorado',  10000,    'cat_beige'],
-        ['Cat-Blue-128',     'Cat-Blue-128-Gold',     'Gato Azul Dorado',   10000,    'cat_blue'],
-        ['Cat-Pink-128',     'Cat-Pink-128-Gold',     'Gato Rosa Dorado',   10000,    'cat_pink'],
-        ['Cat-Tiger-128',    'Cat-Tiger-128-Gold',    'Gato Tigre Dorado',  100000,   'cat_tiger'],
-        ['Cat-Tiger-Beige-128','Cat-Tiger-Beige-128-Gold','Tigre Beige Dorado',100000,'tiger_beige'],
-        ['Cat-Tiger-Rose-128','Cat-Tiger-Rose-128-Gold','Tigre Rosa Dorado', 100000,  'tiger_rose'],
-        ['Cat-White-128',    'Cat-White-128-Gold',    'Gato Blanco Dorado', 1000000,  'cat_white'],
-        ['Chicken-White-128','Chicken-White-128-Gold','Pollito Dorado',     1000000,  'chicken_white'],
-        ['Chicken-Yellow-128','Chicken-Yellow-128-Gold','Pollito Amarillo Dorado',1000000,'chicken_yellow'],
-        ['Cow-128',          'Cow-128-Gold',          'Vaca Dorada',        10000000, 'cow'],
-        ['Frog-128',         'Frog-128-Gold',         'Rana Dorada',        10000000, 'frog'],
-        ['Penguin-128',      'Penguin-128-Gold',      'Pinguino Dorado',    10000000, 'penguin'],
-        ['Penguin-Pink-128', 'Penguin-Pink-128-Gold', 'Pinguino Rosa Dorado',100000000,'penguin_pink'],
-        ['Shark-128',        'Shark-128-Gold',        'Tiburon Dorado',     100000000,'shark'],
-        ['Sheep-128',        'Sheep-128-Gold',        'Oveja Dorada',       100000000,'sheep'],
+        ['Bear-100',         'Bear-100-Gold',         'Oso Dorado',         50000,  'bear'],
+        ['Bird-128',         'Bird-128-Gold',         'Pajaro Dorado',      50000,  'bird'],
+        ['Bunny-Pink-128',   'Bunny-Pink-128-Gold',   'Conejito Dorado',    50000,  'bunny'],
+        ['Cat-Beige-128',    'Cat-Beige-128-Gold',    'Gato Beige Dorado',  1000,   'cat_beige'],
+        ['Cat-Blue-128',     'Cat-Blue-128-Gold',     'Gato Azul Dorado',   1000,   'cat_blue'],
+        ['Cat-Pink-128',     'Cat-Pink-128-Gold',     'Gato Rosa Dorado',   1000,   'cat_pink'],
+        ['Cat-Tiger-128',    'Cat-Tiger-128-Gold',    'Gato Tigre Dorado',  10000,  'cat_tiger'],
+        ['Cat-Tiger-Beige-128','Cat-Tiger-Beige-128-Gold','Tigre Beige Dorado',10000,'tiger_beige'],
+        ['Cat-Tiger-Rose-128','Cat-Tiger-Rose-128-Gold','Tigre Rosa Dorado', 10000, 'tiger_rose'],
+        ['Cat-White-128',    'Cat-White-128-Gold',    'Gato Blanco Dorado', 100000, 'cat_white'],
+        ['Chicken-White-128','Chicken-White-128-Gold','Pollito Dorado',     100000, 'chicken_white'],
+        ['Chicken-Yellow-128','Chicken-Yellow-128-Gold','Pollito Amarillo Dorado',100000,'chicken_yellow'],
+        ['Cow-128',          'Cow-128-Gold',          'Vaca Dorada',        1000000,'cow'],
+        ['Frog-128',         'Frog-128-Gold',         'Rana Dorada',        1000000,'frog'],
+        ['Penguin-128',      'Penguin-128-Gold',      'Pinguino Dorado',    1000000,'penguin'],
+        ['Penguin-Pink-128', 'Penguin-Pink-128-Gold', 'Pinguino Rosa Dorado',10000000,'penguin_pink'],
+        ['Shark-128',        'Shark-128-Gold',        'Tiburon Dorado',     10000000,'shark'],
+        ['Sheep-128',        'Sheep-128-Gold',        'Oveja Dorada',       10000000,'sheep'],
     ];
     // Descripciones x2 para mascotas doradas
     const goldenDescMap = {
@@ -332,8 +332,8 @@ const PET_ORDER_GOLDEN = [
 ];
 
 // ============================================================
-//  MASCOTAS DIAMANTE — se desbloquean cuando TODAS las normales
-//  Y doradas tienen 100 HP. Efectos x3 del dorado. Precio x100.
+//  MASCOTAS DIAMANTE — efectos x3, precio x100 del dorado
+//  Se desbloquean cuando TODAS las normales Y doradas están a 100 HP
 // ============================================================
 const DIAMOND_DEFS = (() => {
     const defs = {};
@@ -357,29 +357,26 @@ const DIAMOND_DEFS = (() => {
         ['Shark-128',         'Shark-128-Diamond',         'Tiburon Diamante',          10000000000,'shark'],
         ['Sheep-128',         'Sheep-128-Diamond',         'Oveja Diamante',            10000000000,'sheep'],
     ];
-
-    // Descripciones x3 para mascotas diamante
     const diamondDescMap = {
         'bear':          ['Mercado x6 permanente','Dulces con 30% descuento','Penalizacion minima en ventas negativas'],
-        'bird':          ['Mercado x9 permanente','+3 monedas cada 2 segundos','Comida cuesta x2 (en vez de x4)','Pausa al operar igual'],
+        'bird':          ['Mercado x9 permanente','+3 monedas cada 2 segundos','Comida cuesta x2 en vez de x4','Pausa al operar igual'],
         'bunny':         ['Turbo x12 por 90s (cooldown 2 min)','Mercado x12 durante el turbo'],
-        'cat_beige':     ['Mercado x6 permanente','Dulces y Pescado duran x12','−1% salud cada 20 segundos'],
-        'cat_blue':      ['Mercado x6 permanente','Dulces y Pescado duran x15','−3% salud cada 20 segundos'],
-        'cat_pink':      ['Mercado x6 permanente','Dulces y Pescado duran x18','−5% salud cada 25 segundos'],
-        'cat_tiger':     ['Mercado x6 permanente','Dulces y Pescado duran x21','−6% salud cada 30 segundos'],
+        'cat_beige':     ['Mercado x6 permanente','Dulces y Pescado duran x12','-1% salud cada 20 segundos'],
+        'cat_blue':      ['Mercado x6 permanente','Dulces y Pescado duran x15','-3% salud cada 20 segundos'],
+        'cat_pink':      ['Mercado x6 permanente','Dulces y Pescado duran x18','-5% salud cada 25 segundos'],
+        'cat_tiger':     ['Mercado x6 permanente','Dulces y Pescado duran x21','-6% salud cada 30 segundos'],
         'tiger_beige':   ['Mercado x9 permanente','Proteinas duran x45','Sin inflacion en proteinas ni frutas'],
         'tiger_rose':    ['Mercado x9 permanente','Proteinas duran x75','Todo sin inflacion'],
         'cat_white':     ['Mercado x6 permanente','Bono de sector +36%','Toda la comida sin inflacion por siempre'],
         'chicken_white': ['Mercado x5 permanente','Resetea inflacion cada 30s','Proteinas: precio x1.5'],
         'chicken_yellow':['Mercado x5 permanente','Resetea inflacion cada 20s','Proteinas gratis','150% de ganar lo que pagaste al vender'],
-        'cow':           ['Compras en mercado −75%','Ganancias en ventas x450%','−8% salud cada 30 segundos'],
+        'cow':           ['Compras en mercado -75%','Ganancias en ventas x450%','-8% salud cada 30 segundos'],
         'frog':          ['Prediccion perfecta permanente sin cooldown','Bonus +15% en sector predicho'],
-        'penguin':       ['Pescado 100% gratis','+150% ganancia en ventas','+10% interes adicional','90% de repetir accion al vender','+5000 monedas cada 2 minutos','Compra en rojo = salud −15%'],
+        'penguin':       ['Pescado 100% gratis','+150% ganancia en ventas','+10% interes adicional','90% de repetir accion al vender','+5000 monedas cada 2 minutos','Compra en rojo = salud -15%'],
         'penguin_pink':  ['Pescado 100% gratis','+210% ganancia en ventas','+24% interes adicional','100% de repetir accion al vender','+8000 monedas cada 2 minutos','Sin penalizacion por compra en rojo'],
-        'shark':         ['Mercado x6 permanente','Resetea inflacion','Ventas multiplicadas x24','Con 3+ del mismo sector: +45% bono','−8% salud cada 2 minutos'],
+        'shark':         ['Mercado x6 permanente','Resetea inflacion','Ventas multiplicadas x24','Con 3+ del mismo sector: +45% bono','-8% salud cada 2 minutos'],
         'sheep':         ['Mercado x6 permanente','Tienda GRATIS siempre','+10000 monedas cada 30 segundos','Al vender: +75% ganancia, 100% repetir, prediccion 90s, 75% de ganar 15000 extra'],
     };
-
     pairs.forEach(([baseId, id, label, cost, passive], i) => {
         const base = PET_DEFS[baseId];
         defs[id] = {
@@ -395,7 +392,6 @@ const DIAMOND_DEFS = (() => {
     return defs;
 })();
 
-// Inyectar diamantes en PET_DEFS
 Object.assign(PET_DEFS, DIAMOND_DEFS);
 
 const PET_ORDER_DIAMOND = [
@@ -425,27 +421,20 @@ const checkVictory = () => {
     }
 };
 
-// ============================================================
-//  SEGUNDA VICTORIA DIAMANTE — todas normales Y doradas a 100 HP
-// ============================================================
+// Victoria Diamante — todas las doradas a 100 HP
 const checkDiamondVictory = () => {
     if (state.diamondVictoryAchieved) return;
-    if (!state.victoryAchieved) return; // primero necesita victoria normal
+    if (!state.victoryAchieved) return;
     if (!state.petData) return;
-
     const allGoldenAt100 = PET_ORDER_GOLDEN.every(id => {
         const d = state.petData.get(id);
         return d && d.unlocked && Math.round(d.health) >= 100;
     });
-
     if (allGoldenAt100) {
         state.diamondVictoryAchieved = true;
         if (typeof saveGame === 'function') saveGame();
         if (typeof showToast === 'function')
-            showToast('VICTORIA DIAMANTE! Todas las mascotas doradas estan al 100%. Se desbloquearon las mascotas Diamante!');
-        // Mostrar modal de victoria diamante si existe, si no usar el normal
-        const modal = document.getElementById('modal-victory-diamond') || document.getElementById('modal-victory');
-        if (modal) modal.style.display = 'flex';
+            showToast('VICTORIA DIAMANTE! Se desbloquearon las mascotas Diamante!');
     }
 };
 
@@ -1040,6 +1029,18 @@ window.closePetInfo = () => {
     if (modal) modal.style.display = 'none';
 };
 
+const canUnlockDiamondPet = (id) => {
+    if (!state.diamondVictoryAchieved) return false;
+    const idx = PET_ORDER_DIAMOND.indexOf(id);
+    if (idx < 0) return false;
+    if (idx > 0) {
+        const prevId   = PET_ORDER_DIAMOND[idx - 1];
+        const prevData = state.petData.get(prevId);
+        if (!prevData || !prevData.unlocked) return false;
+    }
+    return state.monedas >= PET_DEFS[id].cost;
+};
+
 const buildPetCard = (id, golden = false, diamond = false) => {
     const def  = PET_DEFS[id];
     if (!def) return '';
@@ -1052,7 +1053,6 @@ const buildPetCard = (id, golden = false, diamond = false) => {
     const cost  = def.cost;
     const imgId = def.baseId || id;
 
-    // Estilos visuales según tipo
     const goldenStyle  = golden  ? 'filter:sepia(0.4) saturate(4) hue-rotate(5deg) brightness(1.25);border:2px solid gold;box-shadow:0 0 10px rgba(255,200,0,0.6);' : '';
     const diamondStyle = diamond ? 'filter:saturate(1.5) brightness(1.3) hue-rotate(180deg) contrast(1.2);border:2px solid #a8d8ff;box-shadow:0 0 14px rgba(100,200,255,0.8);' : '';
     const imgStyle     = diamond ? diamondStyle : goldenStyle;
@@ -1081,7 +1081,7 @@ const buildPetCard = (id, golden = false, diamond = false) => {
                 : '';
 
     return `
-    <div class="pet-option ${isActive?'pet-selected':''} ${isUnlocked?'':'pet-locked'} ${diamond?'pet-diamond':''}">
+    <div class="pet-option ${isActive?'pet-selected':''} ${isUnlocked?'':'pet-locked'}">
         <div class="pet-card-header">
             <div class="pet-preview" style="background-image:url('../assets/pets/${imgId}.png');${imgStyle}"></div>
             <button class="btn-pet-info" onclick="event.stopPropagation(); openPetInfo('${id}')" title="Ver habilidades">
@@ -1089,22 +1089,35 @@ const buildPetCard = (id, golden = false, diamond = false) => {
             </button>
         </div>
         ${badge}
-        <span class="pet-label">${def.label}</span>
+        <span class="pet-label ${golden?'pet-golden-label':''}">${def.label}</span>
         <div class="pet-grid-hearts">${heartHtml}</div>
         ${btnHtml}
     </div>`;
 };
 
-const canUnlockDiamondPet = (id) => {
-    if (!state.diamondVictoryAchieved) return false;
-    const idx = PET_ORDER_DIAMOND.indexOf(id);
-    if (idx < 0) return false;
-    if (idx > 0) {
-        const prevId   = PET_ORDER_DIAMOND[idx - 1];
-        const prevData = state.petData.get(prevId);
-        if (!prevData || !prevData.unlocked) return false;
+window.openPetSelector = () => {
+    initPetData();
+    const grid = document.getElementById('pet-grid');
+    if (!grid) return;
+
+    let html = PET_ORDER.map(id => buildPetCard(id, false, false)).join('');
+
+    if (state.victoryAchieved) {
+        html += `<div class="pet-grid-gold-section">
+            <h4>Mascotas Doradas — Efectos x2</h4>
+        </div>`;
+        html += PET_ORDER_GOLDEN.map(id => buildPetCard(id, true, false)).join('');
     }
-    return state.monedas >= PET_DEFS[id].cost;
+
+    if (state.diamondVictoryAchieved) {
+        html += `<div class="pet-grid-diamond-section">
+            <h4>Mascotas Diamante — Efectos x3</h4>
+        </div>`;
+        html += PET_ORDER_DIAMOND.map(id => buildPetCard(id, false, true)).join('');
+    }
+
+    grid.innerHTML = html;
+    document.getElementById('modal-mascota').style.display = 'flex';
 };
 
 const canUnlockPet = (id) => {
@@ -1127,7 +1140,7 @@ const canUnlockGoldenPet = (id) => {
         const prevId   = PET_ORDER_GOLDEN[idx - 1];
         const prevData = state.petData.get(prevId);
         if (!prevData || !prevData.unlocked) return false;
-        // Sin requisito de salud 100% — solo necesitas tenerla desbloqueada
+        if (Math.round(prevData.health) < 100) return false;
     }
     return state.monedas >= PET_DEFS[id].cost;
 };
@@ -1192,7 +1205,6 @@ const _origChangePetHealth = typeof changePetHealth === 'function' ? changePetHe
 const syncPetHealthToData = () => {
     const data = state.petData.get(state.currentPet);
     if (data) { data.health = state.saludMascota; state.petData.set(state.currentPet, data); }
-    // Verificar condicion de victoria cada vez que cambia la salud
     checkVictory();
     checkDiamondVictory();
 };
