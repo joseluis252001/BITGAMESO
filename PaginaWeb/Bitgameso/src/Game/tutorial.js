@@ -499,14 +499,13 @@ const setupBuyTutorial = () => {
                 }
             });
 
-            // Elevar el botón para que quede sobre el overlay
+            // Deshabilitar overlay para que el botón sea clickeable directamente
+            disableOverlayBlock();
+
+            // Elevar solo el botón y su fila
             elevateElement(targetBtn);
-            // Elevar toda la cadena de padres hasta el body
-            let parent = targetBtn.parentElement;
-            while (parent && parent !== document.body) {
-                elevateElement(parent);
-                parent = parent.parentElement;
-            }
+            const targetRow = targetBtn.closest('.asset-row');
+            if (targetRow) elevateElement(targetRow);
 
             // Scroll al botón
             targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -537,6 +536,7 @@ const setupBuyTutorial = () => {
             clearInterval(poll);
             restoreBuyBtns();
             lowerAllElevated();
+            enableOverlayBlock();
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 800);
         }
     }, 500);
@@ -574,6 +574,8 @@ const setupSellTutorial = () => {
         if (portfolioEl) {
             portfolioEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => {
+                // Deshabilitar overlay para que el botón VENDER sea clickeable
+                disableOverlayBlock();
                 // Buscar el botón VENDER de este activo en la cartera
                 const sellBtns = document.querySelectorAll('.portfolio-aside .btn-sell, .portfolio-aside [class*="sell"]');
                 sellBtns.forEach(b => {
@@ -611,6 +613,7 @@ const setupSellTutorial = () => {
             clearInterval(checkSell);
             clearInterval(priceCheck);
             lowerAllElevated();
+            enableOverlayBlock();
             setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 600);
         }
     }, 400);
@@ -624,6 +627,7 @@ const setupClickTarget = (selector) => {
     const el = document.querySelector(selector);
     if (!el) return;
 
+    disableOverlayBlock();
     elevateElement(el);
     addActionGlow(el);
 
@@ -631,6 +635,7 @@ const setupClickTarget = (selector) => {
         el.removeEventListener('click', handler);
         removeActionGlow();
         lowerAllElevated();
+        enableOverlayBlock();
         setTimeout(() => { tutorialStep++; renderTutorialStep(); }, 400);
     };
     el.addEventListener('click', handler);
@@ -761,7 +766,8 @@ const setupBuyFoodTutorial = () => {
 //  SETUP PASO 7 — SELECCIONAR ITEM DEL INVENTARIO
 // ============================================================
 const setupSelectFoodTutorial = () => {
-    // Resaltar el inventario para que el jugador sepa donde clickear
+    // Deshabilitar overlay y resaltar el inventario
+    disableOverlayBlock();
     const invEl = document.querySelector('.inventory-section');
     if (invEl) {
         elevateElement(invEl);
@@ -790,7 +796,8 @@ const setupUseFoodTutorial = () => {
     const btnEnviar = document.getElementById('btn-enviar');
     const btnVender = document.getElementById('btn-vender');
 
-    // Elevar solo el botón Enviar
+    // Deshabilitar overlay y elevar solo el botón Enviar
+    disableOverlayBlock();
     if (btnEnviar) {
         elevateElement(btnEnviar);
         addActionGlow(btnEnviar);
