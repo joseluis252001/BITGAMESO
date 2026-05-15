@@ -1690,10 +1690,32 @@ body {
     margin-bottom: 4px;
 }
 
+/* Badges de tipo (nuevo sistema) */
+.pet-badge-type {
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 2px 7px;
+    display: inline-block;
+    margin-bottom: 4px;
+    text-align: center;
+    width: 100%;
+}
+.pet-badge-type.golden {
+    background: linear-gradient(135deg, #f5c518, #e0a800);
+    color: #333;
+}
+.pet-badge-type.diamond {
+    background: linear-gradient(135deg, #a8d8ff, #6ec6ff, #c9f0ff);
+    color: #003366;
+    box-shadow: 0 0 8px rgba(100, 200, 255, 0.6);
+}
+
 .pet-grid-gold-section {
     margin-top: 16px;
     border-top: 2px dashed #ffd700;
     padding-top: 12px;
+    grid-column: 1 / -1;
 }
 
 .pet-grid-gold-section h4 {
@@ -1702,6 +1724,29 @@ body {
     font-size: 1.1rem;
     margin: 0 0 10px;
     text-align: center;
+}
+
+/* Sección diamante */
+.pet-grid-diamond-section {
+    margin-top: 16px;
+    border-top: 2px dashed #6ec6ff;
+    padding-top: 12px;
+    grid-column: 1 / -1;
+}
+.pet-grid-diamond-section h4 {
+    color: #003d80;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+    margin: 0 0 10px;
+    text-align: center;
+    text-shadow: 0 0 8px rgba(100, 200, 255, 0.6);
+}
+
+/* Tarjeta diamante */
+.pet-diamond {
+    border: 2px solid #a8d8ff !important;
+    box-shadow: 0 0 12px rgba(100, 200, 255, 0.4) !important;
+    background: linear-gradient(135deg, #f0f8ff, #e8f4ff) !important;
 }
 
 /* ============================================================

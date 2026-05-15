@@ -530,6 +530,12 @@ const setupBuyTutorial = () => {
         // Re-aplicar highlight box y flecha
         highlightElement(targetBtn, { arrowDir: 'up' });
         addActionGlow(targetBtn);
+
+        // Asegurar que el botón sea visible en pantalla (importante en iPad)
+        const btnRect = targetBtn.getBoundingClientRect();
+        if (btnRect.bottom > window.innerHeight || btnRect.top < 0) {
+            targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     };
 
     // Guardar referencia para que el loop pueda llamarla

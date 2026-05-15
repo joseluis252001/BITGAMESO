@@ -25,6 +25,7 @@ const state = {
     petData: null,              // Map<petId, {health, unlocked}> — gestionado por pets.js
     marketSpeedEnabled: true,   // false = fuerza velocidad normal aunque la mascota tenga pasivo de velocidad
     victoryAchieved:   false,   // true cuando todas las mascotas normales llegan a 100 de salud
+    diamondVictoryAchieved: false, // true cuando todas las doradas llegan a 100 de salud
 };
 
 const refs = {};
@@ -324,6 +325,7 @@ const saveGame = () => {
             effectsTime:        { ...state.effectsTime },
             petData:            state.petData ? Array.from(state.petData.entries()) : [],
             victoryAchieved:    state.victoryAchieved || false,
+            diamondVictoryAchieved: state.diamondVictoryAchieved || false,
             marketSpeedEnabled: state.marketSpeedEnabled !== false,
         });
         // Guardar local siempre (rápido)
@@ -357,6 +359,7 @@ const loadGame = () => {
             }
         }
         state.victoryAchieved    = d.victoryAchieved    ?? false;
+        state.diamondVictoryAchieved = d.diamondVictoryAchieved ?? false;
         state.marketSpeedEnabled = d.marketSpeedEnabled ?? true;
 
         // Restaurar efectos activos — solo los que aún tienen tiempo
