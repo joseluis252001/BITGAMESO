@@ -182,10 +182,13 @@ const createTutorialUI = () => {
             <div class="tut-mascot-wrap">
                 <img id="tut-mascot-img" src="../assets/pets/${(() => {
                     const petDef = typeof PET_DEFS !== 'undefined' && PET_DEFS[state.currentPet];
-                    return (petDef && petDef.golden && petDef.baseId) ? petDef.baseId : (state.currentPet || 'Bunny-Pink-128');
+                    // Doradas y diamante usan la imagen base
+                    return (petDef && petDef.baseId) ? petDef.baseId : (state.currentPet || 'Bunny-Pink-128');
                 })()}.png" alt="Mascota" style="${(() => {
                     const petDef = typeof PET_DEFS !== 'undefined' && PET_DEFS[state.currentPet];
-                    return (petDef && petDef.golden) ? 'filter:sepia(1) saturate(3) hue-rotate(5deg) brightness(1.1)' : '';
+                    if (petDef && petDef.diamond) return 'filter:sepia(1) saturate(5) hue-rotate(185deg) brightness(1.2) contrast(1.1)';
+                    if (petDef && petDef.golden)  return 'filter:sepia(1) saturate(3) hue-rotate(5deg) brightness(1.1)';
+                    return '';
                 })()}">
             </div>
             ${!tutorialFirstRun ? `
