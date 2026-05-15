@@ -513,7 +513,11 @@ const setupBuyTutorial = () => {
                 addActionGlow(targetBtn);
 
                 const textEl = document.getElementById('tut-text');
-                if (textEl) textEl.textContent = 'Presiona COMPRAR en la accion resaltada para hacer tu primera inversion.';
+                if (textEl) {
+                    // Cancelar typewriter activo antes de sobreescribir
+                    if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
+                    textEl.textContent = 'Presiona COMPRAR en la accion resaltada para hacer tu primera inversion.';
+                }
             }, 500);
         };
         doHighlightBtn();
@@ -588,6 +592,7 @@ const setupSellTutorial = () => {
         if (posNow && cur) {
             const textEl = document.getElementById('tut-text');
             if (textEl) {
+                if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
                 textEl.textContent = cur.price >= posNow.buyPrice
                     ? '¡Esta en verde! Es buen momento para vender. ¡Presiona VENDER en tu cartera!'
                     : 'Aun esta en rojo, espera un poco mas antes de vender...';
@@ -692,7 +697,10 @@ const setupBuyFoodTutorial = () => {
 
         // Actualizar texto de la burbuja
         const textEl = document.getElementById('tut-text');
-        if (textEl) textEl.textContent = 'Compra la MANZANA que esta resaltada. Las frutas activan el mercado rapido.';
+        if (textEl) {
+            if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
+            textEl.textContent = 'Compra la MANZANA que esta resaltada. Las frutas activan el mercado rapido.';
+        }
     };
 
     // Actualizar el paso en TUTORIAL_STEPS para que diga Manzana

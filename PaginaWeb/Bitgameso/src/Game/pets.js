@@ -1015,7 +1015,7 @@ const canUnlockGoldenPet = (id) => {
         const prevId   = PET_ORDER_GOLDEN[idx - 1];
         const prevData = state.petData.get(prevId);
         if (!prevData || !prevData.unlocked) return false;
-        if (Math.round(prevData.health) < 100) return false;
+        // Sin requisito de salud 100% — solo necesitas tenerla desbloqueada
     }
     return state.monedas >= PET_DEFS[id].cost;
 };

@@ -1762,9 +1762,7 @@ window.canjearCodigo = () => {
     updateUI();
     input.value = '';
     showToast(resultado);
-
-    // Cerrar modal tras 2.5s
-    setTimeout(() => closeCodigoModal(), 2500);
+    // El modal queda abierto para que el usuario pueda canjear otro código
 };
 
 // También permitir Enter en el input
