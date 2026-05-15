@@ -26,12 +26,28 @@
 
         <h2>Iniciar Sesión</h2>
         <form id="form-login">
-            <input type="text" id="login-usuario" placeholder="Nombre de usuario" required>
+            <input type="text" id="login-usuario" placeholder="Usuario o correo electrónico" required>
             <input type="password" id="login-pass" placeholder="Contraseña" required>
             <button type="submit">Entrar</button>
         </form>
-        
-        <p style="margin-top: 15px; font-size: 0.8rem;">
+
+        <!-- Botón recuperar contraseña -->
+        <div style="margin-top: 10px; text-align: center;">
+            <button id="btn-olvide" style="
+                background: none;
+                border: none;
+                color: #CBA6F7;
+                font-size: 0.8rem;
+                font-weight: bold;
+                cursor: pointer;
+                font-family: 'Poppins', sans-serif;
+                padding: 4px 0;
+                text-decoration: underline;
+                width: auto;
+            ">¿Olvidaste tu contraseña?</button>
+        </div>
+
+        <p style="margin-top: 12px; font-size: 0.8rem;">
             ¿No tienes cuenta? <a href="../CrearCuenta/registro.html" class="link-highlight">Regístrate aquí</a>
         </p>
     </main>
@@ -40,6 +56,7 @@
         <p>Esta app es solo para fines educativos</p>
     </footer>
 
-    <script src="inico.js"></script>
+    <!-- Supabase como módulo ES -->
+    <script type="module" src="inico.js"></script>
 </body>
 </html>

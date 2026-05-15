@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Contraseña - BITGAMESO</title>
+    <link rel="stylesheet" href="inicio.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="login-header">
+        <div class="logo-container-header">
+            <img src="../assets/logo/Coin-128.png" alt="Logo BITGAMESO" class="mini-logo">
+            <h1>BITGAMESO</h1>
+        </div>
+    </header>
+
+    <main class="registro-container">
+        <h2>Nueva Contraseña</h2>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:16px;">
+            Escribe tu nueva contraseña para BITGAMESO.
+        </p>
+
+        <form id="form-reset">
+            <input type="password" id="new-pass"     placeholder="Nueva contraseña" required>
+            <input type="password" id="confirm-pass" placeholder="Confirmar contraseña" required>
+            <button type="submit">Guardar contraseña</button>
+        </form>
+
+        <div id="msg-reset"></div>
+    </main>
+
+    <footer class="footer-login">
+        <p>Esta app es solo para fines educativos</p>
+    </footer>
+
+    <script type="module">
+        import { supabase } from '../assets/supabase-client.js';
+
+        document.getElementById('form-reset').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const p1  = document.getElementById('new-pass').value;
+            const p2  = document.getElementById('confirm-pass').value;
+            const msg = document.getElementById('msg-reset');
+
+            if (p1 !== p2) {
+                msg.textContent     = 'Las contraseñas no coinciden.';
+                msg.style.color     = '#c0392b';
+                return;
+            }
+            if (p1.length < 6) {
+                msg.textContent     = 'La contraseña debe tener al menos 6 caracteres.';
+                msg.style.color     = '#c0392b';
+                return;
+            }
+
+            const { error } = await supabase.auth.updateUser({ password: p1 });
+
+            if (error) {
+                msg.textContent = 'Error: ' + error.message;
+                msg.style.color = '#c0392b';
+            } else {
+                msg.innerHTML   = '✅ ¡Contraseña actualizada! Redirigiendo al login...';
+                msg.style.color = '#27ae60';
+                setTimeout(() => {
+                    window.location.href = 'inico.html';
+                }, 2500);
+            }
+        });
+    </script>
+</body>
+</html>
