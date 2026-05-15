@@ -2,7 +2,7 @@
 //  BITGAMESO — registro.js  (Supabase Auth)
 // ============================================================
 
-import { supabase } from '../assets/supabase-client.js';
+import { supabase } from '../Supabase/supabase-client.js';
 
 // ── Formulario de registro ───────────────────────────────────
 const registroForm = document.getElementById('form-registro');

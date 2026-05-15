@@ -3,7 +3,7 @@
 //  Login real + recuperación de contraseña
 // ============================================================
 
-import { supabase } from '../assets/supabase-client.js';
+import { supabase } from '../Supabase/supabase-client.js';
 
 // ── Login ────────────────────────────────────────────────────
 const loginForm = document.getElementById('form-login');
