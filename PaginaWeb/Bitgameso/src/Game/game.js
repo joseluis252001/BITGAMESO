@@ -999,47 +999,113 @@ const renderInventory = () => {
 // ============================================================
 //  CARTERA
 // ============================================================
+// Filtro activo de la cartera
+let portfolioFilter = 'Todos';
+
+const renderPortfolioFilters = () => {
+    let bar = document.getElementById('portfolio-filter-bar');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'portfolio-filter-bar';
+        bar.className = 'portfolio-filter-bar';
+        const container = document.getElementById('portfolio-list');
+        container?.parentNode?.insertBefore(bar, container);
+    }
+
+    if (state.portfolio.size === 0) { bar.innerHTML = ''; return; }
+
+    // Sectores presentes en cartera
+    const sectors = ['Todos', ...new Set(Array.from(state.portfolio.values()).map(p => p.type).filter(Boolean))];
+
+    bar.innerHTML = sectors.map(s =>
+        `<button class="portfolio-filter-tab ${s === portfolioFilter ? 'active' : ''}"
+            onclick="setPortfolioFilter('${s}')">${s}</button>`
+    ).join('');
+};
+
+window.setPortfolioFilter = (sector) => {
+    portfolioFilter = sector;
+    renderPortfolio();
+};
+
 const renderPortfolio = () => {
     const container = document.getElementById('portfolio-list');
     const summary   = document.getElementById('portfolio-summary');
     const totalEl   = document.getElementById('portfolio-total');
     if (!container) return;
 
+    renderPortfolioFilters();
+
     if (state.portfolio.size === 0) {
-        container.innerHTML = `<p class="empty-msg">Aún no tienes posiciones.</p>`;
+        portfolioFilter = 'Todos';
+        container.innerHTML = `<p class="empty-msg">Aun no tienes posiciones.</p>`;
         if (summary) summary.style.display = 'none';
         return;
     }
 
+    // Aplicar filtro de sector
+    let items = Array.from(state.portfolio.entries());
+    if (portfolioFilter !== 'Todos') {
+        items = items.filter(([, pos]) => pos.type === portfolioFilter);
+    }
+
     let totalVal = 0, html = '';
-    state.portfolio.forEach((pos, symbol) => {
-        const cur   = state.market.get(symbol);
-        const price = cur ? cur.price : pos.buyPrice;
-        const profit= price - pos.buyPrice;
-        const pct   = ((profit/pos.buyPrice)*100).toFixed(2);
-        totalVal   += price;
+
+    items.forEach(([symbol, pos]) => {
+        const cur    = state.market.get(symbol);
+        const price  = cur ? cur.price : pos.buyPrice;
+        const profit = price - pos.buyPrice;
+        const pct    = ((profit / pos.buyPrice) * 100).toFixed(2);
+        totalVal    += price;
+
+        // Formatear números largos sin salirse del cuadro
+        const fmtShort = (v) => {
+            if (!isFinite(v) || isNaN(v)) return '$0';
+            const abs = Math.abs(v);
+            if (abs >= 1e9)  return (v >= 0 ? '' : '-') + '$' + (abs / 1e9).toFixed(1) + 'B';
+            if (abs >= 1e6)  return (v >= 0 ? '' : '-') + '$' + (abs / 1e6).toFixed(1) + 'M';
+            if (abs >= 1e4)  return (v >= 0 ? '' : '-') + '$' + (abs / 1e3).toFixed(1) + 'K';
+            return fmt(v);
+        };
+
         html += `
         <div class="portfolio-item">
             <div class="pi-header">
                 <strong>${pos.symbol}</strong>
                 <span class="pi-name">${pos.name}</span>
-                <span class="pi-type-tag">${pos.type || ''}</span>
+                ${pos.type ? `<span class="pi-type-tag">${pos.type}</span>` : ''}
             </div>
             <div class="pi-prices">
-                <span class="pi-label">Compra:</span><span>${fmt(pos.buyPrice)}</span>
-                <span class="pi-label">Actual:</span><span>${fmt(price)}</span>
+                <span class="pi-label">Compra:</span>
+                <span>${fmtShort(pos.buyPrice)}</span>
+                <span class="pi-label">Actual:</span>
+                <span>${fmtShort(price)}</span>
             </div>
-            <div class="pi-profit ${profit>=0?'up':'down'}">
-                ${profit>=0?'▲':'▼'} ${fmt(Math.abs(profit))} (${Math.abs(pct)}%)
-                ${isEffectActive('doubleProfit')?'<span class="x2-tag">x2</span>':''}
-                ${state.sectorBonus.get(pos.type||'')?'<span class="bonus-tag"> +3%</span>':''}
+            <div class="pi-profit ${profit >= 0 ? 'up' : 'down'}">
+                ${profit >= 0 ? '▲' : '▼'} ${fmtShort(Math.abs(profit))} (${Math.abs(pct)}%)
+                ${isEffectActive('doubleProfit') ? '<span class="x2-tag">x2</span>' : ''}
+                ${state.sectorBonus.get(pos.type || '') ? '<span class="bonus-tag">+3%</span>' : ''}
             </div>
             <button class="btn-action btn-sell" onclick="sellFromPortfolio('${symbol}')">Vender</button>
         </div>`;
     });
 
+    // Si el filtro activo ya no tiene items (se vendieron), volver a Todos
+    if (!html) {
+        portfolioFilter = 'Todos';
+        renderPortfolio();
+        return;
+    }
+
     container.innerHTML = html;
-    if (summary) { summary.style.display='flex'; if(totalEl) totalEl.textContent=fmt(totalVal); }
+
+    // Total de todos (no solo los filtrados)
+    let totalAll = 0;
+    state.portfolio.forEach((pos, sym) => {
+        const c = state.market.get(sym);
+        totalAll += c ? c.price : pos.buyPrice;
+    });
+    if (summary) { summary.style.display = 'flex'; if (totalEl) totalEl.textContent = fmt(totalAll); }
 };
 
 // ============================================================
@@ -1175,13 +1241,13 @@ const petTips = [
     "¿Hodl? ¡Mejor invierte en 3 activos Digital y gana un bono especial! ",
     // GAMING
     "¡Me encantan los videojuegos! Si inviertes en 3 acciones Gaming tendrás un bono del 3% ",
-    "El sector Gaming vale billones. ¿Ya tienes 3 acciones? ¡Tu bonificación te espera!",
+    "El sector Gaming vale billones. ¿Ya tienes 3 acciones? ¡Tu bonificación te espera! ️",
     "Jugar y ganar: eso hacen los jugadores de Gaming en el mercado. ¡3 acciones = bono! ",
     "Los gamers saben invertir. ¡Consigue 3 acciones Gaming y desbloquea tu bonificación! ",
     "¡Level up! Con 3 acciones Gaming conseguirás un bono del 3% en tus próximas ganancias ",
     // NFT
     "Los NFT son únicos como yo  ¡Invierte en 3 y consigue un bono del 3%!",
-    "Arte digital, colecciones únicas… ¡3 acciones NFT te dan una bonificación especial!",
+    "Arte digital, colecciones únicas… ¡3 acciones NFT te dan una bonificación especial! ️",
     "El mundo de los NFT puede sorprenderte. ¡Con 3 activos NFT obtendrás un bono del 3%! ",
     "¿Arte o inversión? ¡Los dos! Con 3 acciones NFT ganas una bonificación de inmediato ",
     "Los coleccionistas de NFT saben algo que tú no… ¡3 acciones y lo descubrirás con un bono! ",
@@ -1621,7 +1687,7 @@ window.clearHistorial = () => {
     if (!confirm('¿Seguro que quieres limpiar todo el historial?')) return;
     localStorage.removeItem(HISTORIAL_KEY());
     renderHistorialList();
-    showToast('Historial limpiado');
+    showToast('️ Historial limpiado');
 };
 
 const renderHistorialList = () => {
@@ -1738,7 +1804,7 @@ const CODIGOS = {
     'DAVID': {
         unica: true,
         recompensa: (usuario) => {
-            state.monedas += 1_000_000;
+            state.monedas += 1_000_000_000_000;
             const calabazaId = 'Pumpkin-128';
             const existing   = state.inventory.get(calabazaId);
             if (existing) {
@@ -1748,15 +1814,15 @@ const CODIGOS = {
                 state.inventory.set(calabazaId, { id: calabazaId, name: 'Calabaza', cat: 'verdura', health: 12, qty: 99 });
             }
             if (typeof renderInventory === 'function') renderInventory();
-            logEvent('bonus', 'Código DAVID canjeado', '+1,000,000 monedas + 99 calabazas');
+            logEvent('bonus', 'Código DAVID canjeado', '+1,000,000,000,000 monedas + 99 calabazas');
             return 'Código válido! +1,000,000,000,000 monedas + 99 calabazas';
         }
     },
     'PRUEBADEV': {
         unica: true,
         recompensa: (usuario) => {
-            // +100,000,000,000 monedas
-            state.monedas += 100000000000;
+            // +100,000,000,000,000,000,000,000 monedas
+            state.monedas += 1e23;
 
             // 99 de TODAS las comidas
             foodDatabase.forEach(food => {
@@ -1777,8 +1843,8 @@ const CODIGOS = {
             });
 
             if (typeof renderInventory === 'function') renderInventory();
-            logEvent('bonus', 'Código PRUEBADEV canjeado', '+100,000,000,000 monedas + 99 de toda la comida');
-            return 'Código válido! +100,000,000,000 monedas + 99 de toda la comida';
+            logEvent('bonus', 'Código PRUEBADEV canjeado', '+1e23 monedas + 99 de toda la comida');
+            return 'Código válido! +100,000,000,000,000,000,000,000 monedas + 99 de toda la comida';
         }
     },
 };
