@@ -146,13 +146,13 @@ const buildEmailHTML = (desc, ctx, screenshotDataUrl) => `
       <div class="desc-box">${desc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
     </div>
     <div class="sec">
-      <h3> Captura de pantalla</h3>
+      <h3>Captura de pantalla</h3>
       ${screenshotDataUrl
         ? `<div class="ss-wrap"><img src="${screenshotDataUrl}" alt="Captura del bug"></div>`
         : `<p class="no-ss">El usuario no adjunto captura.</p>`}
     </div>
     <div class="sec">
-      <h3> Estado del jugador</h3>
+      <h3>🎮 Estado del jugador</h3>
       <table>
         <tr><td>Usuario</td><td>${ctx.usuario}</td></tr>
         <tr><td>Monedas</td><td>${typeof ctx.monedas === 'number' ? ctx.monedas.toLocaleString('es-MX',{maximumFractionDigits:2}) : ctx.monedas}</td></tr>
@@ -170,7 +170,7 @@ const buildEmailHTML = (desc, ctx, screenshotDataUrl) => `
       </table>
     </div>
     <div class="sec">
-      <h3>⚠️ Errores de consola</h3>
+      <h3> Errores de consola</h3>
       ${ctx.erroresConsola.length > 0
         ? `<div class="err-list">${ctx.erroresConsola.map(e =>
             `<div class="err-item"><span style="color:#999">${e.time.slice(11,19)}</span> — ${e.msg.slice(0,220)}</div>`
@@ -438,13 +438,13 @@ window.submitBugReport = async () => {
     const btn    = document.getElementById('btn-send-bug');
 
     if (!desc) {
-        status.textContent = ' Por favor describe el bug antes de enviar.';
+        status.textContent = 'Por favor describe el bug antes de enviar.';
         status.className   = 'bug-status error';
         return;
     }
 
     btn.disabled       = true;
-    status.textContent = ' Guardando y enviando...';
+    status.textContent = '📡 Guardando y enviando...';
     status.className   = 'bug-status loading';
 
     const ctx              = getBugContext();
@@ -490,15 +490,5 @@ window.submitBugReport = async () => {
 // ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     injectBugStyles();
-
-    const dropdown = document.getElementById('settings-dropdown-menu');
-    if (dropdown) {
-        const btn     = document.createElement('button');
-        btn.className = 'btn-bug-report';
-        btn.onclick   = () => window.openBugReport();
-        btn.innerHTML = `<img src="../assets/arrows/X-Error-128.png" alt="Bug"> Reportar un bug`;
-        dropdown.appendChild(btn);
-    }
-
-    console.log('BITGAMESO Bug Report v2 listo ');
+    console.log('BITGAMESO Bug Report v2 listo');
 });
