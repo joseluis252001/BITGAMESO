@@ -1673,7 +1673,7 @@ const CODIGOS = {
         }
     },
     '1234': {
-        unica: false,  // infinitas veces
+        unica: true,  // solo una vez por cuenta
         recompensa: (usuario) => {
             state.monedas += 1000000;
             logEvent('bonus', 'Código 1234 canjeado', '+1,000,000 monedas');
@@ -1681,7 +1681,7 @@ const CODIGOS = {
         }
     },
     'BIENVENIDA': {
-        unica: false,
+        unica: true,
         recompensa: (usuario) => {
             state.monedas += 500;
             // Añadir comidas respetando límite de 99
@@ -1704,7 +1704,7 @@ const CODIGOS = {
         }
     },
     'JOSELUIS': {
-        unica: false,
+        unica: true,
         recompensa: (usuario) => {
             state.foodInflation.clear();
             logEvent('bonus', 'Código JOSELUIS canjeado', 'Inflación de comida reseteada');
@@ -1890,5 +1890,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inicializar mecánicas financieras realistas
     if (typeof window.initFinanceMechanics === 'function') window.initFinanceMechanics();
 });
-
 console.log('BITGAMESO v5 — inflación comida, bonos sector, 50 mensajes mascota. ');
