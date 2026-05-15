@@ -44,7 +44,7 @@ const TUTORIAL_STEPS = [
     // PASO 3 — Comprar una accion (resalta botón específico)
     {
         target:   null,   // se asigna dinámicamente en setupBuyTutorial
-        mascot:   'Voy a resaltar una accion. Presiona el boton COMPRAR de esa accion para hacer tu primera inversion.',
+        mascot:   'Voy a resaltar una accion. Presiona el botón COMPRAR de esa accion para hacer tu primera inversion.',
         waitFor:  'buy_tutorial',
         scrollTo: true,
     },
@@ -58,7 +58,7 @@ const TUTORIAL_STEPS = [
     // PASO 5 — Abrir tienda Y comprar manzana (un solo paso)
     {
         target:   '#btn-comprar',
-        mascot:   'Ahora vamos a comprarme comida. Presiona el boton "Comprar" para abrir la tienda y compra la MANZANA.',
+        mascot:   'Ahora vamos a comprarme comida. Presiona el botón "Comprar" para abrir la tienda y compra la MANZANA.',
         waitFor:  'buy_food_tutorial',
         scrollTo: true,
     },
@@ -80,7 +80,7 @@ const TUTORIAL_STEPS = [
     {
         target:   '.pet-aside',
         arrowDir: 'right',
-        mascot:   'Aqui estoy yo, tu mascota. Cada mascota tiene habilidades unicas que afectan el mercado. Hay mascotas que aceleran el mercado, duplican ganancias o predicen precios. Usa el boton "Mascotas" para ver todas.',
+        mascot:   'Esta soy yo, tu mascota. Cada mascota tiene habilidades unicas que afectan el mercado. Hay mascotas que aceleran el mercado, duplican ganancias o predicen precios. Usa el botón "Mascotas" para ver todas.',
         waitFor:  'next',
         scrollTo: true,
     },
@@ -636,7 +636,7 @@ const setupSellTutorial = () => {
         const textEl2 = document.getElementById('tut-text');
         if (textEl2) {
             if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-            typewriterEffect(textEl2, '¡Ahora esta en VERDE! Es ganancia. Presiona el boton VENDER en tu cartera.');
+            typewriterEffect(textEl2, '¡Ahora esta en VERDE! Es ganancia. Presiona el botón VENDER en tu cartera.');
         }
 
         // Resaltar y habilitar el botón VENDER
@@ -911,7 +911,7 @@ const setupUseFoodTutorial = () => {
             } else {
                 // Vendió la comida — pedir que compre otra
                 const textEl = document.getElementById('tut-text');
-                if (textEl) textEl.textContent = '¡Ups! Vendiste la manzana en vez de enviarla. Compra otra Manzana y usa el boton "Enviar". ¡Intentalo de nuevo!';
+                if (textEl) textEl.textContent = '¡Ups! Vendiste la manzana en vez de enviarla. Compra otra Manzana y usa el botón "Enviar". ¡Intentalo de nuevo!';
                 setTimeout(() => {
                     // Volver al paso de abrir la tienda
                     const stepIdx = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'buy_food_tutorial');

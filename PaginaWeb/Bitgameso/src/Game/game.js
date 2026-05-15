@@ -759,10 +759,11 @@ window.buyFood = (foodId, price) => {
     }
 
     const nextPrice = Math.round(price * 2);
-    showToast(` Compraste ${food.name} por ${price} | Próximo precio: ${nextPrice}`);
+    showToast(`Compraste ${food.name} por ${price} | Proximo precio: ${nextPrice}`);
     logEvent('comida', `Compraste ${food.name}`, `Precio: ${price} | Efecto: ${catLabel[food.cat]}`);
     updateUI();
-    closeFoodShop();
+    // Refrescar la tienda para mostrar precios actualizados — NO cerrar
+    openFoodShop();
 };
 
 // ============================================================
