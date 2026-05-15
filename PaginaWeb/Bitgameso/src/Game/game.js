@@ -1711,6 +1711,33 @@ const CODIGOS = {
             return ' ¡Código válido! Toda la inflación de comida ha sido reseteada';
         }
     },
+    'DAVID': {
+        unica: true,
+        recompensa: (usuario) => {
+            // +1,000,000,000,000 monedas
+            state.monedas += 1_000_000_000_000;
+
+            // +99 calabazas
+            const calabazaId = 'Pumpkin-128';
+            const existing   = state.inventory.get(calabazaId);
+            if (existing) {
+                existing.qty = Math.min((existing.qty || 1) + 99, 99);
+                state.inventory.set(calabazaId, existing);
+            } else {
+                state.inventory.set(calabazaId, {
+                    id:     calabazaId,
+                    name:   'Calabaza',
+                    cat:    'verdura',
+                    health: 12,
+                    qty:    99,
+                });
+            }
+
+            if (typeof renderInventory === 'function') renderInventory();
+            logEvent('bonus', 'Código DAVID canjeado', '+1,000,000,000,000 monedas + 99 calabazas');
+            return 'Código válido! +1,000,000,000,000 monedas + 99 calabazas';
+        }
+    },
 };
 
 const getCodigoKey = (codigo) => {
@@ -1890,4 +1917,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inicializar mecánicas financieras realistas
     if (typeof window.initFinanceMechanics === 'function') window.initFinanceMechanics();
 });
+
 console.log('BITGAMESO v5 — inflación comida, bonos sector, 50 mensajes mascota. ');
