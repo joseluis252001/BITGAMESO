@@ -446,8 +446,13 @@ const typewriterEffect = (el, text, onDone) => {
 
 // ============================================================
 //  SETUP PASO 3 — COMPRAR ACCION
-//  Eleva y resalta solo el botón COMPRAR del activo elegido
+//  Resalta solo el botón COMPRAR del activo elegido
+//  y lo mantiene resaltado aunque renderMarket se llame
 // ============================================================
+let _buyTutorialActive  = false;
+let _buyTutorialSymbol  = null;
+let _buyTutorialRender  = null; // función que re-aplica el highlight tras cada render
+
 const setupBuyTutorial = () => {
     // Elegir primer activo no poseído
     let targetSymbol = null;
@@ -456,6 +461,8 @@ const setupBuyTutorial = () => {
     }
     if (!targetSymbol) { tutorialNext(); return; }
     tutorialSelectedAction = targetSymbol;
+    _buyTutorialSymbol = targetSymbol;
+    _buyTutorialActive = true;
 
     // Mover el activo al inicio del mapa para que aparezca primero
     const targetAsset = state.market.get(targetSymbol);
@@ -473,67 +480,69 @@ const setupBuyTutorial = () => {
     const marketEl = document.querySelector('.market-main');
     if (marketEl) marketEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Esperar scroll y luego resaltar el botón correcto
-    setTimeout(() => {
-        const doHighlightBtn = () => {
-            const rows = document.querySelectorAll('.asset-row');
-            let targetBtn = null;
-            rows.forEach(row => {
-                const symEl = row.querySelector('.asset-symbol');
-                if (symEl && symEl.textContent.trim() === targetSymbol) {
-                    targetBtn = row.querySelector('.btn-buy');
-                }
-            });
-
-            if (!targetBtn) {
-                // Reintentar si el DOM todavía no se renderizó
-                setTimeout(doHighlightBtn, 400);
-                return;
+    // Función que aplica el resaltado — se llama tras cada renderMarket
+    const applyBuyHighlight = () => {
+        if (!_buyTutorialActive) return;
+        const rows = document.querySelectorAll('.asset-row');
+        let targetBtn = null;
+        let targetRow = null;
+        rows.forEach(row => {
+            const symEl = row.querySelector('.asset-symbol');
+            if (symEl && symEl.textContent.trim() === targetSymbol) {
+                targetBtn = row.querySelector('.btn-buy');
+                targetRow = row;
             }
+        });
+        if (!targetBtn) return;
 
-            // Deshabilitar TODOS los otros botones comprar
-            document.querySelectorAll('.btn-buy').forEach(btn => {
-                if (btn !== targetBtn) {
-                    btn.style.opacity       = '0.3';
-                    btn.style.pointerEvents = 'none';
-                }
-            });
+        // Atenuar todos los demás botones
+        document.querySelectorAll('.btn-buy').forEach(btn => {
+            if (btn !== targetBtn) {
+                btn.style.opacity       = '0.3';
+                btn.style.pointerEvents = 'none';
+            } else {
+                btn.style.opacity       = '1';
+                btn.style.pointerEvents = 'auto';
+                btn.style.boxShadow     = '0 0 0 3px #CBA6F7, 0 0 15px rgba(203,166,247,0.8)';
+            }
+        });
 
-            // Deshabilitar overlay para que el botón sea clickeable directamente
-            disableOverlayBlock();
+        // Re-aplicar highlight box y flecha
+        highlightElement(targetBtn, { arrowDir: 'up' });
+        addActionGlow(targetBtn);
+    };
 
-            // Elevar solo el botón y su fila
-            elevateElement(targetBtn);
-            const targetRow = targetBtn.closest('.asset-row');
-            if (targetRow) elevateElement(targetRow);
+    // Guardar referencia para que el loop pueda llamarla
+    _buyTutorialRender = applyBuyHighlight;
 
-            // Scroll al botón
-            targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            setTimeout(() => {
-                highlightElement(targetBtn, { arrowDir: 'up' });
-                addActionGlow(targetBtn);
-
-                const textEl = document.getElementById('tut-text');
-                if (textEl) {
-                    // Cancelar typewriter activo antes de sobreescribir
-                    if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-                    typewriterEffect(textEl, 'Presiona COMPRAR en la accion resaltada para hacer tu primera inversion.');
-                }
-            }, 500);
-        };
-        doHighlightBtn();
-    }, 900);
+    // Deshabilitar overlay y aplicar primer highlight tras scroll
+    disableOverlayBlock();
+    setTimeout(() => {
+        applyBuyHighlight();
+        // Actualizar texto
+        const textEl = document.getElementById('tut-text');
+        if (textEl) {
+            if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
+            typewriterEffect(textEl, 'Presiona COMPRAR en la accion resaltada para hacer tu primera inversion.');
+        }
+    }, 1000);
 
     // Polling: esperar que el activo aparezca en cartera
     const poll = setInterval(() => {
         if (!tutorialActive) {
             clearInterval(poll);
+            _buyTutorialActive = false;
+            _buyTutorialRender = null;
             restoreBuyBtns();
             return;
         }
+        // Re-aplicar highlight en cada tick (por si renderMarket lo borró)
+        applyBuyHighlight();
+
         if (state.portfolio.has(targetSymbol)) {
             clearInterval(poll);
+            _buyTutorialActive = false;
+            _buyTutorialRender = null;
             restoreBuyBtns();
             lowerAllElevated();
             enableOverlayBlock();
