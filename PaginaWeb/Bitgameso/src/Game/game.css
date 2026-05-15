@@ -7,7 +7,7 @@
     --accent:     #94E2D5;
     --text:       #4C4F69;
     --danger:     #F38BA8;
-    --success:    #a8e6cf;
+    --success:    #B2F2BB;
     --bg:         #EFF1F5;
     --card-bg:    #FFFFFF;
     --shadow:     5px 5px 0px var(--text);
@@ -119,7 +119,7 @@ body {
     font-size:11px; font-weight:700; white-space:nowrap; flex-shrink:0;
 }
 .effect-badge.fast   { background:#fff3cd; color:#856404; }
-.effect-badge.double { background:#d1f5d3; color:#1e6c34; }
+.effect-badge.double { background:#B2F2BB; color:#5a9e6f; }
 .effect-badge.vision { background:#f0e7ff; color:#6a0dad; }
 
 .eff-icon  { width:18px; height:18px; object-fit:contain; }
@@ -281,7 +281,7 @@ body {
     cursor:pointer; transition:all .15s ease; color:white;
     box-shadow:0 3px 0px rgba(0,0,0,.15); letter-spacing:.3px;
 }
-.btn-buy  { background: #52b788; }   /* verde limón pastel */
+.btn-buy  { background: #B2F2BB; }   /* verde limón pastel */
 .btn-sell { background: #FFB6C1; }   /* rosa pastel */
 .btn-sm   { padding:5px 10px; font-size:10px; }
 
@@ -439,7 +439,7 @@ body {
 }
 .pi-profit.up   {
     background: #e8f8e8;
-    color: #52b788;   /* verde limón pastel */
+    color: #52b788;   /* verde menta pastel */
 }
 .pi-profit.down {
     background: #fff0f3;
@@ -580,7 +580,7 @@ body {
 
 .dep-amount { font-size:1.1rem; font-weight:700; color:var(--text); }
 .dep-cost   { font-size:.85rem; font-weight:700; padding:3px 10px; border-radius:10px; }
-.cost-low    { background:#e6f9e6; color:#2a7a2a; }
+.cost-low    { background:#edfff0; color:#5a9e6f; }
 .cost-mid    { background:#fff3e0; color:#a05400; }
 .cost-high   { background:#ffe0e0; color:#a00000; }
 .cost-danger { background:#f8d7da; color:#7a0000; }
@@ -599,7 +599,7 @@ body {
 .legend-tag {
     padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;
 }
-.legend-tag.veg     { background:#e6f9e6; color:#2a7a2a; }
+.legend-tag.veg     { background:#edfff0; color:#5a9e6f; }
 .legend-tag.fruit   { background:#fff3e0; color:#a05400; }
 .legend-tag.protein { background:#ffe0e0; color:#a00000; }
 .legend-tag.candy   { background:#f0e7ff; color:#6a0dad; }
@@ -629,7 +629,7 @@ body {
     font-size:9px; padding:2px 7px; border-radius:8px; font-weight:700;
     text-align:center; white-space:nowrap;
 }
-.food-eff-tag.veg     { background:#e6f9e6; color:#2a7a2a; }
+.food-eff-tag.veg     { background:#edfff0; color:#5a9e6f; }
 .food-eff-tag.fruit   { background:#fff3e0; color:#a05400; }
 .food-eff-tag.protein { background:#ffe0e0; color:#a00000; }
 .food-eff-tag.candy   { background:#f0e7ff; color:#6a0dad; }
@@ -763,7 +763,7 @@ body {
 
 .row-boom {
     animation: flash-boom 1s ease-in-out infinite;
-    border-left: 3px solid #27ae60 !important;
+    border-left: 3px solid #52b788 !important;
 }
 
 /* Mascota con advertencia de crash */
@@ -773,7 +773,7 @@ body {
 }
 
 @keyframes warn-boom {
-    0%,100% { color: #27ae60; text-shadow: none; }
+    0%,100% { color: #52b788; text-shadow: none; }
     50%     { color: #1e8449; text-shadow: 0 0 10px rgba(39,174,96,0.6); }
 }
 
@@ -872,7 +872,7 @@ body {
     line-height: 1.5;
 }
 
-.info-why { color: #27ae60 !important; }
+.info-why { color: #52b788 !important; }
 
 .info-emoji { font-size: 1.4rem; }
 
@@ -1082,7 +1082,7 @@ body {
     font-size: 10px; font-weight: 700; padding: 3px 8px;
     border-radius: 10px; text-align: center;
 }
-.pet-badge.active { background: #d1f5d3; color: #1e6c34; }
+.pet-badge.active { background: #B2F2BB; color: #5a9e6f; }
 .pet-badge.locked { background: #f0f0f0; color: #aaa; }
 
 /* Botones en grid de mascotas */
