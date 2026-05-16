@@ -1613,15 +1613,26 @@ body {
         overflow-x: hidden;
         max-height: 250px;
     }
-    .portfolio-item { padding: 6px 4px; gap: 2px; border-radius: 10px; }
-    .pi-header { padding-bottom: 3px; }
-    .pi-header strong { font-size: 10px; }
-    .pi-name { font-size: 7px; }
+    .portfolio-item { padding: 6px 4px; gap: 2px; border-radius: 10px; min-width: 0; overflow: hidden; }
+    .pi-header { padding-bottom: 3px; min-width: 0; }
+    .pi-header strong { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .pi-name { font-size: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
     .pi-type-tag { font-size: 7px; padding: 1px 3px; }
-    .pi-prices { font-size: 8px; gap: 1px 2px; }
-    .pi-label { font-size: 7px; }
-    .pi-profit { font-size: 8px; padding: 2px 3px; }
-    .btn-sell { padding: 4px 5px; font-size: 8px; }
+    .pi-prices { font-size: 8px; gap: 1px 2px; min-width: 0; }
+    .pi-label { font-size: 7px; flex-shrink: 0; }
+    .pi-prices span:not(.pi-label) {
+        font-size: clamp(5px, 1.8vw, 8px);
+        white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis; min-width: 0;
+    }
+    .pi-profit {
+        font-size: clamp(5px, 1.8vw, 8px);
+        padding: 2px 3px;
+        white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis;
+        display: block; text-align: center;
+    }
+    .btn-sell { padding: 4px 5px; font-size: 8px; width: 100%; }
     .portfolio-filter-bar { gap: 3px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
     .portfolio-filter-tab { font-size: 7px; padding: 2px 5px; flex-shrink: 0; }
     .portfolio-summary { font-size: 10px; margin-top: 6px; padding-top: 5px; flex-shrink: 0; }

@@ -374,18 +374,18 @@ const positionBubble = (rect, dir = 'up') => {
 
     // Móvil: siempre fijo abajo centrado, el JS no toca nada
     if (wW <= 600) {
-        bubble.style.cssText = `
-            position: fixed !important;
-            bottom: 12px !important;
-            top: auto !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            width: calc(100vw - 16px) !important;
-            max-width: 340px !important;
-            max-height: 52vh !important;
-            overflow-y: auto !important;
-            z-index: 9999 !important;
-        `;
+        bubble.style.position   = 'fixed';
+        bubble.style.bottom     = '12px';
+        bubble.style.top        = 'auto';
+        bubble.style.left       = '8px';
+        bubble.style.right      = '8px';
+        bubble.style.width      = 'auto';
+        bubble.style.maxWidth   = '340px';
+        bubble.style.margin     = '0 auto';
+        bubble.style.transform  = 'none';
+        bubble.style.maxHeight  = '52vh';
+        bubble.style.overflowY  = 'auto';
+        bubble.style.zIndex     = '9999';
         return;
     }
 
