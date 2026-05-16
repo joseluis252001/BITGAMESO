@@ -2049,13 +2049,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 console.log('BITGAMESO v5 — inflación comida, bonos sector, 50 mensajes mascota. ');
 
 // ============================================================
-//  BUG REPORT — integrado directamente en game.js
+//  BUG REPORT — usa /api/send-bug y /api/save-bug (claves seguras en servidor)
 // ============================================================
-const BUG_RESEND_KEY = 're_g4CkTcXo_Hf3x4ywQAwa7r2QTPQhVXtDM';
-const BUG_FROM      = 'noreply@bitgameso.com';
-const BUG_TO        = 'joseluis252001@hotmail.com';
-const BUG_SB_URL    = 'https://pvugnjnnfyvkfqhnecpz.supabase.co';
-const BUG_SB_KEY    = 'sb_publishable_i8guONbRc21Ska2Jy6VA-A_pV19OyiM';
+// Las claves de Resend y Supabase ya NO están aquí.
+// Están en variables de entorno privadas de Vercel.
 
 // Capturar errores de consola
 window._bugErrors = [];
@@ -2210,22 +2207,38 @@ window.submitBugInline = async () => {
 
     let ok = false;
 
-    // 1 — Resend
+    // 1 — Resend (via API segura)
     try {
-        const r = await fetch('https://api.resend.com/emails', {
+        const r = await fetch('/api/send-bug', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${BUG_RESEND_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from: `BITGAMESO Bugs <${BUG_FROM}>`, to: [BUG_TO], subject: `Bug de ${ctx.usuario} — ${ctx.fecha}`, html }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                subject: `Bug de ${ctx.usuario} — ${ctx.fecha}`,
+                html,
+            }),
         });
         if (r.ok) ok = true;
     } catch(e) { console.warn('Resend error:', e); }
 
-    // 2 — Supabase
+    // 2 — Supabase (via API segura)
     try {
-        await fetch(`${BUG_SB_URL}/rest/v1/bug_reports`, {
+        await fetch('/api/save-bug', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': BUG_SB_KEY, 'Authorization': `Bearer ${BUG_SB_KEY}`, 'Prefer': 'return=minimal' },
-            body: JSON.stringify({ user_id: ctx.userId, usuario: ctx.usuario, descripcion: desc, mascota: ctx.mascota, monedas: typeof ctx.monedas==='number'?ctx.monedas:null, salud: typeof ctx.salud==='number'?ctx.salud:null, navegador: navigator.userAgent, pantalla: ctx.pantalla, url: ctx.url, errores_consola: JSON.stringify(ctx.errores), tiene_screenshot: !!ss, created_at: ctx.fechaISO }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id:          ctx.userId,
+                usuario:          ctx.usuario,
+                descripcion:      desc,
+                mascota:          ctx.mascota,
+                monedas:          typeof ctx.monedas==='number' ? ctx.monedas : null,
+                salud:            typeof ctx.salud==='number'   ? ctx.salud   : null,
+                navegador:        navigator.userAgent,
+                pantalla:         ctx.pantalla,
+                url:              ctx.url,
+                errores_consola:  JSON.stringify(ctx.errores),
+                tiene_screenshot: !!ss,
+                created_at:       ctx.fechaISO,
+            }),
         });
         ok = true;
     } catch(e) { console.warn('Supabase error:', e); }
