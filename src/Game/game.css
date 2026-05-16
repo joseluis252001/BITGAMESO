@@ -1553,20 +1553,25 @@ body {
     .chevron-img { width: 10px; }
     .profile-trigger { padding: 2px 6px 2px 2px; gap: 4px; }
 
-    /* Nav: una sola fila */
+    /* Nav: una sola fila — monedas a la izquierda, botones a la derecha */
     .game-nav { top: 44px; height: 44px; padding: 0 .6rem; flex-wrap: nowrap; justify-content: space-between; }
     .nav-left { gap: 5px; flex-shrink: 1; min-width: 0; overflow: hidden; }
     .score-container { font-size: .7rem; gap: 3px; white-space: nowrap; flex-shrink: 1; }
     .coin-icon { width: 14px; flex-shrink: 0; }
-    #monedas-count { font-size: .7rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+    #monedas-count { font-size: .7rem; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #balance-panel { display: none !important; }
-    .active-effects { gap: 2px; max-width: 80px; overflow: hidden; }
+    .active-effects { gap: 2px; max-width: 60px; overflow: hidden; }
     .effect-badge { padding: 1px 4px; font-size: 7px; }
     .eff-icon { width: 10px; height: 10px; }
     .eff-timer { font-size: 7px; }
+    /* Botones nav: compactos, sin border-radius exagerado, sin iconos */
     .nav-actions { gap: 3px; flex-shrink: 0; }
-    .nav-actions button { padding: 5px 7px; font-size: .6rem; gap: 2px; white-space: nowrap; }
-    .btn-nav-icon { width: 12px; height: 12px; }
+    .nav-actions button {
+        padding: 4px 7px; font-size: .58rem; gap: 0;
+        border-radius: 8px; white-space: nowrap;
+        min-width: 0;
+    }
+    .btn-nav-icon { display: none; }  /* ocultar iconos en nav para ahorrar espacio */
 
     /* Inventario: banda fina sin tapar contenido */
     .inventory-section { top: 88px; height: 40px; padding: 3px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
@@ -1650,16 +1655,26 @@ body {
     .hi-msg { font-size: 9px; }
     .hi-hora, .hi-monedas { font-size: 7px; }
 
-    /* Tutorial: visible y centrado */
+    /* Tutorial: completamente visible, centrado en pantalla */
     #tutorial-bubble {
-        width: calc(100vw - 14px);
-        max-width: 360px;
-        bottom: 12px; top: auto !important;
+        width: calc(100vw - 16px) !important;
+        max-width: 340px !important;
+        max-height: 70vh;
+        overflow-y: auto;
+        position: fixed !important;
+        bottom: 16px !important;
+        top: auto !important;
         left: 50% !important;
+        right: auto !important;
         transform: translateX(-50%) !important;
+        z-index: 9999;
     }
-    #tut-text { font-size: 11px; line-height: 1.5; }
-    .tut-btn-primary { padding: 8px 18px; font-size: 12px; }
+    .tut-speech { padding: 12px 14px 8px; }
+    #tut-text { font-size: 12px; line-height: 1.5; }
+    .tut-mascot-wrap img { width: 44px; height: 44px; }
+    .tut-btn-primary { padding: 8px 16px; font-size: 12px; }
+    .tut-counter { font-size: 10px; }
+    .tut-footer { padding: 8px 14px 12px; }
 }
 
 /* Movil muy pequeno (max 380px) */
