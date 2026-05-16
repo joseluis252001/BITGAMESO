@@ -1555,13 +1555,44 @@ body {
     /* Título visible pero compacto */
     .header-left h1 { display: block !important; font-size: .75rem; }
 
-    /* Nav: una sola fila — monedas a la izquierda, botones a la derecha */
-    .game-nav { top: 44px; height: 44px; padding: 0 .6rem; flex-wrap: nowrap; justify-content: space-between; }
-    .nav-left { gap: 5px; flex-shrink: 1; min-width: 0; overflow: hidden; }
+    /* Nav: dos líneas — primera: monedas + botones, segunda: balance */
+    .game-nav {
+        top: 44px; height: auto; min-height: 44px;
+        padding: 3px .6rem 3px; flex-wrap: wrap;
+        align-items: center; gap: 2px;
+    }
+    .nav-left {
+        display: flex; flex-wrap: nowrap;
+        align-items: center; gap: 5px;
+        flex: 1; min-width: 0; overflow: hidden;
+    }
     .score-container { font-size: .7rem; gap: 3px; white-space: nowrap; flex-shrink: 1; }
     .coin-icon { width: 14px; flex-shrink: 0; }
     #monedas-count { font-size: .7rem; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #balance-panel { display: none !important; }
+
+    /* Balance panel: segunda línea completa */
+    #balance-panel {
+        display: flex !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 2px 6px !important;
+        gap: 5px !important;
+        font-size: 9px !important;
+        background: rgba(255,255,255,0.85) !important;
+        border-radius: 8px !important;
+        border: 1px solid #f0e7ff !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        justify-content: space-between !important;
+        order: 3 !important;
+    }
+    .balance-label { font-size: 7px !important; }
+    .balance-value { font-size: 8px !important; }
+    .balance-divider { font-size: 9px !important; }
+
+    /* Inventario más abajo para compensar la segunda línea */
+    .inventory-section { top: 104px; height: 40px; padding: 3px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
+    body { padding-top: 158px; }
     .active-effects { gap: 2px; max-width: 60px; overflow: hidden; }
     .effect-badge { padding: 1px 4px; font-size: 7px; }
     .eff-icon { width: 10px; height: 10px; }
@@ -1573,10 +1604,7 @@ body {
         border-radius: 8px; white-space: nowrap;
         min-width: 0;
     }
-    .btn-nav-icon { display: none; }  /* ocultar iconos en nav para ahorrar espacio */
-
-    /* Inventario: banda fina sin tapar contenido */
-    .inventory-section { top: 88px; height: 40px; padding: 3px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
+    .btn-nav-icon { display: none; }
     .inv-title { display: none; }
     .inv-item { min-width: 34px; padding: 2px 4px; border-radius: 8px; }
     .inv-img { width: 24px; height: 24px; }
