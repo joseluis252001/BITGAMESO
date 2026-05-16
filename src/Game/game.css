@@ -1627,7 +1627,8 @@ body {
         min-width: 0;
     }
     .btn-nav-icon { display: none; }
-    .inv-title { display: none; }
+    .inv-title { display: flex !important; align-items: center; flex-shrink: 0; }
+    .inv-icon-img { width: 22px; height: 22px; }
     .inv-item { min-width: 34px; padding: 2px 4px; border-radius: 8px; }
     .inv-img { width: 24px; height: 24px; }
     .inv-qty { font-size: 7px; }
