@@ -1838,24 +1838,30 @@ body {
     .hi-msg { font-size: 9px; }
     .hi-hora, .hi-monedas { font-size: 7px; }
 
-    /* Tutorial: fijado abajo, siempre visible */
+    /* Tutorial: centrado abajo con left+right */
+    #tutorial-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 9989 !important;
+    }
     #tutorial-bubble {
-        width: calc(100vw - 16px) !important;
-        max-width: 340px !important;
+        position: fixed !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: 16px !important;
+        top: auto !important;
+        transform: none !important;
+        width: auto !important;
+        max-width: none !important;
         max-height: 55vh !important;
         overflow-y: auto !important;
-        position: fixed !important;
-        bottom: 14px !important;
-        top: auto !important;
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
+        transition: none !important;
         z-index: 9999 !important;
     }
     .tut-header { padding: 8px 12px; }
     .tut-mascot-wrap img { width: 38px; height: 38px; }
     .tut-speech { padding: 10px 12px 6px; min-height: 60px; }
-    #tut-text { font-size: 11px; line-height: 1.5; }
+    #tut-text { font-size: 12px; line-height: 1.5; }
     .tut-footer { padding: 7px 12px 10px; }
     .tut-counter { font-size: 10px; }
     .tut-btn-primary { padding: 7px 14px; font-size: 11px; }

@@ -372,20 +372,12 @@ const positionBubble = (rect, dir = 'up') => {
     const wW  = window.innerWidth;
     const wH  = window.innerHeight;
 
-    // Móvil: siempre fijo abajo centrado
+    // Móvil: el CSS maneja todo con left+right+bottom, no tocar
     if (wW <= 600) {
-        bubble.style.position   = 'fixed';
-        bubble.style.bottom     = '12px';
-        bubble.style.top        = 'auto';
-        bubble.style.left       = '0';
-        bubble.style.right      = '0';
-        bubble.style.width      = 'calc(100vw - 16px)';
-        bubble.style.maxWidth   = '340px';
-        bubble.style.margin     = '0 auto';
-        bubble.style.transform  = 'none';
-        bubble.style.maxHeight  = '52vh';
-        bubble.style.overflowY  = 'auto';
-        bubble.style.zIndex     = '9999';
+        bubble.style.removeProperty('top');
+        bubble.style.removeProperty('left');
+        bubble.style.removeProperty('right');
+        bubble.style.removeProperty('transform');
         return;
     }
 
