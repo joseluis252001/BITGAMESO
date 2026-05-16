@@ -1088,7 +1088,13 @@ const renderPortfolio = () => {
         html += `
         <div class="portfolio-item">
             <div class="pi-header">
-                <strong>${pos.symbol}</strong>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <strong>${pos.symbol}</strong>
+                    <div style="display:flex; gap:2px; flex-shrink:0;">
+                        ${isEffectActive('doubleProfit') ? '<span class="x2-tag">x2</span>' : ''}
+                        ${state.sectorBonus.get(pos.type || '') ? '<span class="bonus-tag">+3%</span>' : ''}
+                    </div>
+                </div>
                 <span class="pi-name">${pos.name}</span>
                 ${pos.type ? `<span class="pi-type-tag">${pos.type}</span>` : ''}
             </div>
@@ -1104,8 +1110,6 @@ const renderPortfolio = () => {
             </div>
             <div class="pi-profit ${profit >= 0 ? 'up' : 'down'}">
                 ${profit >= 0 ? '▲' : '▼'} ${fmtShort(Math.abs(profit))} (${Math.abs(pct)}%)
-                ${isEffectActive('doubleProfit') ? '<span class="x2-tag">x2</span>' : ''}
-                ${state.sectorBonus.get(pos.type || '') ? '<span class="bonus-tag">+3%</span>' : ''}
             </div>
             <button class="btn-action btn-sell" onclick="sellFromPortfolio('${symbol}')">Vender</button>
         </div>`;
