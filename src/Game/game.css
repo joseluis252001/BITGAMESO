@@ -1555,25 +1555,49 @@ body {
     /* Título visible pero compacto */
     .header-left h1 { display: block !important; font-size: .75rem; }
 
-    /* Nav: altura fija con balance debajo de monedas */
+    /* Nav: dos filas claras */
     .game-nav {
-        top: 44px; height: 58px; min-height: 58px;
-        padding: 2px .6rem; flex-wrap: wrap;
-        align-content: center; gap: 1px;
+        top: 44px;
+        height: auto;
+        padding: 4px .6rem;
+        flex-wrap: wrap;
+        gap: 3px;
+        align-items: center;
     }
-    .nav-left {
-        display: flex; flex-direction: column;
-        gap: 1px; flex: 1; min-width: 0;
-    }
-    .score-container { font-size: .7rem; gap: 3px; white-space: nowrap; }
-    .coin-icon { width: 14px; flex-shrink: 0; }
-    #monedas-count { font-size: .7rem; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* Balance panel: justo debajo de monedas, muy compacto */
+    /* Fila 1: monedas (izquierda) + botones (derecha) */
+    .nav-left {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+        flex: 1;
+        min-width: 0;
+    }
+    .score-container {
+        font-size: .72rem; gap: 3px;
+        white-space: nowrap; flex-shrink: 1;
+    }
+    .coin-icon { width: 15px; flex-shrink: 0; }
+    #monedas-count {
+        font-size: .72rem;
+        max-width: 130px;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .nav-actions { gap: 3px; flex-shrink: 0; }
+    .nav-actions button {
+        padding: 4px 7px; font-size: .58rem;
+        gap: 0; border-radius: 8px; white-space: nowrap;
+    }
+    .btn-nav-icon { display: none; }
+
+    /* Fila 2: balance panel ancho completo */
     #balance-panel {
         display: flex !important;
+        width: 100% !important;
+        order: 10 !important;
         margin: 0 !important;
-        padding: 1px 4px !important;
+        padding: 2px 0 !important;
         gap: 4px !important;
         font-size: 8px !important;
         background: none !important;
@@ -1581,16 +1605,15 @@ body {
         box-shadow: none !important;
         flex-wrap: nowrap !important;
         overflow: hidden !important;
-        width: 100% !important;
-        order: 3 !important;
+        align-items: center !important;
     }
-    .balance-label { font-size: 6px !important; opacity: .7; }
-    .balance-value { font-size: 7px !important; }
-    .balance-divider { font-size: 8px !important; color: #CBA6F7 !important; }
+    .balance-label { font-size: 7px !important; opacity: .7; }
+    .balance-value { font-size: 8px !important; font-weight: 700; }
+    .balance-divider { font-size: 9px !important; color: #CBA6F7 !important; }
 
     /* Ajustar inventario y body */
-    .inventory-section { top: 102px !important; height: 38px; padding: 2px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
-    body { padding-top: 153px; }
+    .inventory-section { top: 108px !important; height: 38px; padding: 2px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
+    body { padding-top: 160px; }
     .active-effects { gap: 2px; max-width: 60px; overflow: hidden; }
     .effect-badge { padding: 1px 4px; font-size: 7px; }
     .eff-icon { width: 10px; height: 10px; }
