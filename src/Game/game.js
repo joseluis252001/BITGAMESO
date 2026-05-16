@@ -947,7 +947,7 @@ const renderPetHealth = () => {
     if (heartsEl) {
         const config = getHeartConfig(state.saludMascota);
         heartsEl.innerHTML = config.map(type =>
-            `<img src="../assets/Hearts/${heartImg[type]}.png" class="heart-icon" alt="${type}">`
+            `<img src="/src/assets/Hearts/${heartImg[type]}.png" class="heart-icon" alt="${type}">`
         ).join('');
     }
     if (refs.petHealthValue) refs.petHealthValue.textContent = state.saludMascota;
@@ -978,7 +978,7 @@ const renderPet = () => {
     if (!s) return;
     const def = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet] : null;
     const imgId = def?.baseId || state.currentPet;
-    s.style.backgroundImage = `url('../assets/pets/${imgId}.png')`;
+    s.style.backgroundImage = `url('/src/assets/pets/${imgId}.png')`;
     if (def?.diamond) {
         s.style.filter = 'sepia(1) saturate(5) hue-rotate(185deg) brightness(1.2) contrast(1.1) drop-shadow(0 0 12px #6ec6ff)';
     } else if (def?.golden) {

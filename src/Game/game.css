@@ -1498,10 +1498,9 @@ body {
    RESPONSIVE — Tablet grande / PC pequeño (max 1100px)
    ============================================================ */
 @media (max-width: 1100px) {
-    .bottom-row {
-        grid-template-columns: 1.5fr 1fr;
-    }
+    .bottom-row { grid-template-columns: 1.5fr 1fr; }
     .dashboard-grid { padding: 16px 1.2rem 1.2rem; }
+    .portfolio-list { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* ============================================================
@@ -1514,215 +1513,188 @@ body {
     .header-left h1 { font-size: 1.3rem; }
     .btn-header { padding: 6px 10px; font-size: .75rem; }
 
-    /* Nav: monedas + botones en dos líneas */
     .game-nav { height: auto; flex-wrap: wrap; padding: 6px 1.2rem; gap: 6px; }
     .nav-left  { width: 100%; }
     .nav-actions { flex-wrap: wrap; gap: 5px; }
     .nav-actions button { padding: 5px 10px; font-size: .75rem; }
 
-    /* Inventario */
     .inventory-section { top: 138px; padding: 6px 1.2rem; height: auto; flex-wrap: wrap; }
 
-    /* Dashboard */
     .dashboard-grid { padding: 14px 1rem 1rem; gap: 14px; }
-
-    /* Cartera y mascota: columna completa */
     .bottom-row { grid-template-columns: 1fr; gap: 14px; }
 
-    .portfolio-aside,
-    .pet-aside {
-        height: auto;
-        min-height: unset;
-        max-height: unset;
-    }
+    .portfolio-aside, .pet-aside { height: auto; min-height: unset; max-height: unset; }
 
-    /* Cartera: scroll horizontal */
+    /* Cartera: 2 columnas en tablet */
     .portfolio-list {
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-        height: 210px;
-        padding-bottom: 8px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 360px;
     }
-    .portfolio-item { min-width: 185px; max-width: 185px; }
+    .portfolio-item { min-width: unset; max-width: unset; }
 
-    /* Mascota centrada */
-    .pet-aside {
-        text-align: center;
-        padding: 16px;
-    }
+    .pet-aside { text-align: center; padding: 16px; }
 
-    /* Mercado */
     .market-header { display: none; }
     .asset-row {
         grid-template-columns: 1.4fr 0.9fr 1fr auto;
-        gap: 4px;
-        padding: 10px 8px;
+        gap: 4px; padding: 10px 8px;
     }
     .asset-info  { grid-column: 1 / 3; }
     .asset-type  { grid-column: 3; text-align: right; font-size: 10px; }
     .asset-price { grid-column: 1; font-size: 12px; }
     .asset-change{ grid-column: 2; text-align: right; font-size: 11px; }
-    .market-btns {
-        grid-column: 3 / 5;
-        justify-content: flex-end;
-        gap: 4px;
-    }
+    .market-btns { grid-column: 3 / 5; justify-content: flex-end; gap: 4px; }
 
     .market-list { max-height: 420px; }
     .market-filters { gap: 4px; }
     .filter-tab { padding: 3px 9px; font-size: 10px; }
 
-    /* Modales */
     .modal-box { padding: 20px 16px; }
     .food-shop-grid { grid-template-columns: repeat(3, 1fr); }
     .info-grid { grid-template-columns: 1fr; }
     .pet-grid  { grid-template-columns: repeat(3, 1fr); }
     .score-container { font-size: .82rem; }
+
+    /* Balance panel compacto */
+    #balance-panel { margin: 4px 0; gap: 6px; font-size: 10px; }
 }
 
 /* ============================================================
    RESPONSIVE — Móvil (max 600px)
    ============================================================ */
 @media (max-width: 600px) {
-    body { padding-top: 220px; }
+    body { padding-top: 210px; }
 
-    /* Header */
+    /* Header compacto */
     .game-header {
-        height: auto;
-        padding: 8px 1rem;
-        flex-wrap: wrap;
-        gap: 6px;
+        height: auto; padding: 6px 1rem;
+        flex-wrap: wrap; gap: 4px;
     }
-    .header-left h1 { font-size: 1.1rem; }
-    .mini-logo       { width: 26px; height: 26px; }
-    .header-center   { gap: 5px; flex-wrap: wrap; justify-content: center; width: 100%; }
-    .btn-header      { padding: 5px 8px; font-size: .7rem; }
-    .btn-header-icon { width: 14px; height: 14px; }
-    /* Ocultar texto de botones de header, solo iconos */
+    .header-left h1 { font-size: 1rem; }
+    .mini-logo { width: 24px; height: 24px; }
+    .header-center { gap: 4px; flex-wrap: wrap; justify-content: center; width: 100%; }
+    .btn-header { padding: 4px 8px; font-size: .68rem; }
+    .btn-header-icon { width: 13px; height: 13px; }
     .btn-header span { display: none; }
-    .header-right    { width: 100%; justify-content: flex-end; }
+    .header-right { width: 100%; justify-content: flex-end; }
 
-    /* Nav */
+    /* Nav compacto */
     .game-nav {
-        height: auto;
-        flex-direction: column;
-        padding: 6px 1rem;
-        gap: 6px;
-        align-items: stretch;
+        height: auto; flex-direction: column;
+        padding: 5px 1rem; gap: 5px; align-items: stretch;
     }
-    .nav-left        { width: 100%; }
-    .score-container { font-size: .8rem; gap: 6px; }
+    .nav-left { width: 100%; }
+    .score-container { font-size: .78rem; gap: 5px; flex-wrap: wrap; }
+
+    /* Balance panel — ocultar en móvil para ahorrar espacio */
+    #balance-panel { display: none !important; }
+
     .nav-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 5px;
-        width: 100%;
+        display: grid; grid-template-columns: 1fr 1fr;
+        gap: 4px; width: 100%;
     }
     .nav-actions button {
-        padding: 7px 4px;
-        font-size: .68rem;
-        width: 100%;
-        justify-content: center;
+        padding: 6px 4px; font-size: .65rem;
+        width: 100%; justify-content: center;
     }
-    .btn-nav-icon { width: 14px; height: 14px; }
+    .btn-nav-icon { width: 13px; height: 13px; }
 
     /* Inventario */
     .inventory-section {
-        top: 175px;
-        padding: 5px 1rem;
-        height: auto;
-        flex-wrap: nowrap;
-        overflow-x: auto;
+        top: 165px; padding: 4px 1rem;
+        height: auto; flex-wrap: nowrap; overflow-x: auto;
     }
-    .inv-title { font-size: .75rem; white-space: nowrap; }
-
-    /* Balance panel (finance.js) */
-    #balance-panel {
-        margin-left: 0;
-        margin-top: 4px;
-        width: 100%;
-        font-size: 10px;
-        gap: 6px;
-    }
+    .inv-title { font-size: .72rem; white-space: nowrap; }
+    .inv-item { min-width: 48px; }
+    .inv-img  { width: 32px; height: 32px; }
+    .inv-qty  { font-size: 9px; }
 
     /* Dashboard */
-    .dashboard-grid {
-        padding: 10px .8rem .8rem;
-        gap: 12px;
-    }
+    .dashboard-grid { padding: 10px .8rem .8rem; gap: 10px; }
+    .bottom-row { grid-template-columns: 1fr; gap: 10px; }
+    .portfolio-aside, .pet-aside { height: auto; min-height: unset; max-height: unset; }
 
-    /* Cartera + mascota: columna */
-    .bottom-row { grid-template-columns: 1fr; gap: 12px; }
-
-    .portfolio-aside,
-    .pet-aside {
-        height: auto;
-        min-height: unset;
-        max-height: unset;
-    }
-
+    /* Cartera: 2 columnas en móvil */
     .portfolio-list {
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-        height: 200px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 400px;
+        gap: 8px;
     }
-    .portfolio-item { min-width: 170px; max-width: 170px; }
+    .portfolio-item {
+        min-width: unset; max-width: unset;
+        padding: 8px 6px;
+    }
+    .pi-header strong { font-size: 12px; }
+    .pi-name { font-size: 8px; }
+    .pi-prices { font-size: 9px; gap: 1px 4px; }
+    .pi-label { font-size: 8px; }
+    .pi-profit { font-size: 10px; padding: 3px 4px; }
 
-    .pet-aside {
-        text-align: center;
-        padding: 14px;
-    }
-    .pet-container { width: 100px; height: 100px; }
+    /* Filtros cartera */
+    .portfolio-filter-bar { gap: 4px; }
+    .portfolio-filter-tab { font-size: 9px; padding: 2px 8px; }
+
+    /* Mascota */
+    .pet-aside { text-align: center; padding: 12px; }
+    .pet-container { width: 90px; height: 90px; }
+    #pet-character { width: 90px; height: 90px; }
+    .heart-icon { width: 24px; height: 24px; }
 
     /* Mercado */
     .market-header { display: none; }
     .asset-row {
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto auto;
-        gap: 3px 6px;
-        padding: 9px 8px;
+        gap: 3px 6px; padding: 8px;
     }
     .asset-info   { grid-column: 1 / 3; }
+    .asset-symbol { font-size: 12px; }
+    .asset-name   { font-size: 8px; }
     .asset-type   { display: none; }
-    .asset-price  { grid-column: 1; font-size: 12px; font-weight: 700; }
-    .asset-change { grid-column: 2; text-align: right; font-size: 11px; }
-    .market-btns  {
-        grid-column: 1 / 3;
-        display: flex;
-        gap: 5px;
-        justify-content: stretch;
-    }
-    .market-btns .btn-action { flex: 1; font-size: 11px; padding: 6px 4px; }
-    .btn-asset-info { font-size: 10px; padding: 4px 6px; }
+    .asset-price  { grid-column: 1; font-size: 11px; font-weight: 700; }
+    .asset-change { grid-column: 2; text-align: right; font-size: 10px; }
+    .market-btns  { grid-column: 1 / 3; display: flex; gap: 4px; }
+    .market-btns .btn-action { flex: 1; font-size: 10px; padding: 5px 4px; }
+    .btn-asset-info { font-size: 9px; padding: 3px 5px; }
+    .asset-cat-badge { display: none; }
 
-    .market-list { max-height: 380px; }
-    .market-filters { gap: 4px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
-    .filter-tab { padding: 3px 8px; font-size: 10px; white-space: nowrap; flex-shrink: 0; }
+    .market-list { max-height: 360px; }
+    .market-filters { gap: 3px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+    .filter-tab { padding: 3px 8px; font-size: 9px; white-space: nowrap; flex-shrink: 0; }
 
     /* Modales */
     .modal-box {
-        padding: 16px 14px;
-        max-width: calc(100vw - 24px);
-        width: calc(100vw - 24px);
+        padding: 14px 12px;
+        max-width: calc(100vw - 20px);
+        width: calc(100vw - 20px);
+        border-radius: 16px;
     }
-    .modal-wide { max-width: calc(100vw - 24px); }
-    .food-shop-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .pet-grid        { grid-template-columns: repeat(2, 1fr); }
-    .info-grid       { grid-template-columns: 1fr; }
+    .modal-wide { max-width: calc(100vw - 20px); }
+    .food-shop-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 320px; }
+    .pet-grid  { grid-template-columns: repeat(2, 1fr); }
+    .info-grid { grid-template-columns: 1fr; }
 
-    /* Deposit cards */
     .deposit-options { grid-template-columns: 1fr 1fr; }
+
+    /* Historial */
+    .historial-item { grid-template-columns: 32px 1fr auto; gap: 6px; padding: 8px 10px; }
+    .hi-icon { width: 28px; height: 28px; font-size: .85rem; }
+    .hi-msg  { font-size: 11px; }
+    .hi-hora { font-size: 9px; }
+    .hi-monedas { font-size: 9px; }
 
     /* Tutorial burbuja */
     #tutorial-bubble {
-        width: calc(100vw - 24px);
-        max-width: calc(100vw - 24px);
-        bottom: 12px;
-        top: auto !important;
-        left: 12px !important;
-        transform: none;
+        width: calc(100vw - 20px);
+        max-width: calc(100vw - 20px);
+        bottom: 12px; top: auto !important;
+        left: 10px !important; transform: none;
     }
 }
 
@@ -1730,15 +1702,15 @@ body {
    RESPONSIVE — Móvil muy pequeño (max 380px)
    ============================================================ */
 @media (max-width: 380px) {
-    body { padding-top: 240px; }
-    .inventory-section { top: 195px; }
+    body { padding-top: 230px; }
+    .inventory-section { top: 185px; }
 
-    .nav-actions button { font-size: .62rem; padding: 6px 2px; }
+    .nav-actions button { font-size: .6rem; padding: 5px 2px; }
     .food-shop-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
     .pet-grid { grid-template-columns: repeat(2, 1fr); }
+    .portfolio-list { grid-template-columns: 1fr; }
 
     .asset-badge, .asset-cat-badge { display: none; }
-    .pi-prices { grid-template-columns: auto 1fr; }
 }
 
 /* ====   TUTORIAL
