@@ -73,7 +73,7 @@
     <script src="script.js"></script>
     <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('../sw.js')
+    navigator.serviceWorker.register('/sw.js')
       .then(() => console.log("Menú listo para instalar como App"))
       .catch(err => console.log("Error de registro:", err));
   }
