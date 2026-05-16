@@ -1555,44 +1555,42 @@ body {
     /* Título visible pero compacto */
     .header-left h1 { display: block !important; font-size: .75rem; }
 
-    /* Nav: dos líneas — primera: monedas + botones, segunda: balance */
+    /* Nav: altura fija con balance debajo de monedas */
     .game-nav {
-        top: 44px; height: auto; min-height: 44px;
-        padding: 3px .6rem 3px; flex-wrap: wrap;
-        align-items: center; gap: 2px;
+        top: 44px; height: 58px; min-height: 58px;
+        padding: 2px .6rem; flex-wrap: wrap;
+        align-content: center; gap: 1px;
     }
     .nav-left {
-        display: flex; flex-wrap: nowrap;
-        align-items: center; gap: 5px;
-        flex: 1; min-width: 0; overflow: hidden;
+        display: flex; flex-direction: column;
+        gap: 1px; flex: 1; min-width: 0;
     }
-    .score-container { font-size: .7rem; gap: 3px; white-space: nowrap; flex-shrink: 1; }
+    .score-container { font-size: .7rem; gap: 3px; white-space: nowrap; }
     .coin-icon { width: 14px; flex-shrink: 0; }
-    #monedas-count { font-size: .7rem; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #monedas-count { font-size: .7rem; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* Balance panel: segunda línea completa */
+    /* Balance panel: justo debajo de monedas, muy compacto */
     #balance-panel {
         display: flex !important;
-        width: 100% !important;
         margin: 0 !important;
-        padding: 2px 6px !important;
-        gap: 5px !important;
-        font-size: 9px !important;
-        background: rgba(255,255,255,0.85) !important;
-        border-radius: 8px !important;
-        border: 1px solid #f0e7ff !important;
+        padding: 1px 4px !important;
+        gap: 4px !important;
+        font-size: 8px !important;
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
         flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        justify-content: space-between !important;
+        overflow: hidden !important;
+        width: 100% !important;
         order: 3 !important;
     }
-    .balance-label { font-size: 7px !important; }
-    .balance-value { font-size: 8px !important; }
-    .balance-divider { font-size: 9px !important; }
+    .balance-label { font-size: 6px !important; opacity: .7; }
+    .balance-value { font-size: 7px !important; }
+    .balance-divider { font-size: 8px !important; color: #CBA6F7 !important; }
 
-    /* Inventario más abajo para compensar la segunda línea */
-    .inventory-section { top: 104px; height: 40px; padding: 3px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
-    body { padding-top: 158px; }
+    /* Ajustar inventario y body */
+    .inventory-section { top: 102px !important; height: 38px; padding: 2px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
+    body { padding-top: 153px; }
     .active-effects { gap: 2px; max-width: 60px; overflow: hidden; }
     .effect-badge { padding: 1px 4px; font-size: 7px; }
     .eff-icon { width: 10px; height: 10px; }
