@@ -66,13 +66,13 @@ if (registroForm) {
 
         // 3. Éxito — avisar que revise su correo
         mostrarMensaje(
-            `¡Registro exitoso, ${nombre}! Te enviamos un correo a <b>${email}</b>.<br>
+            `¡Registro exitoso, ${nombre}! 📧 Te enviamos un correo a <b>${email}</b>.<br>
              Revisa tu bandeja (y spam) para confirmar tu cuenta antes de iniciar sesión.`,
             'success'
         );
         registroForm.reset();
         setTimeout(() => {
-            window.location.href = '../InicioCuenta/inico.html';
+            window.location.href = '/login';
         }, 5000);
     });
 }

@@ -20,6 +20,30 @@
       "dest": "/.well-known/security.txt"
     },
     {
+      "src": "/",
+      "dest": "/PaginaWeb/Bitgameso/src/PaginaMenu/index.html"
+    },
+    {
+      "src": "/juego",
+      "dest": "/PaginaWeb/Bitgameso/src/Game/game.html"
+    },
+    {
+      "src": "/login",
+      "dest": "/PaginaWeb/Bitgameso/src/InicioCuenta/inico.html"
+    },
+    {
+      "src": "/registro",
+      "dest": "/PaginaWeb/Bitgameso/src/CrearCuenta/registro.html"
+    },
+    {
+      "src": "/privacidad",
+      "dest": "/PaginaWeb/Bitgameso/src/PaginaMenu/privacidad.html"
+    },
+    {
+      "src": "/reset-password",
+      "dest": "/PaginaWeb/Bitgameso/src/InicioCuenta/reset-password.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/PaginaWeb/Bitgameso/$1"
     }
