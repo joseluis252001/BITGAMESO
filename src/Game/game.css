@@ -1540,7 +1540,7 @@ body {
 
 /* Movil (max 600px) — mismo layout PC pero comprimido */
 @media (max-width: 600px) {
-    body { padding-top: 160px; }
+    body { padding-top: 180px; }
 
     /* Header: una sola fila compacta */
     .game-header { height: 44px; padding: 0 .6rem; }
@@ -1558,11 +1558,13 @@ body {
     /* Nav: dos filas claras */
     .game-nav {
         top: 44px;
-        height: auto;
+        height: 72px !important;
+        min-height: 72px !important;
         padding: 4px .6rem;
         flex-wrap: wrap;
         gap: 3px;
-        align-items: center;
+        align-items: flex-start;
+        align-content: flex-start;
     }
 
     /* Fila 1: monedas (izquierda) + botones (derecha) */
@@ -1612,7 +1614,7 @@ body {
     .balance-divider { font-size: 9px !important; color: #CBA6F7 !important; }
 
     /* Ajustar inventario */
-    .inventory-section { top: 108px !important; height: 38px; padding: 2px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
+    .inventory-section { top: 120px !important; height: 38px; padding: 2px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
     .active-effects { gap: 2px; max-width: 60px; overflow: hidden; }
     .effect-badge { padding: 1px 4px; font-size: 7px; }
     .eff-icon { width: 10px; height: 10px; }
