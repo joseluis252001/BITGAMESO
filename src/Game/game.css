@@ -1585,14 +1585,34 @@ body {
     /* Dashboard: padding minimo */
     .dashboard-grid { padding: 6px .5rem; gap: 8px; }
 
-    /* Cartera + Mascota: EN FILA igual que PC */
+    /* Cartera + Mascota: EN FILA igual que PC, altura FIJA */
     .bottom-row { grid-template-columns: 2fr 1fr; gap: 8px; }
-    .portfolio-aside, .pet-aside {
-        height: 340px; min-height: 340px; max-height: 340px;
+    .portfolio-aside {
+        height: 360px !important;
+        min-height: 360px !important;
+        max-height: 360px !important;
+        overflow: hidden;
+    }
+    .pet-aside {
+        height: 360px !important;
+        min-height: 360px !important;
+        max-height: 360px !important;
+        overflow: hidden;
+        padding: 8px 5px !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    /* Cartera: 2 columnas (4 en PC no cabe en movil) */
-    .portfolio-list { grid-template-columns: repeat(2, 1fr); gap: 5px; max-height: 240px; }
+    /* Cartera: 2 columnas scroll vertical */
+    .portfolio-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 250px;
+    }
     .portfolio-item { padding: 6px 4px; gap: 2px; border-radius: 10px; }
     .pi-header { padding-bottom: 3px; }
     .pi-header strong { font-size: 10px; }
@@ -1602,19 +1622,43 @@ body {
     .pi-label { font-size: 7px; }
     .pi-profit { font-size: 8px; padding: 2px 3px; }
     .btn-sell { padding: 4px 5px; font-size: 8px; }
-    .portfolio-filter-bar { gap: 3px; flex-wrap: nowrap; overflow-x: auto; }
+    .portfolio-filter-bar { gap: 3px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
     .portfolio-filter-tab { font-size: 7px; padding: 2px 5px; flex-shrink: 0; }
-    .portfolio-summary { font-size: 10px; margin-top: 6px; padding-top: 5px; }
+    .portfolio-summary { font-size: 10px; margin-top: 6px; padding-top: 5px; flex-shrink: 0; }
 
-    /* Mascota: centrada y compacta */
-    .pet-aside { padding: 8px 6px; }
-    #pet-character { width: 70px; height: 70px; background-size: contain; }
-    .heart-icon { width: 16px; height: 16px; }
-    #pet-message { font-size: 8px; line-height: 1.3; }
-    .btn-pet-ability { font-size: 9px; padding: 6px 8px; }
-    .btn-change-pet { font-size: 9px; padding: 6px 8px; }
-    .btn-pet-info-active { font-size: 9px; padding: 5px 8px; }
-    .pet-health-label { font-size: 9px; }
+    /* Mascota: todo proporcional y con scroll si es necesario */
+    #pet-character {
+        width: 70px !important; height: 70px !important;
+        background-size: contain;
+        flex-shrink: 0;
+    }
+    #pet-hearts { gap: 2px !important; flex-shrink: 0; }
+    .heart-icon { width: 15px !important; height: 15px !important; }
+    .pet-health-label { font-size: 8px !important; flex-shrink: 0; }
+    #pet-message {
+        font-size: 7px !important; line-height: 1.3 !important;
+        margin-bottom: 4px !important; text-align: center;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        flex-shrink: 0;
+    }
+    /* Botones mascota: tamaño fijo, sin crecer */
+    .pet-ability-area { width: 100%; flex-shrink: 0; margin-bottom: 3px; }
+    .btn-pet-ability {
+        font-size: 8px !important; padding: 5px 6px !important;
+        line-height: 1.2 !important; width: 100%;
+    }
+    .btn-pet-info-active {
+        font-size: 7px !important; padding: 4px 5px !important;
+        margin-top: 2px !important; width: 100%;
+    }
+    .btn-change-pet {
+        font-size: 8px !important; padding: 5px !important;
+        margin-top: 3px !important; width: 100%;
+        flex-shrink: 0;
+    }
 
     /* Mercado */
     .card h2 { font-size: .9rem; margin-bottom: 8px; }

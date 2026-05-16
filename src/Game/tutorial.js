@@ -369,18 +369,34 @@ const highlightElement = (el, step) => {
 const positionBubble = (rect, dir = 'up') => {
     const bubble = document.getElementById('tutorial-bubble');
     if (!bubble) return;
+    const wW  = window.innerWidth;
+    const wH  = window.innerHeight;
+
+    // Móvil: siempre fijo abajo centrado, el JS no toca nada
+    if (wW <= 600) {
+        bubble.style.cssText = `
+            position: fixed !important;
+            bottom: 12px !important;
+            top: auto !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: calc(100vw - 16px) !important;
+            max-width: 340px !important;
+            max-height: 52vh !important;
+            overflow-y: auto !important;
+            z-index: 9999 !important;
+        `;
+        return;
+    }
+
     const bW  = bubble.offsetWidth  || 360;
     const bH  = bubble.offsetHeight || 220;
-    const wH  = window.innerHeight;
-    const wW  = window.innerWidth;
     const pad = 16;
 
-    // En pantallas pequeñas/tablet: centrar horizontalmente abajo
-    if (wW <= 1024 && wW >= 601) {
-        // Tablet: centrar horizontalmente, posicionar debajo o arriba del elemento
+    // Tablet: centrar horizontalmente
+    if (wW <= 1024) {
         let top, left;
         left = Math.max(pad, (wW - bW) / 2);
-
         if (rect && rect.width) {
             top = rect.bottom + 60;
             if (top + bH > wH - pad) top = rect.top - bH - 60;
@@ -389,16 +405,14 @@ const positionBubble = (rect, dir = 'up') => {
         }
         top  = Math.max(pad, Math.min(top, wH - bH - pad));
         left = Math.max(pad, Math.min(left, wW - bW - pad));
+        bubble.style.cssText = '';
         bubble.style.top       = `${top}px`;
         bubble.style.left      = `${left}px`;
         bubble.style.transform = 'none';
         return;
     }
 
-    // Móvil: fijo abajo (manejado por CSS)
-    if (wW <= 600) return;
-
-    // PC: lógica original
+    // PC: logica original
     let left = rect ? rect.left + rect.width/2 - bW/2 : wW/2 - bW/2;
     let top;
 
@@ -415,6 +429,7 @@ const positionBubble = (rect, dir = 'up') => {
     top  = Math.max(pad, Math.min(top,  wH - bH - pad));
     left = Math.max(pad, Math.min(left, wW - bW - pad));
 
+    bubble.style.cssText = '';
     bubble.style.top       = `${top}px`;
     bubble.style.left      = `${left}px`;
     bubble.style.transform = 'none';
