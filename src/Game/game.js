@@ -327,6 +327,7 @@ const saveGame = () => {
             victoryAchieved:    state.victoryAchieved || false,
             diamondVictoryAchieved: state.diamondVictoryAchieved || false,
             marketSpeedEnabled: state.marketSpeedEnabled !== false,
+            savedAt:            new Date().toISOString(),
         });
         // Guardar local siempre (rápido)
         localStorage.setItem(getSaveKey(), saveData);
