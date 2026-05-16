@@ -1,144 +1,49 @@
-// ============================================================
-//  BITGAMESO — registro.js  (Supabase Auth)
-// ============================================================
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styleRegistro.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <title>Registro - BITGAMESO</title>
+</head>
+<body>
 
-import { supabase } from '../Supabase/supabase-client.js';
+    <header class="login-header">
+        <div class="logo-container-header">
+            <img src="../assets/logo/Coin-128.png" alt="Logo BITGAMESO" class="mini-logo">
+            <h1>BITGAMESO</h1>
+        </div>
+    </header>
 
-// ── Formulario de registro ───────────────────────────────────
-const registroForm = document.getElementById('form-registro');
+    <div id="rain-container"></div>
 
-if (registroForm) {
-    registroForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    <main class="registro-container">
+        <div class="back-container">
+            <a href="../PaginaMenu/menu-index.html" class="btn-back">
+                <img src="../assets/arrows/Arrow-Complete-Left-128.png" alt="Volver" class="arrow-icon">
+                <span>Volver</span>
+            </a>
+        </div>
 
-        const nombre = document.getElementById('nombre').value.trim();
-        const email  = document.getElementById('email').value.trim();
-        const pass1  = document.getElementById('pass1').value;
-        const pass2  = document.getElementById('pass2').value;
+        <h2>Únete a BITGAMESO</h2>
+        <form id="form-registro">
+            <input type="text"     id="nombre" placeholder="Nombre de usuario" required>
+            <input type="email"    id="email"  placeholder="Correo electrónico" required>
+            <input type="password" id="pass1"  placeholder="Contraseña (mín. 6 caracteres)" required>
+            <input type="password" id="pass2"  placeholder="Confirmar contraseña" required>
+            <button type="submit">Registrarme</button>
+        </form>
 
-        // Validaciones básicas
-        if (pass1 !== pass2) {
-            mostrarMensaje('Las contraseñas no coinciden. Verifica e intenta otra vez.', 'error');
-            return;
-        }
-        if (pass1.length < 6) {
-            mostrarMensaje('La contraseña debe tener al menos 6 caracteres.', 'error');
-            return;
-        }
-        if (nombre.length < 3) {
-            mostrarMensaje('El nombre de usuario debe tener al menos 3 caracteres.', 'error');
-            return;
-        }
+        <p style="margin-top: 15px; font-size: 0.8rem;">
+            ¿Ya tienes cuenta? <a href="../InicioCuenta/inico.html" class="link-highlight">Iniciar sesión</a>
+        </p>
+    </main>
 
-        // Deshabilitar botón mientras carga
-        const btn = registroForm.querySelector('button[type="submit"]');
-        btn.disabled    = true;
-        btn.textContent = 'Registrando...';
+    <footer class="footer-login">
+        <p>Esta app es solo para fines educativos</p>
+    </footer>
 
-        // 1. Crear usuario en Supabase Auth
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password: pass1,
-            options: {
-                data: { username: nombre },          // guardado en user_metadata
-                emailRedirectTo: `${location.origin}/login`
-            }
-        });
-
-        btn.disabled    = false;
-        btn.textContent = 'Registrarme';
-
-        if (error) {
-            // Traducir errores comunes
-            const msg = traducirError(error.message);
-            mostrarMensaje(msg, 'error');
-            return;
-        }
-
-        // 2. Guardar username en tabla profiles (para el juego)
-        if (data.user) {
-            await supabase.from('profiles').upsert({
-                id:       data.user.id,
-                username: nombre,
-                email
-            });
-        }
-
-        // 3. Éxito — avisar que revise su correo
-        mostrarMensaje(
-            `¡Registro exitoso, ${nombre}! 📧 Te enviamos un correo a <b>${email}</b>.<br>
-             Revisa tu bandeja (y spam) para confirmar tu cuenta antes de iniciar sesión.`,
-            'success'
-        );
-        registroForm.reset();
-        setTimeout(() => {
-            window.location.href = '/login';
-        }, 5000);
-    });
-}
-
-// ── Mensaje de feedback ──────────────────────────────────────
-function mostrarMensaje(html, tipo) {
-    let box = document.getElementById('msg-registro');
-    if (!box) {
-        box = document.createElement('div');
-        box.id = 'msg-registro';
-        box.style.cssText = `
-            margin: 12px 0 0;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            text-align: left;
-        `;
-        registroForm.after(box);
-    }
-    box.innerHTML = html;
-    box.style.background = tipo === 'error' ? '#ffeaea' : '#eaffea';
-    box.style.border      = tipo === 'error' ? '2px solid #f38ba8' : '2px solid #a8e6cf';
-    box.style.color       = tipo === 'error' ? '#c0392b' : '#27ae60';
-}
-
-// ── Traducción de errores de Supabase ────────────────────────
-function traducirError(msg) {
-    if (msg.includes('already registered') || msg.includes('already been registered'))
-        return 'Este correo ya está registrado. ¿Quieres iniciar sesión?';
-    if (msg.includes('invalid email'))
-        return 'El correo electrónico no es válido.';
-    if (msg.includes('Password should be'))
-        return 'La contraseña debe tener al menos 6 caracteres.';
-    if (msg.includes('rate limit'))
-        return 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
-    return msg;
-}
-
-// ── Lluvia de Monedas Interactivas ───────────────────────────
-const rainContainer = document.getElementById('rain-container');
-const foods = ['Apple-128.png', 'Carrot-128.png', 'Fish-128.png'];
-
-function createCoin() {
-    if (!rainContainer) return;
-    const coin = document.createElement('img');
-    coin.src       = '../assets/coins/Coins-3-128.png';
-    coin.className = 'coin-rain';
-    const side = Math.random() > 0.5 ? 'left' : 'right';
-    coin.style.left = (side === 'left' ? Math.random() * 20 : 80 + Math.random() * 15) + 'vw';
-    coin.style.top  = '-60px';
-    const duration  = 3 + Math.random() * 4;
-    coin.style.animationDuration = duration + 's';
-    coin.addEventListener('mousedown', function () {
-        const rect      = this.getBoundingClientRect();
-        const foodItem  = document.createElement('img');
-        foodItem.src    = `../assets/food/${foods[Math.floor(Math.random() * foods.length)]}`;
-        foodItem.className = 'food-pop';
-        foodItem.style.left = rect.left + 'px';
-        foodItem.style.top  = rect.top  + 'px';
-        document.body.appendChild(foodItem);
-        this.remove();
-        setTimeout(() => { if (foodItem.parentNode) foodItem.remove(); }, 800);
-    });
-    rainContainer.appendChild(coin);
-    setTimeout(() => { if (coin.parentNode) coin.remove(); }, duration * 1000);
-}
-
-setInterval(createCoin, 800);
+    <script type="module" src="registro.js"></script>
+</body>
+</html>
