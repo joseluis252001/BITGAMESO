@@ -1093,10 +1093,14 @@ const renderPortfolio = () => {
                 ${pos.type ? `<span class="pi-type-tag">${pos.type}</span>` : ''}
             </div>
             <div class="pi-prices">
-                <span class="pi-label">Compra:</span>
-                <span>${fmtShort(pos.buyPrice)}</span>
-                <span class="pi-label">Actual:</span>
-                <span>${fmtShort(price)}</span>
+                <div class="pi-row">
+                    <span class="pi-label">Compra:</span>
+                    <span>${fmtShort(pos.buyPrice)}</span>
+                </div>
+                <div class="pi-row">
+                    <span class="pi-label">Actual:</span>
+                    <span>${fmtShort(price)}</span>
+                </div>
             </div>
             <div class="pi-profit ${profit >= 0 ? 'up' : 'down'}">
                 ${profit >= 0 ? '▲' : '▼'} ${fmtShort(Math.abs(profit))} (${Math.abs(pct)}%)
