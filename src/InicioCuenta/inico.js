@@ -84,7 +84,7 @@ if (btnOlvide) {
         btnOlvide.textContent = 'Enviando...';
 
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `https://www.bitgameso.com/PaginaWeb/Bitgameso/src/InicioCuenta/reset-password.html`
+            redirectTo: `https://www.bitgameso.com/reset-password`
         });
 
         btnOlvide.disabled    = false;

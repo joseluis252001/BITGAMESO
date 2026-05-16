@@ -41,7 +41,7 @@ if (registroForm) {
             password: pass1,
             options: {
                 data: { username: nombre },          // guardado en user_metadata
-                emailRedirectTo: `${location.origin}/PaginaWeb/Bitgameso/src/InicioCuenta/inico.html`
+                emailRedirectTo: `${location.origin}/login`
             }
         });
 
