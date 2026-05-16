@@ -72,7 +72,7 @@ if (registroForm) {
         );
         registroForm.reset();
         setTimeout(() => {
-            window.location.href = '/login';
+            window.location.href = '/src/InicioCuenta/inico.html';
         }, 5000);
     });
 }
