@@ -1500,184 +1500,181 @@ body {
 /* ============================================================
    RESPONSIVE — Tablet grande (max 1100px)
    ============================================================ */
+/* ============================================================
+   RESPONSIVE MOVIL — mismo layout que PC, escalado
+   ============================================================ */
+
+/* Tablet grande */
 @media (max-width: 1100px) {
-    .bottom-row { grid-template-columns: 1.5fr 1fr; }
-    .dashboard-grid { padding: 16px 1.2rem 1.2rem; }
+    .bottom-row { grid-template-columns: 1.6fr 1fr; }
     .portfolio-list { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ============================================================
-   RESPONSIVE — Tablet (max 900px)
-   ============================================================ */
+/* Tablet */
 @media (max-width: 900px) {
     body { padding-top: 175px; }
     .game-header { height: 52px; padding: 0 1rem; }
     .mini-logo { width: 28px; height: 28px; }
     .header-left h1 { font-size: 1.1rem; }
-    .btn-header { padding: 5px 10px; font-size: .72rem; gap: 4px; }
+    .btn-header { padding: 5px 10px; font-size: .72rem; }
     .btn-header-icon { width: 13px; height: 13px; }
     .user-avatar-img { width: 32px; height: 32px; }
-    #nombre-usuario { font-size: .8rem; }
     .game-nav { top: 52px; height: 50px; padding: 0 1rem; }
-    .score-container { font-size: .82rem; gap: 5px; }
+    .score-container { font-size: .82rem; }
     .coin-icon { width: 18px; }
-    .nav-actions button { padding: 5px 10px; font-size: .75rem; gap: 4px; }
-    .btn-nav-icon { width: 14px; height: 14px; }
-    .inventory-section { top: 102px; padding: 5px 1rem; height: 45px; }
-    .inv-img { width: 28px; height: 28px; }
-    .inv-qty { font-size: 9px; }
-    #balance-panel { margin-left: 8px; gap: 8px; font-size: 10px; }
-    .balance-value { font-size: 11px; }
-    .balance-label { font-size: 9px; }
+    .nav-actions button { padding: 5px 10px; font-size: .75rem; }
+    .inventory-section { top: 102px; height: 46px; padding: 5px 1rem; }
     .dashboard-grid { padding: 12px 1rem; gap: 12px; }
-    .bottom-row { grid-template-columns: 1fr; gap: 12px; }
-    .portfolio-aside, .pet-aside { height: auto; min-height: unset; max-height: unset; }
-    .portfolio-list { display: grid; grid-template-columns: repeat(2, 1fr); overflow-y: auto; overflow-x: hidden; max-height: 340px; gap: 8px; }
-    .portfolio-item { min-width: unset; max-width: unset; }
+    /* Mantener cartera y mascota en fila */
+    .bottom-row { grid-template-columns: 2fr 1fr; gap: 12px; }
+    .portfolio-aside, .pet-aside { height: 380px; min-height: 380px; max-height: 380px; }
+    .portfolio-list { grid-template-columns: repeat(2, 1fr); }
     .market-header { display: none; }
-    .asset-row { grid-template-columns: 1.4fr 0.9fr 1fr auto; gap: 4px; padding: 10px 8px; }
-    .asset-info  { grid-column: 1 / 3; }
-    .asset-type  { grid-column: 3; text-align: right; font-size: 10px; }
-    .asset-price { grid-column: 1; font-size: 12px; }
-    .asset-change{ grid-column: 2; text-align: right; font-size: 11px; }
-    .market-btns { grid-column: 3 / 5; justify-content: flex-end; gap: 4px; }
-    .market-list { max-height: 420px; }
     .market-filters { gap: 4px; }
     .filter-tab { padding: 3px 9px; font-size: 10px; }
     .modal-box { padding: 20px 16px; }
     .food-shop-grid { grid-template-columns: repeat(3, 1fr); }
-    .info-grid { grid-template-columns: 1fr; }
-    .pet-grid  { grid-template-columns: repeat(3, 1fr); }
+    .pet-grid { grid-template-columns: repeat(3, 1fr); }
+    #balance-panel { gap: 6px; font-size: 10px; }
 }
 
-/* ============================================================
-   RESPONSIVE — Movil (max 600px)
-   Misma disposicion que PC pero escalada al celular
-   ============================================================ */
+/* Movil (max 600px) — mismo layout PC pero comprimido */
 @media (max-width: 600px) {
-    body { padding-top: 148px; }
+    body { padding-top: 142px; }
 
-    /* Header: una linea, todo en fila */
-    .game-header { height: 46px; padding: 0 .6rem; flex-wrap: nowrap; }
-    .header-left { gap: 5px; flex-shrink: 0; }
+    /* Header: una sola fila compacta */
+    .game-header { height: 44px; padding: 0 .6rem; }
     .mini-logo { width: 22px; height: 22px; }
-    .header-left h1 { font-size: .85rem; white-space: nowrap; }
-    .header-center { gap: 3px; }
-    .btn-header { padding: 4px 6px; font-size: 0; gap: 0; }
+    .header-left h1 { font-size: .82rem; }
+    .btn-header { padding: 4px 7px; font-size: 0; gap: 0; }
     .btn-header-icon { width: 15px; height: 15px; margin: 0; }
-    .profile-trigger { padding: 3px 6px 3px 3px; gap: 4px; }
-    #nombre-usuario { font-size: .7rem; max-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .user-avatar-img { width: 28px; height: 28px; }
+    #nombre-usuario { font-size: .68rem; max-width: 55px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .chevron-img { width: 10px; }
+    .profile-trigger { padding: 2px 6px 2px 2px; gap: 4px; }
 
-    /* Nav: una linea */
-    .game-nav { top: 46px; height: 46px; padding: 0 .6rem; flex-wrap: nowrap; justify-content: space-between; }
-    .nav-left { gap: 6px; flex-shrink: 1; min-width: 0; overflow: hidden; }
-    .score-container { font-size: .72rem; gap: 3px; flex-shrink: 1; white-space: nowrap; }
-    .coin-icon { width: 15px; flex-shrink: 0; }
-    #monedas-count { font-size: .72rem; }
+    /* Nav: una sola fila */
+    .game-nav { top: 44px; height: 44px; padding: 0 .6rem; flex-wrap: nowrap; justify-content: space-between; }
+    .nav-left { gap: 5px; flex-shrink: 1; min-width: 0; overflow: hidden; }
+    .score-container { font-size: .7rem; gap: 3px; white-space: nowrap; flex-shrink: 1; }
+    .coin-icon { width: 14px; flex-shrink: 0; }
+    #monedas-count { font-size: .7rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
     #balance-panel { display: none !important; }
-    .active-effects { gap: 2px; }
-    .effect-badge { padding: 2px 5px; font-size: 8px; }
-    .eff-icon { width: 11px; height: 11px; }
-    .eff-timer { font-size: 8px; }
+    .active-effects { gap: 2px; max-width: 80px; overflow: hidden; }
+    .effect-badge { padding: 1px 4px; font-size: 7px; }
+    .eff-icon { width: 10px; height: 10px; }
+    .eff-timer { font-size: 7px; }
     .nav-actions { gap: 3px; flex-shrink: 0; }
-    .nav-actions button { padding: 5px 7px; font-size: .62rem; gap: 2px; border-radius: 9px; white-space: nowrap; }
+    .nav-actions button { padding: 5px 7px; font-size: .6rem; gap: 2px; white-space: nowrap; }
     .btn-nav-icon { width: 12px; height: 12px; }
 
-    /* Inventario */
-    .inventory-section { top: 92px; height: 42px; padding: 3px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; }
+    /* Inventario: banda fina sin tapar contenido */
+    .inventory-section { top: 88px; height: 40px; padding: 3px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
     .inv-title { display: none; }
-    .inv-item { min-width: 36px; }
-    .inv-img { width: 26px; height: 26px; }
+    .inv-item { min-width: 34px; padding: 2px 4px; border-radius: 8px; }
+    .inv-img { width: 24px; height: 24px; }
     .inv-qty { font-size: 7px; }
     .inv-cat-dot { width: 4px; height: 4px; }
-    .inv-selected-label { font-size: 8px; white-space: nowrap; }
+    .inv-selected-label { font-size: 7px; padding: 2px 6px; }
 
-    /* Dashboard */
-    .dashboard-grid { padding: 8px .6rem; gap: 8px; }
-    .bottom-row { grid-template-columns: 1fr; gap: 8px; }
-    .portfolio-aside, .pet-aside { height: auto; min-height: unset; max-height: unset; }
+    /* Dashboard: padding minimo */
+    .dashboard-grid { padding: 6px .5rem; gap: 8px; }
 
-    /* Cartera: 4 columnas igual que PC */
-    .portfolio-list { display: grid; grid-template-columns: repeat(4, 1fr); overflow-y: auto; overflow-x: hidden; max-height: 360px; gap: 5px; }
-    .portfolio-item { min-width: unset; max-width: unset; padding: 6px 4px; gap: 3px; }
-    .pi-header strong { font-size: 9px; }
-    .pi-name { font-size: 6px; }
-    .pi-type-tag { font-size: 6px; padding: 1px 3px; }
-    .pi-prices { font-size: 7px; gap: 1px 2px; }
-    .pi-label { font-size: 6px; }
-    .pi-profit { font-size: 7px; padding: 2px 3px; }
-    .btn-sell { padding: 3px 4px; font-size: 8px; }
-    .portfolio-filter-bar { gap: 3px; }
-    .portfolio-filter-tab { font-size: 7px; padding: 2px 5px; }
+    /* Cartera + Mascota: EN FILA igual que PC */
+    .bottom-row { grid-template-columns: 2fr 1fr; gap: 8px; }
+    .portfolio-aside, .pet-aside {
+        height: 340px; min-height: 340px; max-height: 340px;
+    }
 
-    /* Mascota */
-    .pet-aside { padding: 8px; }
-    #pet-character { width: 75px; height: 75px; background-size: contain; }
-    .heart-icon { width: 18px; height: 18px; }
-    #pet-message { font-size: 9px; }
-    .btn-change-pet { font-size: 10px; padding: 6px; }
-    .btn-pet-ability { font-size: 10px; padding: 7px; }
+    /* Cartera: 2 columnas (4 en PC no cabe en movil) */
+    .portfolio-list { grid-template-columns: repeat(2, 1fr); gap: 5px; max-height: 240px; }
+    .portfolio-item { padding: 6px 4px; gap: 2px; border-radius: 10px; }
+    .pi-header { padding-bottom: 3px; }
+    .pi-header strong { font-size: 10px; }
+    .pi-name { font-size: 7px; }
+    .pi-type-tag { font-size: 7px; padding: 1px 3px; }
+    .pi-prices { font-size: 8px; gap: 1px 2px; }
+    .pi-label { font-size: 7px; }
+    .pi-profit { font-size: 8px; padding: 2px 3px; }
+    .btn-sell { padding: 4px 5px; font-size: 8px; }
+    .portfolio-filter-bar { gap: 3px; flex-wrap: nowrap; overflow-x: auto; }
+    .portfolio-filter-tab { font-size: 7px; padding: 2px 5px; flex-shrink: 0; }
+    .portfolio-summary { font-size: 10px; margin-top: 6px; padding-top: 5px; }
+
+    /* Mascota: centrada y compacta */
+    .pet-aside { padding: 8px 6px; }
+    #pet-character { width: 70px; height: 70px; background-size: contain; }
+    .heart-icon { width: 16px; height: 16px; }
+    #pet-message { font-size: 8px; line-height: 1.3; }
+    .btn-pet-ability { font-size: 9px; padding: 6px 8px; }
+    .btn-change-pet { font-size: 9px; padding: 6px 8px; }
+    .btn-pet-info-active { font-size: 9px; padding: 5px 8px; }
+    .pet-health-label { font-size: 9px; }
 
     /* Mercado */
-    .card h2 { font-size: .95rem; }
+    .card h2 { font-size: .9rem; margin-bottom: 8px; }
     .market-header { display: none; }
     .market-filters { gap: 3px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 3px; }
     .filter-tab { padding: 2px 6px; font-size: 8px; white-space: nowrap; flex-shrink: 0; }
-    .asset-row { grid-template-columns: 1fr auto auto; grid-template-rows: auto auto; gap: 2px 5px; padding: 7px 5px; }
-    .asset-info   { grid-column: 1; grid-row: 1 / 3; }
+    .asset-row { grid-template-columns: 1fr auto auto; grid-template-rows: auto auto; gap: 1px 5px; padding: 7px 6px; }
+    .asset-info { grid-column: 1; grid-row: 1 / 3; display: flex; flex-direction: column; justify-content: center; }
     .asset-symbol { font-size: 11px; }
-    .asset-name   { font-size: 7px; }
-    .asset-type   { display: none; }
-    .asset-price  { grid-column: 2; grid-row: 1; font-size: 10px; font-weight: 700; text-align: right; }
+    .asset-name { font-size: 7px; }
+    .asset-type { display: none; }
+    .asset-price { grid-column: 2; grid-row: 1; font-size: 10px; font-weight: 700; text-align: right; }
     .asset-change { grid-column: 3; grid-row: 1; font-size: 9px; text-align: right; }
-    .market-btns  { grid-column: 2 / 4; grid-row: 2; display: flex; gap: 3px; justify-content: flex-end; }
+    .market-btns { grid-column: 2 / 4; grid-row: 2; display: flex; gap: 3px; justify-content: flex-end; }
     .market-btns .btn-action { font-size: 8px; padding: 3px 6px; }
     .btn-asset-info { font-size: 8px; padding: 3px 5px; }
     .asset-cat-badge { display: none; }
-    .future-tag { font-size: 7px; padding: 1px 3px; }
     .market-list { max-height: 340px; }
 
     /* Modales */
     .modal-box { padding: 12px 10px; border-radius: 14px; max-width: calc(100vw - 14px); width: calc(100vw - 14px); }
     .modal-wide { max-width: calc(100vw - 14px); }
     .modal-box h3 { font-size: 1rem; }
-    .food-shop-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; max-height: 290px; }
-    .food-img { width: 34px; height: 34px; }
+    .food-shop-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; max-height: 280px; }
+    .food-img { width: 32px; height: 32px; }
     .food-name { font-size: 8px; }
-    .food-eff-tag { font-size: 7px; padding: 1px 5px; }
+    .food-eff-tag { font-size: 7px; }
     .food-dur, .food-hp { font-size: 7px; }
     .food-price { font-size: 8px; }
+    .food-shop-grid .btn-action { font-size: 8px; padding: 3px 6px; }
     .pet-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .info-grid { grid-template-columns: 1fr; }
     .deposit-options { grid-template-columns: 1fr 1fr; gap: 6px; }
     .dep-amount { font-size: .82rem; }
     .dep-note { font-size: 8px; }
-    .historial-item { grid-template-columns: 26px 1fr auto; gap: 5px; padding: 6px 7px; }
-    .hi-icon { width: 24px; height: 24px; font-size: .75rem; border-radius: 7px; }
+    .historial-item { grid-template-columns: 24px 1fr auto; gap: 5px; padding: 6px 7px; }
+    .hi-icon { width: 22px; height: 22px; font-size: .72rem; border-radius: 6px; }
     .hi-msg { font-size: 9px; }
     .hi-hora, .hi-monedas { font-size: 7px; }
 
-    /* Tutorial */
-    #tutorial-bubble { width: calc(100vw - 14px); max-width: calc(100vw - 14px); bottom: 8px; top: auto !important; left: 7px !important; transform: none; }
-    #tut-text { font-size: 11px; }
+    /* Tutorial: visible y centrado */
+    #tutorial-bubble {
+        width: calc(100vw - 14px);
+        max-width: 360px;
+        bottom: 12px; top: auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+    #tut-text { font-size: 11px; line-height: 1.5; }
+    .tut-btn-primary { padding: 8px 18px; font-size: 12px; }
 }
 
-/* ============================================================
-   RESPONSIVE — Movil muy pequeno (max 380px)
-   ============================================================ */
+/* Movil muy pequeno (max 380px) */
 @media (max-width: 380px) {
-    body { padding-top: 140px; }
-    .game-header { height: 42px; }
-    .game-nav { top: 42px; height: 42px; }
-    .inventory-section { top: 84px; height: 40px; }
+    body { padding-top: 134px; }
+    .game-header { height: 40px; }
+    .game-nav { top: 40px; height: 40px; }
+    .inventory-section { top: 80px; height: 38px; }
     .header-left h1 { display: none; }
-    .nav-actions button { padding: 4px 5px; font-size: .58rem; }
+    .nav-actions button { padding: 4px 5px; font-size: .56rem; }
+    .bottom-row { grid-template-columns: 2fr 1fr; }
+    .portfolio-aside, .pet-aside { height: 300px; min-height: 300px; max-height: 300px; }
     .portfolio-list { grid-template-columns: repeat(2, 1fr); }
     .food-shop-grid { grid-template-columns: repeat(2, 1fr); }
     .pet-grid { grid-template-columns: repeat(2, 1fr); }
-    .asset-badge, .asset-cat-badge { display: none; }
 }
 
 /* ====   TUTORIAL
