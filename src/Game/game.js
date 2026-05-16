@@ -1221,7 +1221,7 @@ window.handleAvatarChange = (src) => {
 
 window.handleLogout = () => {
     localStorage.removeItem('bitgameso_sesion_activa');
-    window.location.href = '/src/PaginaMenu/index.html';
+    window.location.href = '/src/PaginaMenu/menu-index.html';
 };
 
 document.addEventListener('click', (e) => {
