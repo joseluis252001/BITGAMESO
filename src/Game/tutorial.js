@@ -23,7 +23,7 @@ const TUTORIAL_STEPS = [
     // PASO 0 — Bienvenida
     {
         target:  null,
-        mascot:  'Hola! Soy tu mascota y te voy a ensenar lo basico de BITGAMESO en pocos pasos. Presiona Siguiente para comenzar.',
+        mascot:  'Hola! Soy tu mascota y te voy a enseñar lo básico de BITGAMESO en pocos pasos. Presiona Siguiente para comenzar.',
         waitFor: 'next',
     },
     // PASO 1 — Monedas
@@ -37,21 +37,21 @@ const TUTORIAL_STEPS = [
     {
         target:   '.market-main',
         arrowDir: 'up',
-        mascot:   'Este es el Mercado Global. Los precios cambian solos cada pocos segundos. Tu objetivo: comprar barato y vender cuando el precio suba. La inversion aparece en tu Cartera.',
+        mascot:   'Este es el Mercado Global. Los precios cambian solos cada pocos segundos. Tu objetivo: comprar barato y vender cuando el precio suba. La inversión aparece en tu Cartera.',
         waitFor:  'next',
         scrollTo: true,
     },
-    // PASO 3 — Comprar una accion (resalta botón específico)
+    // PASO 3 — Comprar una acción (resalta botón específico)
     {
         target:   null,   // se asigna dinámicamente en setupBuyTutorial
-        mascot:   'Voy a resaltar una accion. Presiona el botón COMPRAR de esa accion para hacer tu primera inversion.',
+        mascot:   'Voy a resaltar una acción. Presiona el botón COMPRAR de esa acción para hacer tu primera inversión.',
         waitFor:  'buy_tutorial',
         scrollTo: true,
     },
     // PASO 4 — Cartera: vender con ganancia
     {
         target:   '.portfolio-aside',
-        mascot:   'Tu inversion esta en la Cartera. Cuando el numero este en VERDE significa ganancia. Presiona VENDER en tu cartera para cobrar.',
+        mascot:   'Tu inversión está en la Cartera. Cuando el numero este en VERDE significa ganancia. Presiona VENDER en tu cartera para cobrar.',
         waitFor:  'sell_tutorial',
         scrollTo: true,
     },
@@ -80,7 +80,7 @@ const TUTORIAL_STEPS = [
     {
         target:   '.pet-aside',
         arrowDir: 'right',
-        mascot:   'Esta soy yo, tu mascota. Cada mascota tiene habilidades unicas que afectan el mercado. Hay mascotas que aceleran el mercado, duplican ganancias o predicen precios. Usa el botón "Mascotas" para ver todas.',
+        mascot:   'Esta soy yo, tu mascota. Cada mascota tiene habilidades únicas que afectan el mercado. Hay mascotas que aceleran el mercado, duplican ganancias o predicen precios. Usa el botón "Mascotas" para ver todas.',
         waitFor:  'next',
         scrollTo: true,
     },
@@ -559,7 +559,7 @@ const setupBuyTutorial = () => {
         const textEl = document.getElementById('tut-text');
         if (textEl) {
             if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-            typewriterEffect(textEl, 'Presiona COMPRAR en la accion resaltada para hacer tu primera inversion.');
+            typewriterEffect(textEl, 'Presiona COMPRAR en la acción resaltada para hacer tu primera inversión.');
         }
     }, 1000);
 
@@ -622,7 +622,7 @@ const setupSellTutorial = () => {
     const textEl = document.getElementById('tut-text');
     if (textEl) {
         if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-        typewriterEffect(textEl, 'Mira: la inversion esta en ROJO, significa perdida. Espera a que suba...');
+        typewriterEffect(textEl, 'Mira: la inversión está en ROJO, significa pérdida. Espera a que suba...');
     }
 
     // Scroll a la cartera
