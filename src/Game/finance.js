@@ -170,23 +170,41 @@ window.getAssetFicha = (symbol) => {
 window.injectBalancePanel = () => {
  if (document.getElementById('balance-panel')) return; // ya existe
 
+ const isMobile = window.innerWidth <= 600;
+
  const panel = document.createElement('div');
  panel.id = 'balance-panel';
- panel.style.cssText = `
- display: inline-flex;
- gap: 10px;
- align-items: center;
- flex-wrap: wrap;
- padding: 4px 12px;
- background: rgba(255,255,255,0.85);
- border-radius: 12px;
- font-size: 11px;
- font-family: 'Poppins', sans-serif;
- border: 1px solid #e8e8e8;
- box-shadow: 0 2px 8px rgba(0,0,0,0.06);
- margin-left: 12px;
- vertical-align: middle;
- `;
+
+ if (isMobile) {
+     panel.style.cssText = `
+     display: flex;
+     gap: 5px;
+     align-items: center;
+     flex-wrap: nowrap;
+     padding: 2px 4px;
+     font-size: 8px;
+     font-family: 'Poppins', sans-serif;
+     overflow-x: auto;
+     width: 100%;
+     `;
+ } else {
+     panel.style.cssText = `
+     display: inline-flex;
+     gap: 10px;
+     align-items: center;
+     flex-wrap: wrap;
+     padding: 4px 12px;
+     background: rgba(255,255,255,0.85);
+     border-radius: 12px;
+     font-size: 11px;
+     font-family: 'Poppins', sans-serif;
+     border: 1px solid #e8e8e8;
+     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+     margin-left: 12px;
+     vertical-align: middle;
+     `;
+ }
+
  panel.innerHTML = `
  <div class="balance-item">
  <span class="balance-label">Efectivo</span>
@@ -209,16 +227,17 @@ window.injectBalancePanel = () => {
  </div>
  `;
 
- // Insertar dentro del score-container junto a las monedas
- const scoreContainer = document.querySelector('.score-container');
- if (scoreContainer) {
-     scoreContainer.appendChild(panel);
+ // En móvil insertar en el nav directamente (segunda línea)
+ // En PC insertar dentro del score-container
+ if (isMobile) {
+     const nav = document.querySelector('.game-nav');
+     if (nav) nav.appendChild(panel);
  } else {
-     // Fallback: insertar en el nav
-     const nav = document.querySelector('.nav-actions');
-     if (nav) nav.prepend(panel);
+     const scoreContainer = document.querySelector('.score-container');
+     if (scoreContainer) scoreContainer.appendChild(panel);
  }
 };
+
 
 // ============================================================
 // MODAL DE FICHA TÉCNICA
