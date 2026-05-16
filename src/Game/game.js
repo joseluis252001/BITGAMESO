@@ -1210,7 +1210,7 @@ window.handleAvatarChange = (src) => {
 
 window.handleLogout = () => {
     localStorage.removeItem('bitgameso_sesion_activa');
-    window.location.href = '/';
+    window.location.href = '/src/PaginaMenu/index.html';
 };
 
 document.addEventListener('click', (e) => {
@@ -1995,7 +1995,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sesionActiva = localStorage.getItem('bitgameso_sesion_activa');
     if (!sesionActiva) {
         alert('Debes iniciar sesión para jugar.');
-        window.location.href = '/login';
+        window.location.href = '/src/InicioCuenta/inico.html';
         return;
     }
 

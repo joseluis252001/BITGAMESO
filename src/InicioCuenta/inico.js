@@ -58,7 +58,7 @@ if (loginForm) {
         localStorage.setItem('bitgameso_sesion_activa', username);
         localStorage.setItem('bitgameso_user_id', data.user.id);
 
-        window.location.href = '/juego';
+        window.location.href = '/src/Game/game.html';
     });
 }
 
