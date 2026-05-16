@@ -1540,7 +1540,7 @@ body {
 
 /* Movil (max 600px) — mismo layout PC pero comprimido */
 @media (max-width: 600px) {
-    body { padding-top: 142px; }
+    body { padding-top: 160px; }
 
     /* Header: una sola fila compacta */
     .game-header { height: 44px; padding: 0 .6rem; }
@@ -1611,9 +1611,8 @@ body {
     .balance-value { font-size: 8px !important; font-weight: 700; }
     .balance-divider { font-size: 9px !important; color: #CBA6F7 !important; }
 
-    /* Ajustar inventario y body */
+    /* Ajustar inventario */
     .inventory-section { top: 108px !important; height: 38px; padding: 2px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
-    body { padding-top: 160px; }
     .active-effects { gap: 2px; max-width: 60px; overflow: hidden; }
     .effect-badge { padding: 1px 4px; font-size: 7px; }
     .eff-icon { width: 10px; height: 10px; }
