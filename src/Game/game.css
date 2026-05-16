@@ -1548,10 +1548,12 @@ body {
     .header-left h1 { font-size: .82rem; }
     .btn-header { padding: 4px 7px; font-size: 0; gap: 0; }
     .btn-header-icon { width: 15px; height: 15px; margin: 0; }
-    .user-avatar-img { width: 24px !important; height: 24px !important; }
-    #nombre-usuario { font-size: .62rem; max-width: 45px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .chevron-img { width: 8px; }
-    .profile-trigger { padding: 2px 5px 2px 2px; gap: 3px; border-radius: 20px; }
+    .user-avatar-img { width: 20px !important; height: 20px !important; }
+    #nombre-usuario { font-size: .58rem; max-width: 38px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chevron-img { width: 7px; }
+    .profile-trigger { padding: 1px 4px 1px 2px; gap: 2px; border-radius: 16px; }
+    /* Título visible pero compacto */
+    .header-left h1 { display: block !important; font-size: .75rem; }
 
     /* Nav: una sola fila — monedas a la izquierda, botones a la derecha */
     .game-nav { top: 44px; height: 44px; padding: 0 .6rem; flex-wrap: nowrap; justify-content: space-between; }
@@ -1835,7 +1837,7 @@ body {
     .game-header { height: 40px; }
     .game-nav { top: 40px; height: 40px; }
     .inventory-section { top: 80px; height: 38px; }
-    .header-left h1 { display: none; }
+    .header-left h1 { display: block !important; font-size: .68rem; }
     .nav-actions button { padding: 4px 5px; font-size: .56rem; }
     .bottom-row { grid-template-columns: 2fr 1fr; }
     .portfolio-aside, .pet-aside { height: 300px; min-height: 300px; max-height: 300px; }
