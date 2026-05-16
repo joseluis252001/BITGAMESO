@@ -1,13 +1,13 @@
 {
   "name": "BITGAMESO - El Juego",
   "short_name": "BITGAMESO",
-  "start_url": "./PaginaMenu/index.html",
+  "start_url": "/juego",
   "display": "standalone",
   "background_color": "#FFF9E6",
   "theme_color": "#D1B3FF",
   "icons": [
     {
-      "src": "./assets/logo/Coin-128.png",
+      "src": "./src/assets/logo/Coin-128.png",
       "sizes": "128x128",
       "type": "image/png"
     }
