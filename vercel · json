@@ -1,81 +1,49 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "PaginaWeb/Bitgameso/**",
-      "use": "@vercel/static"
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
     },
     {
-      "src": "api/*.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "source": "/.well-known/security.txt",
+      "destination": "/.well-known/security.txt"
     },
     {
-      "src": "/.well-known/security.txt",
-      "dest": "/.well-known/security.txt"
+      "source": "/juego",
+      "destination": "/PaginaWeb/Bitgameso/src/Game/game.html"
     },
     {
-      "src": "/",
-      "dest": "/PaginaWeb/Bitgameso/src/PaginaMenu/index.html"
+      "source": "/login",
+      "destination": "/PaginaWeb/Bitgameso/src/InicioCuenta/inico.html"
     },
     {
-      "src": "/juego",
-      "dest": "/PaginaWeb/Bitgameso/src/Game/game.html"
+      "source": "/registro",
+      "destination": "/PaginaWeb/Bitgameso/src/CrearCuenta/registro.html"
     },
     {
-      "src": "/login",
-      "dest": "/PaginaWeb/Bitgameso/src/InicioCuenta/inico.html"
+      "source": "/privacidad",
+      "destination": "/PaginaWeb/Bitgameso/src/PaginaMenu/privacidad.html"
     },
     {
-      "src": "/registro",
-      "dest": "/PaginaWeb/Bitgameso/src/CrearCuenta/registro.html"
+      "source": "/reset-password",
+      "destination": "/PaginaWeb/Bitgameso/src/InicioCuenta/reset-password.html"
     },
     {
-      "src": "/privacidad",
-      "dest": "/PaginaWeb/Bitgameso/src/PaginaMenu/privacidad.html"
-    },
-    {
-      "src": "/reset-password",
-      "dest": "/PaginaWeb/Bitgameso/src/InicioCuenta/reset-password.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/PaginaWeb/Bitgameso/$1"
+      "source": "/",
+      "destination": "/PaginaWeb/Bitgameso/src/PaginaMenu/index.html"
     }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
-        },
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=31536000; includeSubDomains"
-        }
+        { "key": "X-Content-Type-Options",  "value": "nosniff" },
+        { "key": "X-Frame-Options",          "value": "SAMEORIGIN" },
+        { "key": "X-XSS-Protection",         "value": "1; mode=block" },
+        { "key": "Referrer-Policy",          "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy",       "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "Strict-Transport-Security","value": "max-age=31536000; includeSubDomains" }
       ]
     }
   ]
