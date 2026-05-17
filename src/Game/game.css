@@ -1540,7 +1540,7 @@ body {
 
 /* Movil (max 600px) — mismo layout PC pero comprimido */
 @media (max-width: 600px) {
-    body { padding-top: 168px; }
+    body { padding-top: 174px; }
 
     /* Header: una sola fila compacta */
     .game-header { height: 48px; padding: 0 .8rem; }
@@ -1614,7 +1614,7 @@ body {
     .balance-divider { font-size: 9px !important; color: #CBA6F7 !important; }
 
     /* Ajustar inventario */
-    .inventory-section { top: 128px !important; height: 40px; padding: 3px .8rem; gap: 5px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
+    .inventory-section { top: 128px !important; height: 46px; padding: 4px .8rem; gap: 5px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
     .active-effects { gap: 2px; max-width: 60px; overflow: hidden; }
     .effect-badge { padding: 1px 4px; font-size: 7px; }
     .eff-icon { width: 10px; height: 10px; }
@@ -1629,8 +1629,8 @@ body {
     .btn-nav-icon { display: none; }
     .inv-title { display: flex !important; align-items: center; flex-shrink: 0; }
     .inv-icon-img { width: 26px; height: 26px; }
-    .inv-item { min-width: 40px; padding: 3px 6px; border-radius: 10px; }
-    .inv-img { width: 28px; height: 28px; }
+    .inv-item { min-width: 44px; padding: 3px 6px; border-radius: 10px; overflow: visible; }
+    .inv-img { width: 32px; height: 32px; object-fit: contain; }
     .inv-qty { font-size: 8px; }
     .inv-cat-dot { width: 4px; height: 4px; }
     .inv-selected-label { font-size: 7px; padding: 2px 6px; }
@@ -1812,7 +1812,7 @@ body {
     .asset-price { grid-column: 2; grid-row: 1; font-size: 10px; font-weight: 700; text-align: right; }
     .asset-change { grid-column: 3; grid-row: 1; font-size: 9px; text-align: right; }
     .market-btns { grid-column: 2 / 4; grid-row: 2; display: flex; gap: 3px; justify-content: flex-end; }
-    .market-btns .btn-action { font-size: 8px; padding: 3px 6px; }
+    .market-btns .btn-action { font-size: 11px; padding: 7px 12px; font-weight: 700; }
     .btn-asset-info { font-size: 8px; padding: 3px 5px; }
     .asset-cat-badge { display: none; }
     .market-list { max-height: 340px; }
