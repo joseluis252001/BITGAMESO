@@ -2347,11 +2347,11 @@ const buildChartSelector = (selected) => {
     const symbols = Array.from(state.market.keys()).slice(0, 20); // primeros 20
     el.innerHTML = symbols.map(sym => `
         <button onclick="switchChart('${sym}')" style="
-            padding:3px 10px;border-radius:10px;border:2px solid #CBA6F7;
-            font-size:11px;font-family:'Poppins',sans-serif;cursor:pointer;
+            padding:3px 8px;border-radius:8px;border:2px solid #CBA6F7;
+            font-size:10px;font-family:'Poppins',sans-serif;cursor:pointer;
             background:${sym === selected ? '#CBA6F7' : 'white'};
             color:${sym === selected ? 'white' : '#CBA6F7'};
-            font-weight:600;transition:0.2s;
+            font-weight:600;transition:0.2s;white-space:nowrap;flex-shrink:0;
         ">${sym}</button>
     `).join('');
 };
@@ -2404,21 +2404,22 @@ const updateChartUI = () => {
         const maxP   = Math.max(...arr.map(p => p.price));
         const change = ((last - first) / first) * 100;
         const isUp   = change >= 0;
+        const statStyle = "background:#f9f0ff;border-radius:10px;padding:5px 10px;font-size:10px;font-family:'Poppins',sans-serif;flex-shrink:0;min-width:70px;";
         statsEl.innerHTML = `
-            <div style="background:#f9f0ff;border-radius:10px;padding:6px 12px;font-size:11px;font-family:'Poppins',sans-serif;">
-                <span style="color:#aaa;">Cambio 5min</span><br>
-                <strong style="color:${isUp ? '#52b788' : '#e74c3c'};">${isUp ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%</strong>
+            <div style="${statStyle}">
+                <span style="color:#CBA6F7;opacity:.7;">Cambio 5min</span><br>
+                <strong style="color:${isUp ? '#52b788' : '#FFB6C1'};">${isUp ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%</strong>
             </div>
-            <div style="background:#f9f0ff;border-radius:10px;padding:6px 12px;font-size:11px;font-family:'Poppins',sans-serif;">
-                <span style="color:#aaa;">Mínimo</span><br>
+            <div style="${statStyle}">
+                <span style="color:#CBA6F7;opacity:.7;">Mínimo</span><br>
                 <strong style="color:#CBA6F7;">${fmt(minP)}</strong>
             </div>
-            <div style="background:#f9f0ff;border-radius:10px;padding:6px 12px;font-size:11px;font-family:'Poppins',sans-serif;">
-                <span style="color:#aaa;">Máximo</span><br>
+            <div style="${statStyle}">
+                <span style="color:#CBA6F7;opacity:.7;">Máximo</span><br>
                 <strong style="color:#CBA6F7;">${fmt(maxP)}</strong>
             </div>
-            <div style="background:#f9f0ff;border-radius:10px;padding:6px 12px;font-size:11px;font-family:'Poppins',sans-serif;">
-                <span style="color:#aaa;">Actual</span><br>
+            <div style="${statStyle}">
+                <span style="color:#CBA6F7;opacity:.7;">Actual</span><br>
                 <strong style="color:#CBA6F7;">${fmt(last)}</strong>
             </div>
         `;
@@ -2478,7 +2479,7 @@ const drawChart = () => {
     // Área rellena bajo la línea
     const isUp = prices[prices.length - 1] >= prices[0];
     const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + cH);
-    grad.addColorStop(0, isUp ? 'rgba(82,183,136,0.35)' : 'rgba(231,76,60,0.35)');
+    grad.addColorStop(0, isUp ? 'rgba(178,242,187,0.5)' : 'rgba(255,182,193,0.5)');
     grad.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.beginPath();
     ctx.moveTo(toX(0), toY(prices[0]));
@@ -2491,7 +2492,7 @@ const drawChart = () => {
 
     // Línea principal
     ctx.beginPath();
-    ctx.strokeStyle = isUp ? '#52b788' : '#e74c3c';
+    ctx.strokeStyle = isUp ? '#52b788' : '#FFB6C1';
     ctx.lineWidth   = 2;
     ctx.lineJoin    = 'round';
     prices.forEach((p, i) => {
@@ -2504,7 +2505,7 @@ const drawChart = () => {
     const lastY = toY(prices[prices.length - 1]);
     ctx.beginPath();
     ctx.arc(lastX, lastY, 5, 0, Math.PI * 2);
-    ctx.fillStyle   = isUp ? '#52b788' : '#e74c3c';
+    ctx.fillStyle   = isUp ? '#B2F2BB' : '#FFB6C1';
     ctx.fill();
     ctx.strokeStyle = 'white';
     ctx.lineWidth   = 2;
@@ -2514,7 +2515,7 @@ const drawChart = () => {
     if (arr.length >= 2) {
         const startTime = new Date(arr[0].time).toLocaleTimeString();
         const endTime   = new Date(arr[arr.length-1].time).toLocaleTimeString();
-        ctx.fillStyle  = '#aaa';
+        ctx.fillStyle  = '#CBA6F7';
         ctx.font       = '9px Poppins, sans-serif';
         ctx.textAlign  = 'left';
         ctx.fillText(startTime, pad.left, H - 6);
