@@ -143,3 +143,45 @@ button:hover {
 .link-highlight:hover {
     text-decoration: underline;
 }
+
+/* Campo de contraseña con ojo */
+.pass-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pass-field input {
+    flex: 1;
+    margin: 12px 0;
+    padding-right: 44px;
+}
+
+.btn-toggle-pass {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    margin: 0;
+    font-size: 1rem;
+    background: transparent;
+    color: #CBA6F7;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    line-height: 1;
+    transition: opacity 0.2s, background 0.2s;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-toggle-pass:hover {
+    opacity: 1;
+    background: #f0e7ff;
+    transform: translateY(-50%);
+}
