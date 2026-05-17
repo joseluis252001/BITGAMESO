@@ -30,8 +30,18 @@
         <form id="form-registro">
             <input type="text"     id="nombre" placeholder="Nombre de usuario" required>
             <input type="email"    id="email"  placeholder="Correo electrónico" required>
-            <input type="password" id="pass1"  placeholder="Contraseña (mín. 6 caracteres)" required>
-            <input type="password" id="pass2"  placeholder="Confirmar contraseña" required>
+            <div class="pass-field">
+                <input type="password" id="pass1" placeholder="Contraseña (mín. 6 caracteres)" required>
+                <button type="button" class="btn-toggle-pass" onclick="togglePass('pass1', this)" tabindex="-1">
+                    <span class="eye-icon">&#128065;</span>
+                </button>
+            </div>
+            <div class="pass-field">
+                <input type="password" id="pass2" placeholder="Confirmar contraseña" required>
+                <button type="button" class="btn-toggle-pass" onclick="togglePass('pass2', this)" tabindex="-1">
+                    <span class="eye-icon">&#128065;</span>
+                </button>
+            </div>
             <button type="submit">Registrarme</button>
         </form>
 
@@ -44,6 +54,14 @@
         <p>Esta app es solo para fines educativos</p>
     </footer>
 
+    <script>
+    function togglePass(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const isPass = input.type === 'password';
+        input.type = isPass ? 'text' : 'password';
+        btn.querySelector('.eye-icon').textContent = isPass ? '&#128065;&#65039;&#8205;&#128488;&#65039;' : '&#128065;';
+    }
+    </script>
     <script type="module" src="registro.js"></script>
 </body>
 </html>

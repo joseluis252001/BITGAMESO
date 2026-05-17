@@ -34,7 +34,12 @@
         <h2>Iniciar Sesión</h2>
         <form id="form-login">
             <input type="text" id="login-usuario" placeholder="Usuario o correo electrónico" required>
-            <input type="password" id="login-pass" placeholder="Contraseña" required>
+            <div class="pass-field">
+                <input type="password" id="login-pass" placeholder="Contraseña" required>
+                <button type="button" class="btn-toggle-pass" onclick="togglePass('login-pass', this)" tabindex="-1">
+                    <span class="eye-icon">&#128065;</span>
+                </button>
+            </div>
             <button type="submit">Entrar</button>
         </form>
 
@@ -64,6 +69,14 @@
     </footer>
 
     <!-- Supabase como módulo ES -->
+    <script>
+    function togglePass(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const isPass = input.type === 'password';
+        input.type = isPass ? 'text' : 'password';
+        btn.querySelector('.eye-icon').textContent = isPass ? '\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8\uFE0F' : '\uD83D\uDC41';
+    }
+    </script>
     <script type="module" src="inico.js"></script>
 </body>
 </html>
