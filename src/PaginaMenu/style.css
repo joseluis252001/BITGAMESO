@@ -224,3 +224,116 @@ footer a img:hover {
         width: 100px; /* Aún más pequeño en móviles */
     }
 }
+
+/* =========================================
+   SECCIÓN DE SEGURIDAD
+   ========================================= */
+.security-section {
+    padding: 4rem 10%;
+    background: white;
+    text-align: center;
+    border-top: 4px solid var(--azul-cielo);
+}
+
+.security-title {
+    font-family: var(--fuente-titulos);
+    color: var(--morado-suave);
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.security-subtitle {
+    color: var(--morado-suave);
+    font-size: 0.95rem;
+    opacity: 0.7;
+    margin-bottom: 2.5rem;
+}
+
+.security-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.security-card {
+    background: var(--amarillo-suave);
+    border-radius: 20px;
+    padding: 1.5rem 1rem;
+    border: 2px solid #f0e7ff;
+    transition: transform 0.3s ease;
+}
+
+.security-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--morado-suave);
+}
+
+.security-icon-wrap {
+    width: 56px;
+    height: 56px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    border: 2px solid #f0e7ff;
+}
+
+.security-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: drop-shadow(2px 2px 4px rgba(203,166,247,0.3));
+}
+
+.security-card h3 {
+    font-family: var(--fuente-titulos);
+    color: var(--morado-suave);
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.security-card p {
+    font-size: 0.82rem;
+    color: var(--morado-suave);
+    opacity: 0.8;
+    line-height: 1.5;
+}
+
+.security-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.security-badge {
+    background: var(--amarillo-suave);
+    border: 2px solid var(--morado-suave);
+    color: var(--morado-suave);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-family: var(--fuente-cuerpo);
+}
+
+@media (max-width: 850px) {
+    .security-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .security-section {
+        padding: 3rem 5%;
+    }
+    .security-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 500px) {
+    .security-grid {
+        grid-template-columns: 1fr;
+    }
+}
