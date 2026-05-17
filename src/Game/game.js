@@ -580,7 +580,15 @@ const renderMarket = () => {
                 ${catBadge}
             </div>
             <div class="asset-type">${a.type}</div>
-            <div class="asset-price">${fmt(a.price)} ${futureTag}</div>
+            <div class="asset-price">
+                ${(() => {
+                    const discPrice = typeof window.applyPetBuyModifiers === 'function' ? window.applyPetBuyModifiers(a.price) : a.price;
+                    const hasDisc = discPrice < a.price;
+                    return hasDisc
+                        ? `<span style="text-decoration:line-through;opacity:.5;font-size:.8em;">${fmt(a.price)}</span> <span style="color:#52b788;font-weight:700;">${fmt(discPrice)}</span>`
+                        : fmt(a.price);
+                })()} ${futureTag}
+            </div>
             <div class="asset-change ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${Math.abs(a.changePercent).toFixed(2)}%</div>
             <div class="market-btns">
                 <button class="btn-asset-info" onclick="showAssetFicha('${a.symbol}')" title="Ver ficha técnica">Info</button>
@@ -758,8 +766,25 @@ window.buyFood = (foodId, price) => {
     const food = foodDatabase.find(f=>f.id===foodId);
     if (!food) return;
 
-    if (state.monedas < price) { showToast('Monedas insuficientes'); return; }
-    state.monedas -= price;
+    // Si el precio es 0 (pingüino con pescados gratis disponibles), procesar como gratis
+    if (price === 0 && foodId === 'Fish-128' && typeof tryPenguinFreeFish === 'function') {
+        const wasFree = tryPenguinFreeFish(foodId);
+        if (wasFree) {
+            logEvent('comida', 'Pescado gratis del Pingüino', 'Sin costo ni inflación');
+            updateUI();
+            openFoodShop();
+            return;
+        }
+        // Si ya no quedan gratis, cobrar precio real
+        const realPrice = Math.round(typeof getPetFoodPrice === 'function'
+            ? getPetFoodPrice(food, Math.round(typeof foodPrice === 'function' ? foodPrice(food) : food.basePrice))
+            : food.basePrice);
+        if (state.monedas < realPrice) { showToast('Monedas insuficientes'); return; }
+        state.monedas -= realPrice;
+    } else {
+        if (state.monedas < price) { showToast('Monedas insuficientes'); return; }
+        state.monedas -= price;
+    }
     const existing = state.inventory.get(foodId);
     state.inventory.set(foodId, { ...food, price, qty:(existing?.qty||0)+1 });
 

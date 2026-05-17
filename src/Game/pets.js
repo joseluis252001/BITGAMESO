@@ -770,7 +770,12 @@ const isFoodInflationFree = (foodId) => {
 // ¿El pescado es gratis?
 const isFishFree = () => {
     const p = PET_DEFS[state.currentPet]?.passive;
-    return p === 'penguin' || p === 'penguin_pink';
+    if (p !== 'penguin' && p !== 'penguin_pink') return false;
+    // Solo gratis si quedan pescados disponibles en el contador
+    const data = getPenguinFishData();
+    const now  = Date.now();
+    if (now >= data.resetAt) return true; // Se reseteó, hay gratis disponibles
+    return data.count < getPenguinMaxFreeFish();
 };
 
 // ¿La oveja hace la tienda gratis (sin inflación)?
