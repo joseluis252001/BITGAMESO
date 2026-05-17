@@ -37,7 +37,7 @@
             <div class="pass-field">
                 <input type="password" id="login-pass" placeholder="Contraseña" required>
                 <button type="button" class="btn-toggle-pass" onclick="togglePass('login-pass', this)" tabindex="-1">
-                    <span class="eye-icon">&#128065;</span>
+                    <span class="eye-icon">Ver</span>
                 </button>
             </div>
             <button type="submit">Entrar</button>
@@ -74,7 +74,7 @@
         const input = document.getElementById(inputId);
         const isPass = input.type === 'password';
         input.type = isPass ? 'text' : 'password';
-        btn.querySelector('.eye-icon').textContent = isPass ? '\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8\uFE0F' : '\uD83D\uDC41';
+        btn.querySelector('.eye-icon').textContent = isPass ? 'Ocultar' : 'Ver';
     }
     </script>
     <script type="module" src="inico.js"></script>
