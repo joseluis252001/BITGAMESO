@@ -1540,29 +1540,29 @@ body {
 
 /* Movil (max 600px) — mismo layout PC pero comprimido */
 @media (max-width: 600px) {
-    body { padding-top: 154px; }
+    body { padding-top: 168px; }
 
     /* Header: una sola fila compacta */
-    .game-header { height: 44px; padding: 0 .6rem; }
-    .mini-logo { width: 22px; height: 22px; }
-    .header-left h1 { font-size: .82rem; }
-    .btn-header { padding: 4px 7px; font-size: 0; gap: 0; }
-    .btn-header-icon { width: 15px; height: 15px; margin: 0; }
-    .user-avatar-img { width: 20px !important; height: 20px !important; }
-    #nombre-usuario { font-size: .58rem; max-width: 38px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .chevron-img { width: 7px; }
-    .profile-trigger { padding: 1px 4px 1px 2px; gap: 2px; border-radius: 16px; }
+    .game-header { height: 48px; padding: 0 .8rem; }
+    .mini-logo { width: 26px; height: 26px; }
+    .header-left h1 { font-size: .9rem; }
+    .btn-header { padding: 5px 9px; font-size: 0; gap: 0; }
+    .btn-header-icon { width: 18px; height: 18px; margin: 0; }
+    .user-avatar-img { width: 26px !important; height: 26px !important; }
+    #nombre-usuario { font-size: .65rem; max-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chevron-img { width: 8px; }
+    .profile-trigger { padding: 2px 6px 2px 3px; gap: 3px; border-radius: 18px; }
     /* Título visible pero compacto */
-    .header-left h1 { display: block !important; font-size: .75rem; }
+    .header-left h1 { display: block !important; font-size: .88rem; }
 
     /* Nav: dos filas claras */
     .game-nav {
-        top: 44px;
-        height: 72px !important;
-        min-height: 72px !important;
-        padding: 4px .6rem;
+        top: 48px;
+        height: 80px !important;
+        min-height: 80px !important;
+        padding: 5px .8rem;
         flex-wrap: wrap;
-        gap: 3px;
+        gap: 4px;
         align-items: flex-start;
         align-content: flex-start;
     }
@@ -1572,24 +1572,24 @@ body {
         display: flex;
         flex-direction: row;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         flex: 1;
         min-width: 0;
     }
     .score-container {
-        font-size: .72rem; gap: 3px;
+        font-size: .82rem; gap: 4px;
         white-space: nowrap; flex-shrink: 1;
     }
-    .coin-icon { width: 15px; flex-shrink: 0; }
+    .coin-icon { width: 18px; flex-shrink: 0; }
     #monedas-count {
-        font-size: .72rem;
-        max-width: 130px;
+        font-size: .82rem;
+        max-width: 140px;
         overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .nav-actions { gap: 3px; flex-shrink: 0; }
+    .nav-actions { gap: 4px; flex-shrink: 0; }
     .nav-actions button {
-        padding: 4px 7px; font-size: .58rem;
-        gap: 0; border-radius: 8px; white-space: nowrap;
+        padding: 6px 10px; font-size: .65rem;
+        gap: 0; border-radius: 10px; white-space: nowrap;
     }
     .btn-nav-icon { display: none; }
 
@@ -1614,24 +1614,24 @@ body {
     .balance-divider { font-size: 9px !important; color: #CBA6F7 !important; }
 
     /* Ajustar inventario */
-    .inventory-section { top: 112px !important; height: 38px; padding: 2px .6rem; gap: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
+    .inventory-section { top: 128px !important; height: 40px; padding: 3px .8rem; gap: 5px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
     .active-effects { gap: 2px; max-width: 60px; overflow: hidden; }
     .effect-badge { padding: 1px 4px; font-size: 7px; }
     .eff-icon { width: 10px; height: 10px; }
     .eff-timer { font-size: 7px; }
     /* Botones nav: compactos, sin border-radius exagerado, sin iconos */
-    .nav-actions { gap: 3px; flex-shrink: 0; }
+    .nav-actions { gap: 4px; flex-shrink: 0; }
     .nav-actions button {
-        padding: 4px 7px; font-size: .58rem; gap: 0;
-        border-radius: 8px; white-space: nowrap;
+        padding: 6px 10px; font-size: .65rem; gap: 0;
+        border-radius: 10px; white-space: nowrap;
         min-width: 0;
     }
     .btn-nav-icon { display: none; }
     .inv-title { display: flex !important; align-items: center; flex-shrink: 0; }
-    .inv-icon-img { width: 22px; height: 22px; }
-    .inv-item { min-width: 34px; padding: 2px 4px; border-radius: 8px; }
-    .inv-img { width: 24px; height: 24px; }
-    .inv-qty { font-size: 7px; }
+    .inv-icon-img { width: 26px; height: 26px; }
+    .inv-item { min-width: 40px; padding: 3px 6px; border-radius: 10px; }
+    .inv-img { width: 28px; height: 28px; }
+    .inv-qty { font-size: 8px; }
     .inv-cat-dot { width: 4px; height: 4px; }
     .inv-selected-label { font-size: 7px; padding: 2px 6px; }
 
@@ -2008,11 +2008,11 @@ body {
     }
     .portfolio-list { grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .portfolio-item { padding: 6px 8px; }
-    .pi-header strong { font-size: 11px; }
-    .pi-name { font-size: 8px; }
-    .pi-prices { font-size: 9px; }
-    .pi-profit { font-size: 9px; padding: 3px 5px; }
-    .portfolio-summary { font-size: 10px; margin-top: 4px; }
+    .pi-header strong { font-size: 13px; }
+    .pi-name { font-size: 10px; }
+    .pi-prices { font-size: 11px; }
+    .pi-profit { font-size: 10px; padding: 4px 7px; }
+    .portfolio-summary { font-size: 11px; margin-top: 5px; }
 
     /* Mascota compacta */
     .pet-container { width: 60px; height: 60px; margin: 0 auto 6px; }
