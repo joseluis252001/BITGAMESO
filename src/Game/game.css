@@ -1903,6 +1903,113 @@ body {
     .pet-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ====   LANDSCAPE — Celular horizontal (orientation: landscape + max-height: 500px)
+   ==== */
+@media (orientation: landscape) and (max-height: 500px) {
+    body { padding-top: 110px; }
+
+    /* Header super compacto */
+    .game-header { height: 36px; padding: 0 .6rem; }
+    .mini-logo { width: 20px; height: 20px; }
+    .header-left h1 { font-size: .72rem; }
+    .btn-header { padding: 3px 6px; font-size: 0; gap: 0; }
+    .btn-header-icon { width: 13px; height: 13px; margin: 0; }
+    .user-avatar-img { width: 20px !important; height: 20px !important; }
+    #nombre-usuario { font-size: .55rem; max-width: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chevron-img { width: 7px; }
+    .profile-trigger { padding: 1px 4px 1px 2px; gap: 2px; border-radius: 14px; }
+
+    /* Nav compacto */
+    .game-nav { top: 36px; height: 38px !important; min-height: 38px !important; padding: 2px .6rem; flex-wrap: nowrap; gap: 4px; }
+    .nav-left { flex-direction: row; align-items: center; gap: 5px; flex: 1; min-width: 0; }
+    .score-container { font-size: .68rem; gap: 3px; white-space: nowrap; }
+    .coin-icon { width: 14px; }
+    #monedas-count { font-size: .68rem; }
+    .nav-actions { gap: 3px; flex-shrink: 0; }
+    .nav-actions button { padding: 3px 6px; font-size: .55rem; border-radius: 8px; white-space: nowrap; }
+    .btn-nav-icon { display: none; }
+
+    /* Balance panel oculto en landscape para ahorrar espacio */
+    #balance-panel { display: none !important; }
+
+    /* Inventario compacto */
+    .inventory-section { top: 74px !important; height: 36px; padding: 2px .6rem; gap: 4px; }
+    .inv-icon-img { width: 16px; height: 16px; }
+    .inv-item { min-width: 42px; padding: 2px 4px; }
+    .inv-img { width: 22px; height: 22px; }
+
+    /* Dashboard: todo en una fila horizontal */
+    .dashboard-grid { padding: 10px .8rem; gap: 10px; }
+    .bottom-row {
+        grid-template-columns: 1.5fr 0.8fr;
+        gap: 10px;
+        height: auto;
+    }
+
+    /* Cartera y mascota mas bajas */
+    .portfolio-aside, .pet-aside {
+        height: 200px !important;
+        min-height: 200px !important;
+        max-height: 200px !important;
+        padding: 8px !important;
+    }
+    .portfolio-list { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .portfolio-item { padding: 6px 8px; }
+    .pi-header strong { font-size: 11px; }
+    .pi-name { font-size: 8px; }
+    .pi-prices { font-size: 9px; }
+    .pi-profit { font-size: 9px; padding: 3px 5px; }
+    .portfolio-summary { font-size: 10px; margin-top: 4px; }
+
+    /* Mascota compacta */
+    .pet-container { width: 60px; height: 60px; margin: 0 auto 6px; }
+    #pet-character { width: 55px !important; height: 55px !important; }
+    .pet-hearts { gap: 2px !important; }
+    .heart-icon { width: 12px !important; height: 12px !important; }
+    .pet-health-label { font-size: 7px !important; }
+    #pet-message { font-size: 7px !important; margin-bottom: 3px !important; }
+    .btn-change-pet { font-size: 7px !important; padding: 4px !important; margin-top: 2px !important; }
+    .btn-pet-ability { font-size: 7px !important; padding: 3px 4px !important; }
+    .btn-pet-info-active { font-size: 7px !important; padding: 3px 4px !important; }
+
+    /* Mercado */
+    .market-main { grid-column: 1 / -1; }
+    .market-list { max-height: 160px; }
+    .asset-row { padding: 6px 6px; }
+    .asset-symbol { font-size: 10px; }
+    .asset-name { font-size: 7px; }
+    .asset-price { font-size: 10px; }
+    .asset-change { font-size: 8px; }
+    .market-btns .btn-action { font-size: 7px; padding: 2px 5px; }
+    .btn-asset-info { font-size: 7px; padding: 2px 4px; }
+    .market-filters { gap: 3px; flex-wrap: nowrap; overflow-x: auto; }
+    .filter-tab { padding: 2px 6px; font-size: 7px; white-space: nowrap; flex-shrink: 0; }
+    .card h2 { font-size: .85rem; margin-bottom: 6px; }
+
+    /* Tutorial en landscape: lado derecho */
+    #tutorial-bubble {
+        width: 280px !important;
+        max-width: 40vw !important;
+        right: 12px !important;
+        left: auto !important;
+        top: 50% !important;
+        bottom: auto !important;
+        transform: translateY(-50%) !important;
+        max-height: 90vh !important;
+    }
+    .tut-mascot-wrap img { width: 32px; height: 32px; }
+    #tut-text { font-size: 11px; line-height: 1.4; }
+    .tut-btn-primary { padding: 6px 12px; font-size: 10px; }
+    .tut-btn-finish { padding: 6px 12px; font-size: 10px; }
+
+    /* Modales en landscape */
+    .modal-box { max-height: 85vh; overflow-y: auto; padding: 14px 12px; }
+    .food-shop-grid { grid-template-columns: repeat(4, 1fr); max-height: 200px; }
+    .deposit-options { grid-template-columns: repeat(4, 1fr); }
+    .pet-grid { grid-template-columns: repeat(4, 1fr); }
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* ====   TUTORIAL
    ==== */
 #tutorial-overlay {
