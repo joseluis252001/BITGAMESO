@@ -23,7 +23,7 @@ const TUTORIAL_STEPS = [
     // PASO 0 — Bienvenida
     {
         target:  null,
-        mascot:  'Hola! Soy tu mascota y te voy a enseñar lo básico de BITGAMESO en pocos pasos. Presiona Siguiente para comenzar.',
+        mascot:  '¡Hola! Soy tu mascota y te voy a enseñar lo básico de BITGAMESO en pocos pasos. Presiona Siguiente para comenzar.',
         waitFor: 'next',
     },
     // PASO 1 — Monedas
@@ -51,7 +51,7 @@ const TUTORIAL_STEPS = [
     // PASO 4 — Cartera: vender con ganancia
     {
         target:   '.portfolio-aside',
-        mascot:   'Tu inversión está en la Cartera. Cuando el numero este en VERDE significa ganancia. Presiona VENDER en tu cartera para cobrar.',
+        mascot:   'Tu inversión está en la Cartera. Cuando el número esté en VERDE significa ganancia. Presiona VENDER en tu cartera para cobrar.',
         waitFor:  'sell_tutorial',
         scrollTo: true,
     },
@@ -65,14 +65,14 @@ const TUTORIAL_STEPS = [
     // PASO 7 — Seleccionar item del inventario
     {
         target:   '.inventory-section',
-        mascot:   'La manzana esta en tu inventario (barra superior). Haz click en ella para seleccionarla.',
+        mascot:   'La manzana está en tu inventario (barra superior). Haz click en ella para seleccionarla.',
         waitFor:  'select_food_tutorial',
         scrollTo: true,
     },
     // PASO 8 — Enviar comida
     {
         target:   '#btn-enviar',
-        mascot:   'Ahora presiona "Enviar" para darme la comida. Recuerda: "Vender" te da monedas, "Enviar" me alimenta a mi.',
+        mascot:   'Ahora presiona "Enviar" para darme la comida. Recuerda: "Vender" te da monedas, "Enviar" me alimenta a mí.',
         waitFor:  'use_food_tutorial',
         scrollTo: true,
     },
@@ -88,7 +88,7 @@ const TUTORIAL_STEPS = [
     {
         target:   '.pet-aside',
         arrowDir: 'right',
-        mascot:   'Tutorial completado! Como recompensa te doy 1000 monedas extra. El objetivo final es tener todas las mascotas con 100 de salud. Buena suerte!',
+        mascot:   '¡Tutorial completado! Como recompensa te doy 1000 monedas extra. El objetivo final es tener todas las mascotas con 100 de salud. ¡Buena suerte!',
         waitFor: 'finish',
     },
 ];
@@ -121,7 +121,7 @@ const finishTutorial = () => {
     }
     closeTutorial();
     if (typeof showToast === 'function')
-        showToast(tutorialFirstRun ? '¡Tutorial completado! +1000 de regalo' : '¡Repasaste el tutorial!');
+        showToast(tutorialFirstRun ? '¡¡Tutorial completado! +1000 de regalo' : '¡Repasaste el tutorial!');
 };
 
 // ============================================================
@@ -643,7 +643,7 @@ const setupSellTutorial = () => {
         const textEl2 = document.getElementById('tut-text');
         if (textEl2) {
             if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-            typewriterEffect(textEl2, '¡Ahora esta en VERDE! Es ganancia. Presiona el botón VENDER en tu cartera.');
+            typewriterEffect(textEl2, '¡Ahora está en VERDE! Es ganancia. Presiona el botón VENDER en tu cartera.');
         }
 
         // Resaltar y habilitar el botón VENDER
@@ -765,7 +765,7 @@ const setupBuyFoodTutorial = () => {
             const textEl = document.getElementById('tut-text');
             if (textEl) {
                 if (_typewriterTimer) { clearInterval(_typewriterTimer); _typewriterTimer = null; }
-                typewriterEffect(textEl, 'Compra la MANZANA resaltada. Las frutas activan el mercado rapido por un tiempo.');
+                typewriterEffect(textEl, 'Compra la MANZANA resaltada. Las frutas activan el mercado rápido por un tiempo.');
             }
         }
     };
@@ -918,7 +918,7 @@ const setupUseFoodTutorial = () => {
             } else {
                 // Vendió la comida — pedir que compre otra
                 const textEl = document.getElementById('tut-text');
-                if (textEl) textEl.textContent = '¡Ups! Vendiste la manzana en vez de enviarla. Compra otra Manzana y usa el botón "Enviar". ¡Intentalo de nuevo!';
+                if (textEl) textEl.textContent = '¡Ups! Vendiste la manzana en vez de enviarla. Compra otra Manzana y usa el botón "Enviar". ¡Inténtalo de nuevo!';
                 setTimeout(() => {
                     // Volver al paso de abrir la tienda
                     const stepIdx = TUTORIAL_STEPS.findIndex(s => s.waitFor === 'buy_food_tutorial');
