@@ -161,6 +161,55 @@
 
     </main>
 
+    <!-- ====== MODAL: GRÁFICA EN TIEMPO REAL ====== -->
+    <div id="modal-chart" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-wide" style="
+            max-width:720px;
+            padding:14px 16px;
+            border:3px solid #FFF5BA;
+            box-shadow:5px 5px 0px #FFF5BA;
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            max-height:92vh;
+            overflow:hidden;
+        ">
+            <!-- Header -->
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <h3 id="chart-title" style="margin:0;color:#CBA6F7;font-family:'Fredoka',sans-serif;font-size:1.2rem;">Gráfica</h3>
+                    <p id="chart-subtitle" style="margin:0;font-size:10px;color:#CBA6F7;opacity:.7;">Últimos 5 minutos</p>
+                </div>
+                <button onclick="closeChart()" style="background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0;">
+                    <img src="../assets/arrows/X-Error-128.png" style="width:26px;height:26px;" alt="Cerrar">
+                </button>
+            </div>
+            <!-- Selector de activo -->
+            <div id="chart-selector" class="chart-selector-wrap"></div>
+            <!-- Canvas de la gráfica -->
+            <div style="position:relative;width:100%;height:160px;background:#fdf6ff;border-radius:12px;border:2px solid #f0e7ff;overflow:hidden;padding:6px;flex-shrink:0;">
+                <canvas id="chart-canvas" style="width:100%;height:100%;display:block;"></canvas>
+                <div id="chart-tooltip" style="
+                    position:absolute;display:none;
+                    background:white;border:2px solid #CBA6F7;
+                    border-radius:10px;padding:5px 8px;
+                    font-size:10px;font-family:'Poppins',sans-serif;
+                    color:#CBA6F7;pointer-events:none;z-index:10;
+                    box-shadow:0 4px 12px rgba(203,166,247,0.3);
+                "></div>
+            </div>
+            <!-- Stats rápidos -->
+            <div id="chart-stats" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <!-- Precio + Botón comprar -->
+            <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:2px;">
+                <span id="chart-price-display" style="font-size:1rem;font-weight:700;color:#CBA6F7;font-family:'Fredoka',sans-serif;"></span>
+                <button id="chart-buy-btn" onclick="chartBuySelected()" class="btn-action btn-buy" style="padding:6px 16px;font-size:0.85rem;">
+                    Comprar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ====== MODAL: DEPOSITAR ====== -->
     <div id="modal-depositar" class="modal-overlay" style="display:none;">
         <div class="modal-box" style="border-color:#CBA6F7; box-shadow:5px 5px 0px #CBA6F7;">
@@ -234,13 +283,34 @@
         </div>
     </div>
 
+    <!-- ====== MODAL: VICTORIA DIAMANTE ====== -->
+    <div id="modal-diamond-victory" class="modal-overlay" style="display:none;">
+        <div class="modal-box victory-box" style="border-color:#a8d8ff;box-shadow:5px 5px 0px #a8d8ff;max-width:420px;">
+            <div class="victory-stars" style="color:#a8d8ff;font-size:2rem;letter-spacing:8px;">* * *</div>
+            <h2 class="victory-title" style="color:#6ec6ff;font-size:2rem;">FELICIDADES</h2>
+            <p style="color:#CBA6F7;font-size:1rem;font-weight:700;margin:8px 0;">Por completar el juego</p>
+            <div style="background:#f0f8ff;border-radius:14px;padding:16px 20px;margin:12px 0;border:2px solid #a8d8ff;">
+                <p style="color:#CBA6F7;font-size:0.88rem;line-height:1.7;margin:0;">
+                    Muchas gracias por jugar.<br>
+                    Este juego fue creado solo para fines educativos y de entretenimiento.<br><br>
+                    Si gustas seguir jugando, solo dale a continuar.<br>
+                    ¡Diviértete!<br><br>
+                    <strong>BITGAMESO</strong> está contento de que hayas seguido hasta el final.
+                </p>
+            </div>
+            <button onclick="closeDiamondVictoryModal()" class="btn-victory-continue" style="background:linear-gradient(135deg,#a8d8ff,#6ec6ff);border-color:#6ec6ff;">
+                Continuar
+            </button>
+        </div>
+    </div>
+
     <!-- ====== MODAL: GAME OVER ====== -->
     <div id="modal-gameover" class="modal-overlay" style="display:none;">
         <div class="modal-box gameover-box">
-            <h2>💀 GAME OVER</h2>
+            <h2>GAME OVER</h2>
             <p id="gameover-reason">Tu mascota murió de hambre...</p>
-            <button onclick="resetGame()" class="btn-restart">🔄 Volver a intentar</button>
-            <button onclick="handleLogout()" class="btn-logout-go">🚪 Ir al Menú</button>
+            <button onclick="resetGame()" class="btn-restart">Volver a intentar</button>
+            <button onclick="handleLogout()" class="btn-logout-go">Ir al Menú</button>
         </div>
     </div>
 

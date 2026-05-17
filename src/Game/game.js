@@ -1182,7 +1182,7 @@ const checkGameOver = () => {
 };
 
 const triggerGameOver = (reason) => {
-    logEvent('gameover', ' GAME OVER', reason);
+    logEvent('gameover', 'GAME OVER', reason);
     clearSave();
     const m=document.getElementById('modal-gameover');
     const r=document.getElementById('gameover-reason');

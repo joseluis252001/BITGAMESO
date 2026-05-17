@@ -434,12 +434,21 @@ const checkDiamondVictory = () => {
         state.diamondVictoryAchieved = true;
         if (typeof saveGame === 'function') saveGame();
         if (typeof showToast === 'function')
-            showToast('VICTORIA DIAMANTE! Se desbloquearon las mascotas Diamante!');
+            showToast('VICTORIA DIAMANTE! Has completado el juego!');
+        setTimeout(() => {
+            const m = document.getElementById('modal-diamond-victory');
+            if (m) m.style.display = 'flex';
+        }, 500);
     }
 };
 
 window.closeVictoryModal = () => {
     const modal = document.getElementById('modal-victory');
+    if (modal) modal.style.display = 'none';
+};
+
+window.closeDiamondVictoryModal = () => {
+    const modal = document.getElementById('modal-diamond-victory');
     if (modal) modal.style.display = 'none';
 };
 
