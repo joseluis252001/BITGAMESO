@@ -652,10 +652,22 @@ window.sellFromPortfolio = (symbol) => {
         showToast(` Vendiste ${symbol}! +${fmt(realProfit)}${x2tag}${petMsg} +${gain}️`);
         logEvent('venta', `Vendiste ${symbol} con GANANCIA`, `+${fmt(realProfit)}${x2tag}${petMsg}`);
     } else if (realProfit < 0) {
-        const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
-        changePetHealth(-loss);
-        showToast(` Vendiste ${symbol}. ${fmt(Math.abs(realProfit))}${x2tag}${petMsg} -${loss}️`);
-        logEvent('venta', `Vendiste ${symbol} con PÉRDIDA`, `${fmt(Math.abs(realProfit))}${x2tag}${petMsg}`);
+        const petPassive = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.passive : null;
+        const isDiamond  = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.diamond : false;
+        if (petPassive === 'frog') {
+            // Rana: pérdida se convierte en ganancia
+            const gainAmount = Math.abs(realProfit);
+            state.monedas += gainAmount * 2; // devolver lo perdido + convertir en ganancia
+            const healthLoss = isDiamond ? 0 : 30;
+            if (healthLoss > 0) changePetHealth(-healthLoss);
+            showToast(` ¡Rana convirtió la pérdida en ganancia! +${fmt(gainAmount)}${healthLoss > 0 ? ` -${healthLoss}️` : ''}`);
+            logEvent('venta', `Vendiste ${symbol} con RANA (pérdida→ganancia)`, `+${fmt(gainAmount)}`);
+        } else {
+            const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
+            changePetHealth(-loss);
+            showToast(` Vendiste ${symbol}. ${fmt(Math.abs(realProfit))}${x2tag}${petMsg} -${loss}️`);
+            logEvent('venta', `Vendiste ${symbol} con PÉRDIDA`, `${fmt(Math.abs(realProfit))}${x2tag}${petMsg}`);
+        }
     } else {
         showToast(`️ Vendiste ${symbol}${petMsg}`);
     }
@@ -746,25 +758,18 @@ window.buyFood = (foodId, price) => {
     const food = foodDatabase.find(f=>f.id===foodId);
     if (!food) return;
 
-    // Pingüino: intentar dar el pescado gratis (sin cobrar ni inflar)
-    if (foodId === 'Fish-128' && typeof tryPenguinFreeFish === 'function') {
-        const wasFree = tryPenguinFreeFish(foodId);
-        if (wasFree) {
-            logEvent('comida', `Pescado gratis del Pinguino`, `Sin costo ni inflacion`);
-            updateUI();
-            openFoodShop();
-            return;
-        }
-    }
-
     if (state.monedas < price) { showToast('Monedas insuficientes'); return; }
     state.monedas -= price;
     const existing = state.inventory.get(foodId);
     state.inventory.set(foodId, { ...food, price, qty:(existing?.qty||0)+1 });
 
     // Inflación: registrar compra para que la próxima cueste x2
-    const timesB = (state.foodInflation.get(foodId) || 0) + 1;
-    state.foodInflation.set(foodId, timesB);
+    // Si la mascota tiene inmunidad a inflación para este alimento, no registrar
+    const inflFree = typeof isFoodInflationFree === 'function' && isFoodInflationFree(foodId);
+    if (!inflFree) {
+        const timesB = (state.foodInflation.get(foodId) || 0) + 1;
+        state.foodInflation.set(foodId, timesB);
+    }
 
     // Cooldown 2 horas para categoría "otros"
     if (food.cat === 'misc') {

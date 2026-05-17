@@ -180,11 +180,11 @@ const PET_DEFS = {
         id: 'Frog-128', label: 'Rana', cost: 100000, order: 13,
         marketSpeed: 1,
         passive: 'frog',
-        desc: ' Con 3+ acciones del mismo sector: predicción 100% por 30s (cooldown 1min)',
+        desc: ' Vender en negativo = ganancia | -15% salud cada 40s | -30% salud al vender en negativo',
         passiveDesc: [
-            ' Habilidad: predicción perfecta 30s',
-            ' Requiere 3+ acciones del mismo sector',
-            ' Cooldown 1 minuto'
+            ' Vender en negativo convierte la pérdida en ganancia',
+            ' -15% salud cada 40 segundos',
+            ' -30% salud al vender una acción en negativo'
         ]
     },
     'Penguin-128': {
@@ -298,7 +298,7 @@ const GOLDEN_DEFS = (() => {
         'chicken_white': ['⚡ Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2 e inflación +250%'],
         'chicken_yellow':['⚡ Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2.5 e inflación +450%','100% de ganar lo que pagaste al vender'],
         'cow':           ['Compras en mercado −50%','Ganancias en ventas x300%','−11% salud cada 30 segundos'],
-        'frog':          ['Predicción perfecta de sector por 60s','Requiere 3+ acciones del mismo sector','Cooldown 1 minuto'],
+        'frog':          ['Vender en negativo = ganancia','−10% salud cada 40 segundos','−30% salud al vender en negativo'],
         'penguin':       ['Pescado 100% gratis','+100% ganancia en ventas','+6% interés adicional','70% de repetir acción al vender','+2000 monedas cada 2 minutos','Compra en rojo = salud −30% | −12%/50s'],
         'penguin_pink':  ['Pescado 100% gratis','+140% ganancia en ventas','+16% interés adicional','100% de repetir acción al vender','+3000 monedas cada 2 minutos','Compra en rojo = salud −40% | −12%/50s'],
         'shark':         ['⚡ Mercado x4 permanente','Resetea toda la inflación','Ventas multiplicadas x16','Con 3+ del mismo sector: +30% bono y +60% extra','−15% salud cada 2 minutos'],
@@ -371,7 +371,7 @@ const DIAMOND_DEFS = (() => {
         'chicken_white': ['Mercado x5 permanente','Resetea inflacion cada 30s','Proteinas: precio x1.5'],
         'chicken_yellow':['Mercado x5 permanente','Resetea inflacion cada 20s','Proteinas gratis','150% de ganar lo que pagaste al vender'],
         'cow':           ['Compras en mercado -75%','Ganancias en ventas x450%','-8% salud cada 30 segundos'],
-        'frog':          ['Prediccion perfecta permanente sin cooldown','Bonus +15% en sector predicho'],
+        'frog':          ['Vender en negativo = ganancia (sin efectos negativos)','Sin pérdida de salud por ventas negativas','Sin pérdida de salud cada 40 segundos'],
         'penguin':       ['Pescado 100% gratis','+150% ganancia en ventas','+10% interes adicional','90% de repetir accion al vender','+5000 monedas cada 2 minutos','Compra en rojo = salud -15%'],
         'penguin_pink':  ['Pescado 100% gratis','+210% ganancia en ventas','+24% interes adicional','100% de repetir accion al vender','+8000 monedas cada 2 minutos','Sin penalizacion por compra en rojo'],
         'shark':         ['Mercado x6 permanente','Resetea inflacion','Ventas multiplicadas x24','Con 3+ del mismo sector: +45% bono','-8% salud cada 2 minutos'],
@@ -577,6 +577,19 @@ const startPassivesForPet = (petId) => {
         case 'shark':
             petHungerTimer = setInterval(() => { _getChangePH()(-15); _getCheckGO()(); }, 120000); break;
 
+        case 'frog': {
+            // Rana normal: -15% salud cada 40s
+            // Rana dorada: -10% salud cada 40s
+            // Rana diamante: sin pérdida de salud
+            const isDiamond = PET_DEFS[state.currentPet]?.diamond;
+            const isGolden  = PET_DEFS[state.currentPet]?.golden;
+            if (!isDiamond) {
+                const frogLoss = isGolden ? -10 : -15;
+                petHungerTimer = setInterval(() => { _getChangePH()(frogLoss); _getCheckGO()(); }, 40000);
+            }
+            break;
+        }
+
         case 'sheep': {
             const sheepCoins = def.golden ? 3400 : 1700;
             passiveTimers.coins = setInterval(() => {
@@ -678,15 +691,9 @@ window.activateSharkReset = () => {
     const def = PET_DEFS[state.currentPet];
     if (!def || def.passive !== 'shark') return;
 
-    // Resetear inflación de todo excepto pescado y carne
-    let count = 0;
-    state.foodInflation.forEach((_, foodId) => {
-        const food = foodDatabase.find(f => f.id === foodId);
-        if (food && food.id !== 'Fish-128' && food.id !== 'Meat-128') {
-            state.foodInflation.delete(foodId);
-            count++;
-        }
-    });
+    // Resetear TODA la inflación de comida
+    let count = state.foodInflation.size;
+    state.foodInflation.clear();
 
     sharkPenaltyActive = true;
     _getShowToast()(`Inflacion reseteada (${count} alimentos). Advertencia: cambiar de mascota le costara 50% de vida a la siguiente!`);
@@ -930,7 +937,7 @@ const activateSheepPrediction = (excludeSymbol) => {
 };
 
 // Modificadores en COMPRA del mercado
-const applyPetBuyModifiers = (assetPrice) => {
+window.applyPetBuyModifiers = (assetPrice) => {
     const def = PET_DEFS[state.currentPet];
     const pet = def?.passive;
     if (pet === 'cow') return assetPrice * (def?.golden ? 0.25 : 0.5);  // -50% o -75%
@@ -1036,43 +1043,9 @@ window.activateChickenReset = () => {
     }, getChickenCooldownMs());
 };
 
-// Rana: Prediccion perfecta del sector (dorada 60s)
-window.activateFrogPrediction = () => {
-    if (frogCooldown) { _getShowToast()(' Habilidad de Rana en cooldown (1 min)'); return; }
-    const counts = countBySector();
-    let targetSector = null;
-    counts.forEach((c, type) => { if (c >= 3) targetSector = type; });
-    if (!targetSector) { _getShowToast()(' Necesitas 3+ acciones del mismo sector'); return; }
-
-    const isGolden  = PET_DEFS[state.currentPet]?.golden;
-    const predDur   = isGolden ? 60000 : 30000;
-
-    state.market.forEach((a, sym) => {
-        if (a.type === targetSector) {
-            const pred = parseFloat((Math.random() * 10 - 5).toFixed(2));
-            state.market.set(sym, { ...a, _future: pred });
-        }
-    });
-    _getRenderMarket()();
-    _getShowToast()(` Prediccion perfecta del sector ${targetSector} por ${isGolden ? '60s' : '30s'}!`);
-    frogCooldown = true;
-    renderPetAbilityButton();
-    setTimeout(() => {
-        state.market.forEach((a, sym) => {
-            if (a.type === targetSector) {
-                const { _future, ...clean } = a;
-                state.market.set(sym, clean);
-            }
-        });
-        _getRenderMarket()();
-        _getShowToast()(' Prediccion de Rana terminada.');
-    }, predDur);
-    setTimeout(() => {
-        frogCooldown = false;
-        renderPetAbilityButton();
-        _getShowToast()(' Habilidad de Rana disponible!');
-    }, 60000);
-};
+// Rana: Habilidad pasiva — vender en negativo convierte pérdida en ganancia
+// Se activa automáticamente al vender (ver sellFromPortfolio en game.js)
+// Timer de pérdida de salud se maneja en initPetPassives
 
 // ============================================================
 //  RENDER BOTÓN DE HABILIDAD ACTIVA EN MASCOTA
@@ -1111,10 +1084,7 @@ const renderPetAbilityButton = () => {
                     </button>`;
             break;
         case 'frog':
-            html = `<button class="btn-pet-ability ${frogCooldown?'ability-cooldown':''}"
-                        onclick="activateFrogPrediction()" ${frogCooldown?'disabled':''}>
-                        Prediccion ${frogCooldown ? '(cooldown 1min)' : isGolden ? '(60s)' : '(30s)'}
-                    </button>`;
+            // La rana no tiene botón — su habilidad es pasiva al vender
             break;
         case 'chicken_white':
         case 'chicken_yellow': {
