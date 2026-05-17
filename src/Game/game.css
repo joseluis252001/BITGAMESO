@@ -1906,7 +1906,7 @@ body {
 /* ====   LANDSCAPE — Celular horizontal (orientation: landscape + max-height: 500px)
    ==== */
 @media (orientation: landscape) and (max-height: 500px) {
-    body { padding-top: 110px; }
+    body { padding-top: 130px; }
 
     /* Header super compacto */
     .game-header { height: 36px; padding: 0 .6rem; }
@@ -1919,21 +1919,38 @@ body {
     .chevron-img { width: 7px; }
     .profile-trigger { padding: 1px 4px 1px 2px; gap: 2px; border-radius: 14px; }
 
-    /* Nav compacto */
-    .game-nav { top: 36px; height: 38px !important; min-height: 38px !important; padding: 2px .6rem; flex-wrap: nowrap; gap: 4px; }
+    /* Nav compacto — monedas izquierda, botones 2x2 derecha */
+    .game-nav {
+        top: 36px;
+        height: 58px !important;
+        min-height: 58px !important;
+        padding: 3px .6rem;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+    }
     .nav-left { flex-direction: row; align-items: center; gap: 5px; flex: 1; min-width: 0; }
     .score-container { font-size: .68rem; gap: 3px; white-space: nowrap; }
     .coin-icon { width: 14px; }
     #monedas-count { font-size: .68rem; }
-    .nav-actions { gap: 3px; flex-shrink: 0; }
-    .nav-actions button { padding: 3px 6px; font-size: .55rem; border-radius: 8px; white-space: nowrap; }
+
+    /* Botones en grid 2x2 a la derecha */
+    .nav-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px;
+        flex-shrink: 0;
+    }
+    .nav-actions button { padding: 3px 7px; font-size: .52rem; border-radius: 7px; white-space: nowrap; }
     .btn-nav-icon { display: none; }
 
     /* Balance panel oculto en landscape para ahorrar espacio */
     #balance-panel { display: none !important; }
 
     /* Inventario compacto */
-    .inventory-section { top: 74px !important; height: 36px; padding: 2px .6rem; gap: 4px; }
+    .inventory-section { top: 94px !important; height: 36px; padding: 2px .6rem; gap: 4px; }
     .inv-icon-img { width: 16px; height: 16px; }
     .inv-item { min-width: 42px; padding: 2px 4px; }
     .inv-img { width: 22px; height: 22px; }
