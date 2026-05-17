@@ -1548,10 +1548,10 @@ body {
     .header-left h1 { font-size: .9rem; }
     .btn-header { padding: 5px 9px; font-size: 0; gap: 0; }
     .btn-header-icon { width: 18px; height: 18px; margin: 0; }
-    .user-avatar-img { width: 26px !important; height: 26px !important; }
-    #nombre-usuario { font-size: .65rem; max-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .user-avatar-img { width: 22px !important; height: 22px !important; }
+    #nombre-usuario { font-size: .58rem; max-width: 42px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .chevron-img { width: 8px; }
-    .profile-trigger { padding: 2px 6px 2px 3px; gap: 3px; border-radius: 18px; }
+    .profile-trigger { padding: 1px 4px 1px 2px; gap: 2px; border-radius: 16px; }
     /* Título visible pero compacto */
     .header-left h1 { display: block !important; font-size: .88rem; }
 
@@ -1614,7 +1614,7 @@ body {
     .balance-divider { font-size: 9px !important; color: #CBA6F7 !important; }
 
     /* Ajustar inventario */
-    .inventory-section { top: 134px !important; height: 46px; padding: 4px .8rem; gap: 5px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
+    .inventory-section { top: 128px !important; height: 44px; padding: 3px .8rem; gap: 5px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
     .active-effects { gap: 2px; max-width: 60px; overflow: hidden; }
     .effect-badge { padding: 1px 4px; font-size: 7px; }
     .eff-icon { width: 10px; height: 10px; }
@@ -1630,7 +1630,7 @@ body {
     .inv-title { display: flex !important; align-items: center; flex-shrink: 0; }
     .inv-icon-img { width: 26px; height: 26px; }
     .inv-item { min-width: 44px; padding: 3px 6px; border-radius: 10px; overflow: visible; }
-    .inv-img { width: 32px; height: 32px; object-fit: contain; }
+    .inv-img { width: 28px; height: 28px; object-fit: contain; }
     .inv-qty { font-size: 8px; }
     .inv-cat-dot { width: 4px; height: 4px; }
     .inv-selected-label { font-size: 7px; padding: 2px 6px; }
