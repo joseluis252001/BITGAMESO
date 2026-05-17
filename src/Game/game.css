@@ -144,7 +144,7 @@ body {
     height:55px; background:var(--pink-light);
     border-bottom:2px solid var(--primary);
     display:flex; align-items:center; gap:12px;
-    padding:0 2rem; z-index:998;
+    padding:0 2rem; z-index:1000;
 }
 
 .inv-title { font-weight:700; font-size:.85rem; color:var(--primary-dk); white-space:nowrap; flex-shrink:0; }
@@ -2570,4 +2570,12 @@ body {
         overflow-x: auto !important;
         justify-content: flex-start !important;
     }
+}
+
+/* Móvil vertical: inventario encima del nav, debajo de cartera */
+@media (max-width: 600px) and (orientation: portrait) {
+    .inventory-section { z-index: 1000 !important; }
+    .game-nav { z-index: 999 !important; }
+    .dashboard-grid { z-index: 1 !important; position: relative; }
+    .card { z-index: 1 !important; position: relative; }
 }
