@@ -2457,3 +2457,37 @@ body {
     #modal-chart #chart-buy-btn { padding: 4px 12px !important; font-size: 0.78rem !important; }
     #modal-chart #chart-price-display { font-size: 0.9rem !important; }
 }
+
+/* ============================================================
+   GRÁFICA — Selector responsive
+   ============================================================ */
+
+/* Selector: siempre en filas y columnas, sin scroll */
+.chart-selector-wrap {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    overflow: visible;
+}
+
+/* Móvil: botones más pequeños */
+@media (max-width: 600px) {
+    .chart-selector-wrap button {
+        font-size: 9px !important;
+        padding: 2px 7px !important;
+        border-radius: 7px !important;
+    }
+    /* Gráfica más pequeña en móvil para que todo quepa */
+    #modal-chart > div > div:nth-child(3) {
+        height: 130px !important;
+    }
+    #modal-chart #chart-stats {
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+    }
+    #modal-chart #chart-stats > div {
+        font-size: 9px !important;
+        padding: 3px 8px !important;
+        min-width: 60px !important;
+    }
+}

@@ -185,14 +185,8 @@
                     <img src="../assets/arrows/X-Error-128.png" style="width:26px;height:26px;" alt="Cerrar">
                 </button>
             </div>
-            <!-- Selector de activo — una línea con scroll horizontal -->
-            <div id="chart-selector" style="
-                display:flex;gap:5px;
-                flex-wrap:nowrap;
-                overflow-x:auto;
-                padding-bottom:4px;
-                scrollbar-width:none;
-            "></div>
+            <!-- Selector de activo — wrap en móvil, scroll en PC -->
+            <div id="chart-selector" class="chart-selector-wrap"></div>
             <!-- Canvas de la gráfica -->
             <div style="position:relative;width:100%;height:160px;background:#fdf6ff;border-radius:12px;border:2px solid #f0e7ff;overflow:hidden;padding:6px;flex-shrink:0;">
                 <canvas id="chart-canvas" style="width:100%;height:100%;display:block;"></canvas>
