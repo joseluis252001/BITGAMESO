@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="manifest" href="../manifest.json">
+    <link rel="manifest" href="/manifest.json">
+    <!-- PWA iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="BITGAMESO">
+    <link rel="apple-touch-icon" href="/src/assets/logo/Coin-128.png">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Security Headers como meta tags -->
@@ -93,9 +99,27 @@
     <script src="script.js"></script>
     <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('../sw.js')
-      .then(() => console.log("Menú listo para instalar como App"))
-      .catch(err => console.log("Error de registro:", err));
+    navigator.serviceWorker.register('/sw.js').then((reg) => {
+        console.log('[PWA] Service Worker registrado');
+
+        // Detectar nueva versión disponible
+        reg.addEventListener('updatefound', () => {
+            const newSW = reg.installing;
+            newSW.addEventListener('statechange', () => {
+                if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Hay nueva versión — activar automáticamente
+                    newSW.postMessage('SKIP_WAITING');
+                    console.log('[PWA] Nueva versión activada automáticamente');
+                    window.location.reload();
+                }
+            });
+        });
+    }).catch(err => console.log('[PWA] Error:', err));
+
+    // Recargar si el SW toma control (nueva versión)
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+    });
   }
 </script>
 </body>

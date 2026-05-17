@@ -1,15 +1,37 @@
 {
-  "name": "BITGAMESO - El Juego",
+  "name": "BITGAMESO - Aprende a Invertir",
   "short_name": "BITGAMESO",
-  "start_url": "./PaginaMenu/menu-index.html",
+  "description": "Plataforma educativa para aprender inversiones jugando con mascotas virtuales.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#FFF9E6",
-  "theme_color": "#D1B3FF",
+  "theme_color": "#CBA6F7",
+  "lang": "es",
+  "categories": ["education", "games", "finance"],
   "icons": [
     {
-      "src": "./assets/logo/Coin-128.png",
+      "src": "/src/assets/logo/Coin-128.png",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Jugar",
+      "short_name": "Jugar",
+      "description": "Ir al juego directamente",
+      "url": "/juego",
+      "icons": [{ "src": "/src/assets/logo/Coin-128.png", "sizes": "128x128" }]
+    },
+    {
+      "name": "Iniciar Sesión",
+      "short_name": "Login",
+      "description": "Iniciar sesión en BITGAMESO",
+      "url": "/login",
+      "icons": [{ "src": "/src/assets/logo/Coin-128.png", "sizes": "128x128" }]
     }
   ]
 }
