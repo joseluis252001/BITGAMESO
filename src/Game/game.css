@@ -2415,3 +2415,28 @@ body {
     object-fit: contain;
     vertical-align: middle;
 }
+
+/* ============================================================
+   GRÁFICA — Botón y modal
+   ============================================================ */
+.btn-chart-open {
+    background: white;
+    border: 2px solid #CBA6F7;
+    border-radius: 8px;
+    padding: 3px 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+.btn-chart-open:hover {
+    background: #CBA6F7;
+}
+.btn-chart-open:hover img {
+    filter: brightness(0) invert(1);
+}
+#chart-canvas {
+    cursor: crosshair;
+}

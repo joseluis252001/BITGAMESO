@@ -520,6 +520,8 @@ const fetchMarket = () => {
     renderMarket();
     renderPortfolio();
     saveGame();
+    // Registrar tick en historial de gráfica
+    if (typeof recordChartTick === 'function') recordChartTick();
 };
 
 const startMarket = (speed = SPEED_NORMAL) => {
@@ -592,6 +594,9 @@ const renderMarket = () => {
             <div class="asset-change ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${Math.abs(a.changePercent).toFixed(2)}%</div>
             <div class="market-btns">
                 <button class="btn-asset-info" onclick="showAssetFicha('${a.symbol}')" title="Ver ficha técnica">Info</button>
+                <button class="btn-chart-open" onclick="openChart('${a.symbol}')" title="Ver gráfica">
+                    <img src="../assets/settings/Ranking-128.png" style="width:16px;height:16px;vertical-align:middle;" alt="Gráfica">
+                </button>
                 <button class="btn-action btn-buy ${owned?'btn-disabled':''}"
                         onclick="buy('${a.symbol}')"
                         ${owned?'disabled':''}>Comprar</button>
@@ -2294,4 +2299,269 @@ window.submitBugInline = async () => {
         status.textContent = 'Error al enviar. Intenta de nuevo.';
         btn.disabled = false;
     }
+};
+
+// ============================================================
+//  GRÁFICA EN TIEMPO REAL — BITGAMESO
+//  Historial de 5 minutos (300 ticks de 1s aprox)
+// ============================================================
+
+const CHART_MAX_POINTS = 300; // 5 min a ~1 tick/seg
+const chartHistory     = new Map(); // symbol → [{price, time}]
+let   chartSymbol      = null;      // activo abierto en modal
+let   chartAnimFrame   = null;
+
+// ── Registrar precio en historial cada tick ──────────────────
+const recordChartTick = () => {
+    const now = Date.now();
+    state.market.forEach((asset, sym) => {
+        if (!chartHistory.has(sym)) chartHistory.set(sym, []);
+        const arr = chartHistory.get(sym);
+        arr.push({ price: asset.price, time: now });
+        if (arr.length > CHART_MAX_POINTS) arr.shift();
+    });
+    // Si el modal está abierto, redibujar
+    if (chartSymbol && document.getElementById('modal-chart')?.style.display !== 'none') {
+        drawChart();
+        updateChartUI();
+    }
+};
+
+// ── Abrir modal de gráfica ───────────────────────────────────
+window.openChart = (symbol) => {
+    chartSymbol = symbol;
+    document.getElementById('modal-chart').style.display = 'flex';
+    buildChartSelector(symbol);
+    updateChartUI();
+    drawChart();
+};
+
+window.closeChart = () => {
+    document.getElementById('modal-chart').style.display = 'none';
+};
+
+// ── Selector de activos dentro del modal ─────────────────────
+const buildChartSelector = (selected) => {
+    const el = document.getElementById('chart-selector');
+    if (!el) return;
+    const symbols = Array.from(state.market.keys()).slice(0, 20); // primeros 20
+    el.innerHTML = symbols.map(sym => `
+        <button onclick="switchChart('${sym}')" style="
+            padding:3px 10px;border-radius:10px;border:2px solid #CBA6F7;
+            font-size:11px;font-family:'Poppins',sans-serif;cursor:pointer;
+            background:${sym === selected ? '#CBA6F7' : 'white'};
+            color:${sym === selected ? 'white' : '#CBA6F7'};
+            font-weight:600;transition:0.2s;
+        ">${sym}</button>
+    `).join('');
+};
+
+window.switchChart = (sym) => {
+    chartSymbol = sym;
+    buildChartSelector(sym);
+    updateChartUI();
+    drawChart();
+};
+
+// ── Actualizar título, precio y botón comprar ─────────────────
+const updateChartUI = () => {
+    const asset = state.market.get(chartSymbol);
+    if (!asset) return;
+
+    document.getElementById('chart-title').textContent = `${asset.symbol} — ${asset.name}`;
+    document.getElementById('chart-subtitle').textContent = `${asset.type} · Últimos 5 minutos`;
+
+    // Precio con descuento si hay vaca
+    const discPrice = typeof window.applyPetBuyModifiers === 'function'
+        ? window.applyPetBuyModifiers(asset.price) : asset.price;
+    const owned = state.portfolio.has(chartSymbol);
+    const priceEl = document.getElementById('chart-price-display');
+    const buyBtn  = document.getElementById('chart-buy-btn');
+
+    if (discPrice < asset.price) {
+        priceEl.innerHTML = `<span style="text-decoration:line-through;opacity:.5;font-size:.8em;">${fmt(asset.price)}</span> <span style="color:#52b788;">${fmt(discPrice)}</span>`;
+    } else {
+        priceEl.textContent = fmt(asset.price);
+    }
+
+    if (owned) {
+        buyBtn.textContent  = 'Ya tienes este activo';
+        buyBtn.disabled     = true;
+        buyBtn.className    = 'btn-action btn-disabled';
+    } else {
+        buyBtn.textContent  = `Comprar ${chartSymbol}`;
+        buyBtn.disabled     = false;
+        buyBtn.className    = 'btn-action btn-buy';
+    }
+
+    // Stats rápidos
+    const arr = chartHistory.get(chartSymbol) || [];
+    const statsEl = document.getElementById('chart-stats');
+    if (arr.length >= 2) {
+        const first  = arr[0].price;
+        const last   = arr[arr.length - 1].price;
+        const minP   = Math.min(...arr.map(p => p.price));
+        const maxP   = Math.max(...arr.map(p => p.price));
+        const change = ((last - first) / first) * 100;
+        const isUp   = change >= 0;
+        statsEl.innerHTML = `
+            <div style="background:#f9f0ff;border-radius:10px;padding:6px 12px;font-size:11px;font-family:'Poppins',sans-serif;">
+                <span style="color:#aaa;">Cambio 5min</span><br>
+                <strong style="color:${isUp ? '#52b788' : '#e74c3c'};">${isUp ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%</strong>
+            </div>
+            <div style="background:#f9f0ff;border-radius:10px;padding:6px 12px;font-size:11px;font-family:'Poppins',sans-serif;">
+                <span style="color:#aaa;">Mínimo</span><br>
+                <strong style="color:#CBA6F7;">${fmt(minP)}</strong>
+            </div>
+            <div style="background:#f9f0ff;border-radius:10px;padding:6px 12px;font-size:11px;font-family:'Poppins',sans-serif;">
+                <span style="color:#aaa;">Máximo</span><br>
+                <strong style="color:#CBA6F7;">${fmt(maxP)}</strong>
+            </div>
+            <div style="background:#f9f0ff;border-radius:10px;padding:6px 12px;font-size:11px;font-family:'Poppins',sans-serif;">
+                <span style="color:#aaa;">Actual</span><br>
+                <strong style="color:#CBA6F7;">${fmt(last)}</strong>
+            </div>
+        `;
+    } else {
+        statsEl.innerHTML = '<span style="color:#aaa;font-size:11px;">Acumulando datos...</span>';
+    }
+};
+
+// ── Dibujar gráfica con Canvas ────────────────────────────────
+const drawChart = () => {
+    const canvas = document.getElementById('chart-canvas');
+    if (!canvas) return;
+    const ctx    = canvas.getContext('2d');
+    const arr    = chartHistory.get(chartSymbol) || [];
+
+    // Ajustar resolución del canvas
+    const W = canvas.offsetWidth  || 600;
+    const H = canvas.offsetHeight || 200;
+    canvas.width  = W * window.devicePixelRatio;
+    canvas.height = H * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+    ctx.clearRect(0, 0, W, H);
+
+    if (arr.length < 2) {
+        ctx.fillStyle = '#CBA6F7';
+        ctx.font      = '13px Poppins, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Acumulando datos del mercado...', W / 2, H / 2);
+        return;
+    }
+
+    const prices = arr.map(p => p.price);
+    const minP   = Math.min(...prices);
+    const maxP   = Math.max(...prices);
+    const range  = maxP - minP || 1;
+    const pad    = { top: 16, right: 16, bottom: 24, left: 60 };
+    const cW     = W - pad.left - pad.right;
+    const cH     = H - pad.top  - pad.bottom;
+
+    const toX = (i)   => pad.left + (i / (arr.length - 1)) * cW;
+    const toY = (p)   => pad.top  + (1 - (p - minP) / range) * cH;
+
+    // Fondo grid
+    ctx.strokeStyle = '#f0e7ff';
+    ctx.lineWidth   = 1;
+    for (let i = 0; i <= 4; i++) {
+        const y = pad.top + (i / 4) * cH;
+        ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cW, y); ctx.stroke();
+        const val = maxP - (i / 4) * range;
+        ctx.fillStyle   = '#CBA6F7';
+        ctx.font        = '9px Poppins, sans-serif';
+        ctx.textAlign   = 'right';
+        ctx.fillText(fmt(val), pad.left - 4, y + 3);
+    }
+
+    // Área rellena bajo la línea
+    const isUp = prices[prices.length - 1] >= prices[0];
+    const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + cH);
+    grad.addColorStop(0, isUp ? 'rgba(82,183,136,0.35)' : 'rgba(231,76,60,0.35)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath();
+    ctx.moveTo(toX(0), toY(prices[0]));
+    prices.forEach((p, i) => { if (i > 0) ctx.lineTo(toX(i), toY(p)); });
+    ctx.lineTo(toX(prices.length - 1), pad.top + cH);
+    ctx.lineTo(toX(0), pad.top + cH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Línea principal
+    ctx.beginPath();
+    ctx.strokeStyle = isUp ? '#52b788' : '#e74c3c';
+    ctx.lineWidth   = 2;
+    ctx.lineJoin    = 'round';
+    prices.forEach((p, i) => {
+        i === 0 ? ctx.moveTo(toX(i), toY(p)) : ctx.lineTo(toX(i), toY(p));
+    });
+    ctx.stroke();
+
+    // Punto actual (último)
+    const lastX = toX(prices.length - 1);
+    const lastY = toY(prices[prices.length - 1]);
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 5, 0, Math.PI * 2);
+    ctx.fillStyle   = isUp ? '#52b788' : '#e74c3c';
+    ctx.fill();
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth   = 2;
+    ctx.stroke();
+
+    // Etiquetas de tiempo (inicio y fin)
+    if (arr.length >= 2) {
+        const startTime = new Date(arr[0].time).toLocaleTimeString();
+        const endTime   = new Date(arr[arr.length-1].time).toLocaleTimeString();
+        ctx.fillStyle  = '#aaa';
+        ctx.font       = '9px Poppins, sans-serif';
+        ctx.textAlign  = 'left';
+        ctx.fillText(startTime, pad.left, H - 6);
+        ctx.textAlign  = 'right';
+        ctx.fillText(endTime, pad.left + cW, H - 6);
+    }
+};
+
+// ── Comprar desde el modal ────────────────────────────────────
+window.chartBuySelected = () => {
+    if (!chartSymbol) return;
+    buy(chartSymbol);
+    updateChartUI();
+};
+
+// ── Tooltip al pasar el mouse ─────────────────────────────────
+const initChartTooltip = () => {
+    const canvas  = document.getElementById('chart-canvas');
+    const tooltip = document.getElementById('chart-tooltip');
+    if (!canvas || !tooltip) return;
+
+    canvas.addEventListener('mousemove', (e) => {
+        const arr = chartHistory.get(chartSymbol) || [];
+        if (arr.length < 2) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx   = e.clientX - rect.left;
+        const W    = rect.width;
+        const pad  = { left: 60, right: 16 };
+        const cW   = W - pad.left - pad.right;
+        const idx  = Math.round(((mx - pad.left) / cW) * (arr.length - 1));
+        const pt   = arr[Math.max(0, Math.min(idx, arr.length - 1))];
+        if (!pt) return;
+        const time = new Date(pt.time).toLocaleTimeString();
+        tooltip.style.display = 'block';
+        tooltip.style.left    = `${mx + 10}px`;
+        tooltip.style.top     = `10px`;
+        tooltip.innerHTML     = `<strong>${fmt(pt.price)}</strong><br><span style="opacity:.7">${time}</span>`;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+    });
+};
+
+// Inicializar tooltip cuando se abre el modal
+const _origOpenChart = window.openChart;
+window.openChart = (symbol) => {
+    _origOpenChart(symbol);
+    setTimeout(initChartTooltip, 50);
 };
