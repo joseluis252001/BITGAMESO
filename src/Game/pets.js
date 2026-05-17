@@ -270,39 +270,39 @@ const GOLDEN_DEFS = (() => {
         ['Cat-Beige-128',    'Cat-Beige-128-Gold',    'Gato Beige Dorado',  1000,   'cat_beige'],
         ['Cat-Blue-128',     'Cat-Blue-128-Gold',     'Gato Azul Dorado',   1000,   'cat_blue'],
         ['Cat-Pink-128',     'Cat-Pink-128-Gold',     'Gato Rosa Dorado',   1000,   'cat_pink'],
-        ['Cat-Tiger-128',    'Cat-Tiger-128-Gold',    'Gato Tigre Dorado',  10000,  'cat_tiger'],
-        ['Cat-Tiger-Beige-128','Cat-Tiger-Beige-128-Gold','Tigre Beige Dorado',10000,'tiger_beige'],
-        ['Cat-Tiger-Rose-128','Cat-Tiger-Rose-128-Gold','Tigre Rosa Dorado', 10000, 'tiger_rose'],
-        ['Cat-White-128',    'Cat-White-128-Gold',    'Gato Blanco Dorado', 100000, 'cat_white'],
-        ['Chicken-White-128','Chicken-White-128-Gold','Pollito Dorado',     100000, 'chicken_white'],
-        ['Chicken-Yellow-128','Chicken-Yellow-128-Gold','Pollito Amarillo Dorado',100000,'chicken_yellow'],
-        ['Cow-128',          'Cow-128-Gold',          'Vaca Dorada',        1000000,'cow'],
-        ['Frog-128',         'Frog-128-Gold',         'Rana Dorada',        1000000,'frog'],
-        ['Penguin-128',      'Penguin-128-Gold',      'Pinguino Dorado',    1000000,'penguin'],
-        ['Penguin-Pink-128', 'Penguin-Pink-128-Gold', 'Pinguino Rosa Dorado',10000000,'penguin_pink'],
-        ['Shark-128',        'Shark-128-Gold',        'Tiburon Dorado',     10000000,'shark'],
-        ['Sheep-128',        'Sheep-128-Gold',        'Oveja Dorada',       10000000,'sheep'],
+        ['Cat-Tiger-128',    'Cat-Tiger-128-Gold',    'Gato Tigre Dorado',  1000000,  'cat_tiger'],
+        ['Cat-Tiger-Beige-128','Cat-Tiger-Beige-128-Gold','Tigre Beige Dorado',1000000,'tiger_beige'],
+        ['Cat-Tiger-Rose-128','Cat-Tiger-Rose-128-Gold','Tigre Rosa Dorado', 1000000, 'tiger_rose'],
+        ['Cat-White-128',    'Cat-White-128-Gold',    'Gato Blanco Dorado', 10000000, 'cat_white'],
+        ['Chicken-White-128','Chicken-White-128-Gold','Pollito Dorado',     10000000, 'chicken_white'],
+        ['Chicken-Yellow-128','Chicken-Yellow-128-Gold','Pollito Amarillo Dorado',10000000,'chicken_yellow'],
+        ['Cow-128',          'Cow-128-Gold',          'Vaca Dorada',        100000000,'cow'],
+        ['Frog-128',         'Frog-128-Gold',         'Rana Dorada',        100000000,'frog'],
+        ['Penguin-128',      'Penguin-128-Gold',      'Pinguino Dorado',    100000000,'penguin'],
+        ['Penguin-Pink-128', 'Penguin-Pink-128-Gold', 'Pinguino Rosa Dorado',1000000000,'penguin_pink'],
+        ['Shark-128',        'Shark-128-Gold',        'Tiburon Dorado',     1000000000,'shark'],
+        ['Sheep-128',        'Sheep-128-Gold',        'Oveja Dorada',       1000000000,'sheep'],
     ];
     // Descripciones x2 para mascotas doradas
     const goldenDescMap = {
-        'bear':          ['⚡ Mercado x4 permanente','🍬 Dulces con 20% descuento','⚠️ Penalización reducida en ventas negativas'],
-        'bird':          ['⚡ Mercado x6 permanente','+2 monedas cada 2 segundos','🍎 Comida cuesta x3 (en vez de x4)','⏸️ Pausa al operar igual'],
-        'bunny':         ['🚀 Turbo x8 por 60s (cooldown 3 min)','⚡ Mercado x8 durante el turbo'],
-        'cat_beige':     ['⚡ Mercado x4 permanente','Dulces y Pescado duran x8','−2% salud cada 20 segundos'],
-        'cat_blue':      ['⚡ Mercado x4 permanente','Dulces y Pescado duran x10','−5% salud cada 20 segundos'],
-        'cat_pink':      ['⚡ Mercado x4 permanente','Dulces y Pescado duran x12','−7% salud cada 25 segundos'],
-        'cat_tiger':     ['⚡ Mercado x4 permanente','Dulces y Pescado duran x14','−9% salud cada 30 segundos'],
-        'tiger_beige':   ['⚡ Mercado x6 permanente','Proteínas duran x30','Sin inflación en proteínas'],
-        'tiger_rose':    ['⚡ Mercado x6 permanente','Proteínas duran x50','Dulces y proteínas sin inflación'],
-        'cat_white':     ['⚡ Mercado x4 permanente','Bono de sector +24%','Pescado y Dulces duran x40 sin inflación'],
-        'chicken_white': ['⚡ Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2 e inflación +250%'],
-        'chicken_yellow':['⚡ Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2.5 e inflación +450%','100% de ganar lo que pagaste al vender'],
+        'bear':          [' Mercado x4 permanente',' Dulces con 20% descuento',' Penalización reducida en ventas negativas'],
+        'bird':          [' Mercado x6 permanente','+2 monedas cada 2 segundos',' Comida cuesta x3 (en vez de x4)',' Pausa al operar igual'],
+        'bunny':         [' Turbo x8 por 60s (cooldown 3 min)',' Mercado x8 durante el turbo'],
+        'cat_beige':     [' Mercado x4 permanente','Dulces y Pescado duran x8','−2% salud cada 20 segundos'],
+        'cat_blue':      [' Mercado x4 permanente','Dulces y Pescado duran x10','−5% salud cada 20 segundos'],
+        'cat_pink':      [' Mercado x4 permanente','Dulces y Pescado duran x12','−7% salud cada 25 segundos'],
+        'cat_tiger':     [' Mercado x4 permanente','Dulces y Pescado duran x14','−9% salud cada 30 segundos'],
+        'tiger_beige':   [' Mercado x6 permanente','Proteínas duran x30','Sin inflación en proteínas'],
+        'tiger_rose':    [' Mercado x6 permanente','Proteínas duran x50','Dulces y proteínas sin inflación'],
+        'cat_white':     [' Mercado x4 permanente','Bono de sector +24%','Pescado y Dulces duran x40 sin inflación'],
+        'chicken_white': [' Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2 e inflación +250%'],
+        'chicken_yellow':[' Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2.5 e inflación +450%','100% de ganar lo que pagaste al vender'],
         'cow':           ['Compras en mercado −50%','Ganancias en ventas x300%','−11% salud cada 30 segundos'],
         'frog':          ['Vender en negativo = ganancia','−10% salud cada 40 segundos','−30% salud al vender en negativo'],
         'penguin':       ['Pescado 100% gratis','+100% ganancia en ventas','+6% interés adicional','70% de repetir acción al vender','+2000 monedas cada 2 minutos','Compra en rojo = salud −30% | −12%/50s'],
         'penguin_pink':  ['Pescado 100% gratis','+140% ganancia en ventas','+16% interés adicional','100% de repetir acción al vender','+3000 monedas cada 2 minutos','Compra en rojo = salud −40% | −12%/50s'],
-        'shark':         ['⚡ Mercado x4 permanente','Resetea toda la inflación','Ventas multiplicadas x16','Con 3+ del mismo sector: +30% bono y +60% extra','−15% salud cada 2 minutos'],
-        'sheep':         ['⚡ Mercado x4 permanente','Tienda gratis si no hay inflación','Si pierdes: tienda se triplica','+3400 monedas cada 30 segundos','Al vender: +50% ganancia, 100% repetir, predicción 70s, 50% de ganar 5000 extra'],
+        'shark':         [' Mercado x4 permanente','Resetea toda la inflación','Ventas multiplicadas x16','Con 3+ del mismo sector: +30% bono y +60% extra','−15% salud cada 2 minutos'],
+        'sheep':         [' Mercado x4 permanente','Tienda gratis si no hay inflación','Si pierdes: tienda se triplica','+3400 monedas cada 30 segundos','Al vender: +50% ganancia, 100% repetir, predicción 70s, 50% de ganar 5000 extra'],
     };
 
     pairs.forEach(([baseId, id, label, cost, passive], i) => {
@@ -312,7 +312,7 @@ const GOLDEN_DEFS = (() => {
             marketSpeed: Math.min(base.marketSpeed * 2, 4),
             passive,
             golden: true,
-            desc: `✨ DORADA — ${base.desc} (efectos x2)`,
+            desc: ` DORADA — ${base.desc} (efectos x2)`,
             passiveDesc: goldenDescMap[passive] || base.passiveDesc.map(l => l + ' (x2)'),
         };
     });
@@ -341,21 +341,21 @@ const DIAMOND_DEFS = (() => {
         ['Bear-100',          'Bear-100-Diamond',          'Oso Diamante',              50000000,   'bear'],
         ['Bird-128',          'Bird-128-Diamond',          'Pajaro Diamante',           50000000,   'bird'],
         ['Bunny-Pink-128',    'Bunny-Pink-128-Diamond',    'Conejito Diamante',         50000000,   'bunny'],
-        ['Cat-Beige-128',     'Cat-Beige-128-Diamond',     'Gato Beige Diamante',       1000000,    'cat_beige'],
-        ['Cat-Blue-128',      'Cat-Blue-128-Diamond',      'Gato Azul Diamante',        1000000,    'cat_blue'],
-        ['Cat-Pink-128',      'Cat-Pink-128-Diamond',      'Gato Rosa Diamante',        1000000,    'cat_pink'],
-        ['Cat-Tiger-128',     'Cat-Tiger-128-Diamond',     'Gato Tigre Diamante',       10000000,   'cat_tiger'],
-        ['Cat-Tiger-Beige-128','Cat-Tiger-Beige-128-Diamond','Tigre Beige Diamante',    10000000,   'tiger_beige'],
-        ['Cat-Tiger-Rose-128','Cat-Tiger-Rose-128-Diamond','Tigre Rosa Diamante',       10000000,   'tiger_rose'],
-        ['Cat-White-128',     'Cat-White-128-Diamond',     'Gato Blanco Diamante',      100000000,  'cat_white'],
-        ['Chicken-White-128', 'Chicken-White-128-Diamond', 'Pollito Diamante',          100000000,  'chicken_white'],
-        ['Chicken-Yellow-128','Chicken-Yellow-128-Diamond','Pollito Amarillo Diamante', 100000000,  'chicken_yellow'],
-        ['Cow-128',           'Cow-128-Diamond',           'Vaca Diamante',             1000000000, 'cow'],
-        ['Frog-128',          'Frog-128-Diamond',          'Rana Diamante',             1000000000, 'frog'],
-        ['Penguin-128',       'Penguin-128-Diamond',       'Pinguino Diamante',         1000000000, 'penguin'],
-        ['Penguin-Pink-128',  'Penguin-Pink-128-Diamond',  'Pinguino Rosa Diamante',    10000000000,'penguin_pink'],
-        ['Shark-128',         'Shark-128-Diamond',         'Tiburon Diamante',          10000000000,'shark'],
-        ['Sheep-128',         'Sheep-128-Diamond',         'Oveja Diamante',            10000000000,'sheep'],
+        ['Cat-Beige-128',     'Cat-Beige-128-Diamond',     'Gato Beige Diamante',       1000000000,    'cat_beige'],
+        ['Cat-Blue-128',      'Cat-Blue-128-Diamond',      'Gato Azul Diamante',        1000000000,    'cat_blue'],
+        ['Cat-Pink-128',      'Cat-Pink-128-Diamond',      'Gato Rosa Diamante',        1000000000,    'cat_pink'],
+        ['Cat-Tiger-128',     'Cat-Tiger-128-Diamond',     'Gato Tigre Diamante',       10000000000,   'cat_tiger'],
+        ['Cat-Tiger-Beige-128','Cat-Tiger-Beige-128-Diamond','Tigre Beige Diamante',    10000000000,   'tiger_beige'],
+        ['Cat-Tiger-Rose-128','Cat-Tiger-Rose-128-Diamond','Tigre Rosa Diamante',       10000000000,   'tiger_rose'],
+        ['Cat-White-128',     'Cat-White-128-Diamond',     'Gato Blanco Diamante',      100000000000,  'cat_white'],
+        ['Chicken-White-128', 'Chicken-White-128-Diamond', 'Pollito Diamante',          100000000000,  'chicken_white'],
+        ['Chicken-Yellow-128','Chicken-Yellow-128-Diamond','Pollito Amarillo Diamante', 100000000000,  'chicken_yellow'],
+        ['Cow-128',           'Cow-128-Diamond',           'Vaca Diamante',             1000000000000, 'cow'],
+        ['Frog-128',          'Frog-128-Diamond',          'Rana Diamante',             1000000000000, 'frog'],
+        ['Penguin-128',       'Penguin-128-Diamond',       'Pinguino Diamante',         1000000000000, 'penguin'],
+        ['Penguin-Pink-128',  'Penguin-Pink-128-Diamond',  'Pinguino Rosa Diamante',    10000000000000,'penguin_pink'],
+        ['Shark-128',         'Shark-128-Diamond',         'Tiburon Diamante',          10000000000000,'shark'],
+        ['Sheep-128',         'Sheep-128-Diamond',         'Oveja Diamante',            10000000000000,'sheep'],
     ];
     const diamondDescMap = {
         'bear':          ['Mercado x6 permanente','Dulces con 30% descuento','Penalizacion minima en ventas negativas'],
@@ -763,7 +763,8 @@ const isFoodInflationFree = (foodId) => {
     if (pet === 'tiger_beige' && food.cat === 'proteina') return true;
     if (pet === 'tiger_rose'  && (food.cat === 'proteina' || food.cat === 'dulce')) return true;
     if (pet === 'cat_white'   && (food.cat === 'proteina' || food.cat === 'dulce')) return true;
-    if ((pet === 'chicken_white' || pet === 'chicken_yellow' || pet === 'shark') && food.cat !== 'proteina') return true;
+    // Pollito: NO exento de inflación pasiva — solo resetea con botón activo
+    if (pet === 'shark' && food.cat !== 'proteina') return true;
     return false;
 };
 
@@ -1169,7 +1170,7 @@ window.openPetInfo = (petId) => {
 
     title.textContent = def.label;
     // Para mascotas doradas usar imagen base con filtro dorado
-    const imgSrc = def.golden && def.baseId
+    const imgSrc = (def.golden || def.diamond) && def.baseId
         ? `../assets/pets/${def.baseId}.png`
         : `../assets/pets/${petId}.png`;
     img.src = imgSrc;
