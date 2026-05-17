@@ -2059,6 +2059,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof window.initCloudSync === 'function') {
         await window.initCloudSync(); // carga desde Supabase si hay guardado más reciente
     }
+    // Iniciar guardia de sesión única
+    if (typeof window.startSessionGuard === 'function') {
+        window.startSessionGuard();
+    }
     loadGame(); // carga desde localStorage (ya actualizado por initCloudSync)
 
     // Actualizar monedas en pantalla inmediatamente tras cargar

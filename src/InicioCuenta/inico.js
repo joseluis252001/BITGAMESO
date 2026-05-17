@@ -58,6 +58,19 @@ if (loginForm) {
         localStorage.setItem('bitgameso_sesion_activa', username);
         localStorage.setItem('bitgameso_user_id', data.user.id);
 
+        // Generar token único de sesión y guardarlo en Supabase
+        // Esto desconectará cualquier otro dispositivo con sesión abierta
+        const sessionToken = crypto.randomUUID();
+        localStorage.setItem('bitgameso_session_token', sessionToken);
+
+        await supabase.from('profiles').upsert({
+            id: data.user.id,
+            username,
+            email: emailFinal,
+            active_session_token: sessionToken,
+            last_login: new Date().toISOString()
+        });
+
         window.location.href = '/src/Game/game.html';
     });
 }
