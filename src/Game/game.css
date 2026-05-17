@@ -174,15 +174,8 @@ body {
 .inv-img  { width:28px; height:28px; object-fit:contain; }
 .inv-qty  { font-size:10px; font-weight:700; color:var(--primary-dk); }
 
-/* Dot de categoría */
-.inv-cat-dot {
-    width:8px; height:8px; border-radius:50%; margin-top:1px;
-}
-.cat-veg     { background:#4caf50; }
-.cat-fruit   { background:#ff9800; }
-.cat-protein { background:#f44336; }
-.cat-candy   { background:#9c27b0; }
-.cat-misc    { background:#3f51b5; }
+/* Dot de categoría — oculto */
+.inv-cat-dot { display: none; }
 
 /* ====   DASHBOARD GRID
    ==== */
