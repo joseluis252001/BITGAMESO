@@ -1931,7 +1931,7 @@ body {
         justify-content: space-between;
         gap: 6px;
     }
-    .nav-left { flex-direction: row; align-items: center; gap: 5px; flex: 1; min-width: 0; }
+    .nav-left { flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; flex: 1; min-width: 0; }
     .score-container { font-size: .68rem; gap: 3px; white-space: nowrap; }
     .coin-icon { width: 14px; }
     #monedas-count { font-size: .68rem; }
@@ -1946,8 +1946,26 @@ body {
     .nav-actions button { padding: 3px 7px; font-size: .52rem; border-radius: 7px; white-space: nowrap; }
     .btn-nav-icon { display: none; }
 
-    /* Balance panel oculto en landscape para ahorrar espacio */
-    #balance-panel { display: none !important; }
+    /* Balance panel visible en landscape — compacto bajo las monedas */
+    #balance-panel {
+        display: flex !important;
+        width: auto !important;
+        order: 10 !important;
+        margin: 0 !important;
+        padding: 1px 4px !important;
+        gap: 4px !important;
+        font-size: 7px !important;
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
+        align-items: center !important;
+        flex-shrink: 1 !important;
+    }
+    .balance-label { font-size: 6px !important; opacity: .7; }
+    .balance-value { font-size: 7px !important; font-weight: 700; }
+    .balance-divider { font-size: 8px !important; color: #CBA6F7 !important; }
 
     /* Inventario compacto */
     .inventory-section { top: 94px !important; height: 36px; padding: 2px .6rem; gap: 4px; }
