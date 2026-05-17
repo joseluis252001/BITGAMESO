@@ -2493,74 +2493,81 @@ body {
 }
 
 /* ============================================================
-   EFECTOS DE COMIDA — junto a la mascota
+   EFECTOS DE COMIDA — franja compacta fija en pet-aside
    ============================================================ */
 
-/* Pet-aside en PC: flex row para mascota + efectos lado a lado */
+/* Resetear display del pet-aside a columna normal */
 .pet-aside {
     display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-.pet-aside h2 {
-    width: 100%;
-    flex-shrink: 0;
-}
-
-/* Contenedor mascota ocupa su espacio natural */
-.pet-container,
-#pet-character,
-.pet-hearts,
-.pet-health-label,
-#pet-message,
-.btn-change-pet,
-.btn-pet-ability,
-.btn-pet-info-active {
-    /* Ya tienen sus estilos — solo aseguramos que el aside los agrupe */
-}
-
-/* Efectos a la DERECHA en PC */
-.pet-effects {
-    display: flex !important;
     flex-direction: column !important;
-    gap: 4px !important;
-    align-items: flex-start !important;
-    flex: 1;
-    min-width: 80px;
-    margin: 0 !important;
-    padding: 0 !important;
+    align-items: center !important;
 }
 
-/* Móvil vertical: efectos a la IZQUIERDA — reordenar */
+/* Barra de efectos — altura fija, nunca empuja botones */
+.pet-effects-bar {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 3px !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    max-height: 52px !important;
+    overflow: hidden !important;
+    margin: 2px 0 !important;
+    padding: 0 !important;
+    justify-content: center !important;
+}
+
+/* Badge individual muy compacto */
+.pet-effects-bar .effect-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    padding: 2px 5px !important;
+    border-radius: 8px !important;
+    font-size: 7px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    height: 20px !important;
+}
+
+.pet-effects-bar .eff-icon {
+    width: 10px !important;
+    height: 10px !important;
+}
+
+.pet-effects-bar .eff-timer {
+    font-size: 7px !important;
+    opacity: .85 !important;
+}
+
+/* Móvil: aún más pequeño */
 @media (max-width: 600px) {
-    .pet-aside {
-        flex-direction: row !important;
-    }
-    .pet-effects {
-        order: -1 !important;
-        min-width: 55px !important;
-        max-width: 70px !important;
-        font-size: 7px !important;
+    .pet-effects-bar {
+        max-height: 46px !important;
         gap: 2px !important;
     }
-    .pet-effects .effect-tag {
-        font-size: 7px !important;
+    .pet-effects-bar .effect-badge {
+        font-size: 6px !important;
         padding: 1px 4px !important;
+        height: 18px !important;
         border-radius: 6px !important;
     }
-    .pet-effects span,
-    .pet-effects div {
-        font-size: 7px !important;
-        padding: 1px 3px !important;
+    .pet-effects-bar .eff-icon {
+        width: 8px !important;
+        height: 8px !important;
+    }
+    .pet-effects-bar .eff-timer {
+        font-size: 6px !important;
     }
 }
 
-/* Landscape: efectos a la DERECHA (igual que PC) */
+/* Landscape: igual de compacto */
 @media (orientation: landscape) and (max-height: 500px) {
-    .pet-effects {
-        order: 0 !important;
+    .pet-effects-bar {
+        max-height: 22px !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        justify-content: flex-start !important;
     }
 }
