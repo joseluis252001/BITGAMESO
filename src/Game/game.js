@@ -2344,16 +2344,59 @@ window.closeChart = () => {
 const buildChartSelector = (selected) => {
     const el = document.getElementById('chart-selector');
     if (!el) return;
-    const symbols = Array.from(state.market.keys()).slice(0, 20); // primeros 20
-    el.innerHTML = symbols.map(sym => `
-        <button onclick="switchChart('${sym}')" style="
-            padding:3px 8px;border-radius:8px;border:2px solid #CBA6F7;
-            font-size:10px;font-family:'Poppins',sans-serif;cursor:pointer;
-            background:${sym === selected ? '#CBA6F7' : 'white'};
-            color:${sym === selected ? 'white' : '#CBA6F7'};
-            font-weight:600;transition:0.2s;white-space:nowrap;flex-shrink:0;
-        ">${sym}</button>
-    `).join('');
+
+    // Agrupar activos por tipo/categoría
+    const byType = new Map();
+    state.market.forEach((asset, sym) => {
+        const type = asset.type || 'Otros';
+        if (!byType.has(type)) byType.set(type, []);
+        byType.get(type).push(sym);
+    });
+
+    // Colores por categoría
+    const typeColors = {
+        'IA':        '#CBA6F7',
+        'Bluechip':  '#A0E7E5',
+        'Digital':   '#FFB6C1',
+        'Gaming':    '#B2F2BB',
+        'NFT':       '#FFF5BA',
+        'Metaverso': '#CBA6F7',
+        'Meme':      '#FFB6C1',
+        'Fintech':   '#A0E7E5',
+        'Energía':   '#B2F2BB',
+        'Biotech':   '#FFF5BA',
+        'Espacio':   '#CBA6F7',
+        'DeFi':      '#A0E7E5',
+    };
+
+    let html = '';
+    byType.forEach((symbols, type) => {
+        const color = typeColors[type] || '#CBA6F7';
+        html += `
+        <div style="width:100%;margin-bottom:6px;">
+            <div style="
+                font-size:9px;font-weight:700;color:${color};
+                font-family:'Poppins',sans-serif;
+                margin-bottom:3px;
+                text-transform:uppercase;
+                letter-spacing:1px;
+            ">${type}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                ${symbols.map(sym => `
+                    <button onclick="switchChart('${sym}')" style="
+                        padding:3px 8px;border-radius:8px;
+                        border:2px solid ${color};
+                        font-size:10px;font-family:'Poppins',sans-serif;cursor:pointer;
+                        background:${sym === selected ? color : 'white'};
+                        color:${sym === selected ? 'white' : color};
+                        font-weight:600;transition:0.2s;white-space:nowrap;
+                    ">${sym}</button>
+                `).join('')}
+            </div>
+        </div>`;
+    });
+
+    el.innerHTML = html;
 };
 
 window.switchChart = (sym) => {
