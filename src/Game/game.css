@@ -2440,3 +2440,20 @@ body {
 #chart-canvas {
     cursor: crosshair;
 }
+
+/* Gráfica en landscape — más compacta */
+@media (orientation: landscape) and (max-height: 500px) {
+    #modal-chart .modal-box {
+        padding: 8px 12px !important;
+        gap: 5px !important;
+        max-height: 96vh !important;
+    }
+    #modal-chart #chart-title { font-size: 1rem !important; }
+    #modal-chart #chart-subtitle { font-size: 9px !important; }
+    #modal-chart #chart-selector button { font-size: 9px !important; padding: 2px 6px !important; }
+    #modal-chart canvas { height: 90px !important; }
+    #modal-chart > div > div:nth-child(3) { height: 110px !important; }
+    #modal-chart #chart-stats div { padding: 3px 7px !important; font-size: 9px !important; min-width: 55px !important; }
+    #modal-chart #chart-buy-btn { padding: 4px 12px !important; font-size: 0.78rem !important; }
+    #modal-chart #chart-price-display { font-size: 0.9rem !important; }
+}
