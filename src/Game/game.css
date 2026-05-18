@@ -2620,13 +2620,25 @@ body {
 /* ============================================================
    META DE INVERSIÓN — Barra de progreso
    ============================================================ */
+.portfolio-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+.portfolio-header-row h2 {
+    margin: 0;
+    flex-shrink: 0;
+}
 .goal-panel {
-    width: 100%;
-    padding: 6px 8px;
-    background: #fdf6ff;
-    border-radius: 10px;
-    border: 2px solid #f0e7ff;
-    margin: 4px 0;
+    flex: 1;
+    min-width: 140px;
+    padding: 6px 10px;
+    background: #FFF5BA;
+    border-radius: 12px;
+    border: 2px solid #CBA6F7;
     flex-shrink: 0;
 }
 .goal-header {
@@ -2642,34 +2654,35 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 .goal-btn-change {
-    background: none;
-    border: 1px solid #CBA6F7;
-    border-radius: 6px;
-    color: #CBA6F7;
+    background: #CBA6F7;
+    border: none;
+    border-radius: 8px;
+    color: white;
     font-size: 9px;
-    padding: 2px 6px;
+    padding: 2px 8px;
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
     width: auto;
     margin: 0;
     transition: 0.2s;
+    font-weight: 700;
 }
 .goal-btn-change:hover {
-    background: #CBA6F7;
-    color: white;
+    background: #FFB6C1;
     transform: none;
 }
 .goal-bar-wrap {
     width: 100%;
     height: 8px;
-    background: #f0e7ff;
+    background: white;
     border-radius: 10px;
     overflow: hidden;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
+    border: 1px solid #f0e7ff;
 }
 .goal-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #B2F2BB, #52b788);
+    background: linear-gradient(90deg, #A0E7E5, #CBA6F7);
     border-radius: 10px;
     transition: width 0.5s ease;
 }
@@ -2681,8 +2694,9 @@ body {
 }
 
 @media (max-width: 600px) {
-    .goal-panel { padding: 4px 6px; }
+    .portfolio-header-row { flex-direction: column; align-items: flex-start; }
+    .goal-panel { width: 100%; min-width: unset; padding: 4px 8px; }
     .goal-label { font-size: 8px; }
-    .goal-btn-change { font-size: 7px; padding: 1px 4px; }
+    .goal-btn-change { font-size: 7px; padding: 1px 6px; }
     .goal-pct { font-size: 7px; }
 }

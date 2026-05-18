@@ -90,10 +90,23 @@
         <div class="bottom-row">
         <!-- CARTERA -->
         <aside class="portfolio-aside card">
-            <h2>
-                <img src="../assets/coins/Coins-1-Chest-128.png" class="section-icon" alt="Cartera">
-                Cartera
-            </h2>
+            <div class="portfolio-header-row">
+                <h2>
+                    <img src="../assets/coins/Coins-1-Chest-128.png" class="section-icon" alt="Cartera">
+                    Cartera
+                </h2>
+                <!-- BARRA DE META DE INVERSIÓN -->
+                <div id="goal-panel" class="goal-panel">
+                    <div class="goal-header">
+                        <span class="goal-label">Meta: <span id="goal-meta-value">$100,000</span></span>
+                        <button onclick="setNewGoal()" class="goal-btn-change">Cambiar</button>
+                    </div>
+                    <div class="goal-bar-wrap">
+                        <div id="goal-progress-bar" class="goal-bar-fill" style="width:0%"></div>
+                    </div>
+                    <span id="goal-progress-pct" class="goal-pct">0%</span>
+                </div>
+            </div>
             <div id="portfolio-list" class="portfolio-list">
                 <p class="empty-msg">Aún no tienes posiciones.</p>
             </div>
@@ -115,17 +128,7 @@
             <p id="pet-message">¡Todo bajo control!</p>
             <!-- Habilidad activa de la mascota -->
             <div id="active-effects" class="active-effects pet-effects-bar"></div>
-            <!-- BARRA DE META DE INVERSIÓN -->
-            <div id="goal-panel" class="goal-panel">
-                <div class="goal-header">
-                    <span class="goal-label">Meta: <span id="goal-meta-value">$100,000</span></span>
-                    <button onclick="setNewGoal()" class="goal-btn-change">Cambiar meta</button>
-                </div>
-                <div class="goal-bar-wrap">
-                    <div id="goal-progress-bar" class="goal-bar-fill" style="width:0%"></div>
-                </div>
-                <span id="goal-progress-pct" class="goal-pct">0%</span>
-            </div>
+
             <div id="pet-ability-area" class="pet-ability-area"></div>
             <button id="btn-cambiar-mascota" class="btn-change-pet" onclick="openPetSelector()">
                 🐾 Mascotas
