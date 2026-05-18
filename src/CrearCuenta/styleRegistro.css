@@ -231,3 +231,16 @@ button:hover {
     padding-right: 44px !important;
     margin: 12px 0 !important;
 }
+
+/* Igualar altura de todos los inputs incluyendo los de pass-field */
+input {
+    height: 48px !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+}
+.pass-field input {
+    height: 48px !important;
+    padding: 0 44px 0 14px !important;
+    box-sizing: border-box !important;
+    margin: 12px 0 !important;
+}
