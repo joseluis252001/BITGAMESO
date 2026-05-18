@@ -558,16 +558,16 @@ const startPassivesForPet = (petId) => {
         }
 
         case 'cat_beige':
-            petHungerTimer = setInterval(() => { _getChangePH()(-1);  _getCheckGO()(); }, 20000); break;
+            petHungerTimer = setInterval(() => { if(window._isPaused) return; _getChangePH()(-1);  _getCheckGO()(); }, 20000); break;
         case 'cat_blue':
-            petHungerTimer = setInterval(() => { _getChangePH()(-5);  _getCheckGO()(); }, 20000); break;
+            petHungerTimer = setInterval(() => { if(window._isPaused) return; _getChangePH()(-5);  _getCheckGO()(); }, 20000); break;
         case 'cat_pink':
-            petHungerTimer = setInterval(() => { _getChangePH()(-7);  _getCheckGO()(); }, 25000); break;
+            petHungerTimer = setInterval(() => { if(window._isPaused) return; _getChangePH()(-7);  _getCheckGO()(); }, 25000); break;
         case 'cat_tiger':
-            petHungerTimer = setInterval(() => { _getChangePH()(-9);  _getCheckGO()(); }, 30000); break;
+            petHungerTimer = setInterval(() => { if(window._isPaused) return; _getChangePH()(-9);  _getCheckGO()(); }, 30000); break;
 
         case 'cow':
-            petHungerTimer = setInterval(() => { _getChangePH()(-11); _getCheckGO()(); }, 30000); break;
+            petHungerTimer = setInterval(() => { if(window._isPaused) return; _getChangePH()(-11); _getCheckGO()(); }, 30000); break;
 
         case 'penguin':
         case 'penguin_pink': {
@@ -579,12 +579,12 @@ const startPassivesForPet = (petId) => {
                 _getShowToast()(` +${amount} del Pinguino!`);
                 _getSaveGame()();
             }, 120000);
-            petHungerTimer = setInterval(() => { _getChangePH()(-12); _getCheckGO()(); }, 50000);
+            petHungerTimer = setInterval(() => { if(window._isPaused) return; _getChangePH()(-12); _getCheckGO()(); }, 50000);
             break;
         }
 
         case 'shark':
-            petHungerTimer = setInterval(() => { _getChangePH()(-15); _getCheckGO()(); }, 120000); break;
+            petHungerTimer = setInterval(() => { if(window._isPaused) return; _getChangePH()(-15); _getCheckGO()(); }, 120000); break;
 
         case 'frog': {
             // Rana normal: -15% salud cada 40s
@@ -594,7 +594,7 @@ const startPassivesForPet = (petId) => {
             const isGolden  = PET_DEFS[state.currentPet]?.golden;
             if (!isDiamond) {
                 const frogLoss = isGolden ? -10 : -15;
-                petHungerTimer = setInterval(() => { _getChangePH()(frogLoss); _getCheckGO()(); }, 40000);
+                petHungerTimer = setInterval(() => { if(window._isPaused) return; _getChangePH()(frogLoss); _getCheckGO()(); }, 40000);
             }
             break;
         }

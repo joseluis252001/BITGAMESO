@@ -2579,3 +2579,40 @@ body {
     .dashboard-grid { z-index: 1 !important; position: relative; }
     .card { z-index: 1 !important; position: relative; }
 }
+
+/* ============================================================
+   BOTÓN DE PAUSA
+   ============================================================ */
+.btn-pause-market {
+    background: white;
+    border: 2px solid #CBA6F7;
+    border-radius: 10px;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    margin-left: 8px;
+    transition: 0.2s;
+}
+.btn-pause-market:hover {
+    background: #f0e7ff;
+    transform: scale(1.05);
+}
+.pause-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+/* Pausado — resaltar en rosa */
+.btn-pause-market.paused {
+    background: #FFB6C1;
+    border-color: #FFB6C1;
+}
+
+@media (max-width: 600px) {
+    .pause-icon { width: 14px; height: 14px; }
+    .btn-pause-market { padding: 3px 6px; margin-left: 4px; }
+}

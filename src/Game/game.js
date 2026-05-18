@@ -397,6 +397,7 @@ let effectTickInterval = null;
 const startEffectTick = () => {
     if (effectTickInterval) { clearInterval(effectTickInterval); effectTickInterval = null; }
     effectTickInterval = setInterval(() => {
+        if (window._isPaused) return; // Pausado — no decrementar efectos
         let changed = false;
         ['marketFast','doubleProfit','futureVision'].forEach(key => {
             if (state.effectsTime[key] > 0) {
@@ -492,11 +493,17 @@ let _marketTimeout = null;
 
 const _marketLoop = () => {
     if (!_marketRunning) return;
+    if (window._isPaused) {
+        // Pausado — esperar y revisar de nuevo
+        _marketTimeout = setTimeout(_marketLoop, 500);
+        return;
+    }
     fetchMarket();
     _marketTimeout = setTimeout(_marketLoop, _marketSpeed);
 };
 
 const fetchMarket = () => {
+    if (window._isPaused) return; // Pausado
     // Aplicar tick de bonos ANTES de actualizar precios volátiles
     if (typeof window.applyBondTick === 'function') window.applyBondTick();
     window._lastMarketUpdate = Date.now();
@@ -2613,3 +2620,109 @@ window.openChart = (symbol) => {
     _origOpenChart(symbol);
     setTimeout(initChartTooltip, 50);
 };
+
+// ============================================================
+//  PAUSA GLOBAL — BITGAMESO
+//  Congela: mercado, timers de comida, salud mascota, bonos
+// ============================================================
+
+window._isPaused = false;
+
+// Timers que se pausan
+let _pausedTimers = [];
+
+window.togglePause = () => {
+    window._isPaused = !window._isPaused;
+    updatePauseUI();
+
+    if (window._isPaused) {
+        pauseEverything();
+    } else {
+        resumeEverything();
+    }
+};
+
+const pauseEverything = () => {
+    // 1. Pausar mercado
+    if (typeof _marketRunning !== 'undefined') {
+        _marketRunning = false;
+        if (typeof _marketTimeout !== 'undefined') clearTimeout(_marketTimeout);
+        if (typeof marketTimer !== 'undefined') clearInterval(marketTimer);
+    }
+
+    // 2. Pausar timers de efectos de comida (guardamos los segundos restantes)
+    if (typeof state !== 'undefined' && state.effectsTime) {
+        window._pausedEffectsTime = {};
+        Object.keys(state.effectsTime).forEach(k => {
+            window._pausedEffectsTime[k] = state.effectsTime[k];
+        });
+    }
+
+    // 3. Pausar timer de salud de la mascota
+    if (typeof petHungerTimer !== 'undefined' && petHungerTimer) {
+        clearInterval(petHungerTimer);
+        window._pausedPetTimer = true;
+    }
+
+    showToast('Mercado pausado');
+};
+
+const resumeEverything = () => {
+    // 1. Reanudar mercado
+    if (typeof startMarket === 'function') {
+        startMarket(typeof _marketSpeed !== 'undefined' ? _marketSpeed : 5000);
+    }
+
+    // 2. Restaurar efectos de comida
+    if (window._pausedEffectsTime && typeof state !== 'undefined') {
+        Object.keys(window._pausedEffectsTime).forEach(k => {
+            state.effectsTime[k] = window._pausedEffectsTime[k];
+        });
+        window._pausedEffectsTime = null;
+    }
+
+    // 3. Reanudar timer de salud mascota
+    if (window._pausedPetTimer && typeof initPetPassives === 'function') {
+        initPetPassives();
+        window._pausedPetTimer = false;
+    }
+
+    showToast('Mercado reanudado');
+};
+
+const updatePauseUI = () => {
+    const isPaused = window._isPaused;
+    const iconSrc  = isPaused
+        ? '../assets/settings/Stopwatch.png'
+        : '../assets/settings/Sun-Day-256.png';
+    const label = isPaused ? 'Pausado' : 'En vivo';
+
+    // Botón en mercado
+    const icon1 = document.getElementById('pause-icon');
+    if (icon1) icon1.src = iconSrc;
+
+    const btn1 = document.getElementById('btn-pause-market');
+    if (btn1) {
+        btn1.style.background = isPaused ? '#FFB6C1' : 'white';
+        btn1.style.borderColor = isPaused ? '#FFB6C1' : '#CBA6F7';
+    }
+
+    // Botón en gráfica
+    const icon2 = document.getElementById('pause-icon-chart');
+    if (icon2) icon2.src = iconSrc;
+
+    const label2 = document.getElementById('pause-label-chart');
+    if (label2) label2.textContent = label;
+
+    const btn2 = document.getElementById('btn-pause-chart');
+    if (btn2) {
+        btn2.style.background = isPaused ? '#FFB6C1' : 'white';
+        btn2.style.borderColor = isPaused ? '#FFB6C1' : '#CBA6F7';
+        btn2.style.color       = isPaused ? 'white' : '#CBA6F7';
+    }
+};
+
+// ── Interceptar fetchMarket para respetar pausa ──────────────
+const _origFetchMarket = window.fetchMarket || null;
+// El check se hace dentro del _marketLoop existente
+// Necesitamos que _marketLoop respete _isPaused

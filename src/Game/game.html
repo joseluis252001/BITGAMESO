@@ -129,6 +129,9 @@
                     <button class="btn-market-info" onclick="openMarketInfo()" title="¿Qué es cada sector?">
                         <img src="../assets/arrows/Arrow-Down-128.png" alt="Info sectores" class="market-info-icon">
                     </button>
+                    <button id="btn-pause-market" class="btn-pause-market" onclick="togglePause()" title="Pausar/Reanudar mercado">
+                        <img id="pause-icon" src="../assets/settings/Sun-Day-256.png" alt="Pausar" class="pause-icon">
+                    </button>
                 </h2>
                 <p id="market-updated" style="font-size:10px;color:#aaa;">Sincronizando...</p>
             </div>
@@ -182,11 +185,21 @@
             <!-- Stats rápidos -->
             <div id="chart-stats" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
             <!-- Precio + Botón comprar -->
-            <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:2px;">
+            <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:2px;">
+                <button id="btn-pause-chart" onclick="togglePause()" title="Pausar/Reanudar" style="
+                    background:white;border:2px solid #CBA6F7;border-radius:10px;
+                    padding:5px 8px;cursor:pointer;display:flex;align-items:center;gap:4px;
+                    font-size:11px;color:#CBA6F7;font-family:'Poppins',sans-serif;font-weight:700;
+                ">
+                    <img id="pause-icon-chart" src="../assets/settings/Sun-Day-256.png" style="width:18px;height:18px;" alt="Pausa">
+                    <span id="pause-label-chart">En vivo</span>
+                </button>
+                <div style="display:flex;gap:8px;align-items:center;">
                 <span id="chart-price-display" style="font-size:1rem;font-weight:700;color:#CBA6F7;font-family:'Fredoka',sans-serif;"></span>
                 <button id="chart-buy-btn" onclick="chartBuySelected()" class="btn-action btn-buy" style="padding:6px 16px;font-size:0.85rem;">
                     Comprar
                 </button>
+                </div>
             </div>
         </div>
     </div>
