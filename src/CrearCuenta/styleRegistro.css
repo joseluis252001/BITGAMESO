@@ -216,3 +216,18 @@ button:hover {
     background: #f0e7ff;
     transform: translateY(-50%);
 }
+
+/* Igualar tamaño de campos de contraseña con los demás inputs */
+.pass-field {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+}
+.pass-field input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding-right: 44px !important;
+    margin: 12px 0 !important;
+}
