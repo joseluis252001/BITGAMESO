@@ -2056,7 +2056,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof window.initCloudSync === 'function') {
         await window.initCloudSync(); // carga desde Supabase si hay guardado más reciente
     }
-    loadGame(); // carga desde localStorage (ya actualizado por initCloudSync)
+    loadGame();
+    if (typeof window.initMissions === 'function') window.initMissions();
+    window._lastLevel = window.getCurrentLevel ? window.getCurrentLevel() : 0;
+    if (typeof window.checkLevelUp === 'function') setTimeout(window.checkLevelUp, 500);
 
     // Actualizar monedas en pantalla inmediatamente tras cargar
     if (refs.monedasCount) {
