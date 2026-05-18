@@ -65,10 +65,16 @@ body {
 .chevron        { font-size:.8rem; color:#999; }
 
 .settings-dropdown {
-    position:absolute; top:calc(100% + 10px); right:0;
-    background:white; border-radius:16px; padding:16px;
-    min-width:280px; border:2px solid #eee;
-    box-shadow:0 8px 30px rgba(0,0,0,.12); z-index:99999;
+    position:fixed !important;
+    top:60px !important;
+    right:12px !important;
+    background:white;
+    border-radius:16px;
+    padding:16px;
+    min-width:280px;
+    border:2px solid #eee;
+    box-shadow:0 8px 30px rgba(0,0,0,.12);
+    z-index:999999 !important;
 }
 
 .dropdown-title { font-weight:700; font-size:.85rem; margin:0 0 10px; }
@@ -2694,8 +2700,8 @@ body {
 }
 
 @media (max-width: 600px) {
-    .portfolio-header-row { flex-direction: column; align-items: flex-start; }
-    .goal-panel { width: 100%; min-width: unset; padding: 4px 8px; }
+    .portfolio-header-row { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .goal-panel { flex: 1; min-width: 120px; padding: 4px 8px; }
     .goal-label { font-size: 8px; }
     .goal-btn-change { font-size: 7px; padding: 1px 6px; }
     .goal-pct { font-size: 7px; }
@@ -2810,7 +2816,8 @@ body {
         padding: 3px 6px !important;
     }
     #exp-panel {
-        display: none !important;
+        padding: 2px 6px !important;
+        min-width: 120px !important;
     }
     #modal-misiones .modal-box {
         max-height: 90vh !important;
@@ -2818,3 +2825,4 @@ body {
         padding: 10px 12px !important;
     }
 }
+
