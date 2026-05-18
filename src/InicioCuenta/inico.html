@@ -2,16 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="/src/assets/logo/Coin-128.png">
+    <link rel="shortcut icon" href="/src/assets/logo/Coin-128.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - BITGAMESO</title>
-    <link rel="manifest" href="/manifest.json">
-    <!-- PWA iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="BITGAMESO">
-    <link rel="apple-touch-icon" href="/src/assets/logo/Coin-128.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <link rel="stylesheet" href="/src/InicioCuenta/inicio.css">
+    <link rel="stylesheet" href="inicio.css">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -34,12 +29,7 @@
         <h2>Iniciar Sesión</h2>
         <form id="form-login">
             <input type="text" id="login-usuario" placeholder="Usuario o correo electrónico" required>
-            <div class="pass-field">
-                <input type="password" id="login-pass" placeholder="Contraseña" required>
-                <button type="button" class="btn-toggle-pass" onclick="togglePass('login-pass', this)" tabindex="-1">
-                    <span class="eye-icon">Ver</span>
-                </button>
-            </div>
+            <input type="password" id="login-pass" placeholder="Contraseña" required>
             <button type="submit">Entrar</button>
         </form>
 
@@ -69,14 +59,6 @@
     </footer>
 
     <!-- Supabase como módulo ES -->
-    <script>
-    function togglePass(inputId, btn) {
-        const input = document.getElementById(inputId);
-        const isPass = input.type === 'password';
-        input.type = isPass ? 'text' : 'password';
-        btn.querySelector('.eye-icon').textContent = isPass ? 'Ocultar' : 'Ver';
-    }
-    </script>
     <script type="module" src="inico.js"></script>
 </body>
 </html>
