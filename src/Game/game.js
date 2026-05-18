@@ -530,13 +530,16 @@ const fetchMarket = () => {
                     ? ` Crash en ${a.symbol}! -${(crashAmt*100).toFixed(1)}% (Rana te protegió!)`
                     : ` Crash en ${a.symbol}! -${(crashAmt*100).toFixed(1)}%`;
                 showToast(crashMsg);
-                // Rana reduce pérdida de salud en crash
-                if (petP !== 'frog') {
-                    if (typeof changePetHealth === 'function') changePetHealth(-5);
-                } else {
-                    const isDiamond = PET_DEFS[state.currentPet]?.diamond;
-                    if (!isDiamond) {
-                        if (typeof changePetHealth === 'function') changePetHealth(-2); // mitad del daño
+                // Daño de salud solo si el jugador TIENE ese activo en cartera
+                // y solo una vez por crash (no acumulativo por número de activos)
+                if (state.portfolio.has(a.symbol)) {
+                    if (petP !== 'frog') {
+                        if (typeof changePetHealth === 'function') changePetHealth(-3);
+                    } else {
+                        const isDiamond = PET_DEFS[state.currentPet]?.diamond;
+                        if (!isDiamond) {
+                            if (typeof changePetHealth === 'function') changePetHealth(-1);
+                        }
                     }
                 }
             } else {
