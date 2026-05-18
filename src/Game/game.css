@@ -2700,3 +2700,115 @@ body {
     .goal-btn-change { font-size: 7px; padding: 1px 6px; }
     .goal-pct { font-size: 7px; }
 }
+
+/* ============================================================
+   MISIONES — Badge y botón
+   ============================================================ */
+.btn-header-missions {
+    position: relative;
+    background: linear-gradient(135deg, #FFF5BA, #FFB6C1);
+    border-color: #FFB6C1;
+}
+.btn-header-missions:hover {
+    background: linear-gradient(135deg, #FFB6C1, #CBA6F7);
+}
+.missions-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #FFB6C1;
+    color: white;
+    font-size: 9px;
+    font-weight: 900;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* ============================================================
+   RESPONSIVO — Misiones, Niveles, Mascotas bloqueadas
+   ============================================================ */
+
+/* Botón misiones en header móvil */
+@media (max-width: 600px) {
+    .btn-header-missions {
+        font-size: 0.55rem;
+        padding: 4px 7px;
+    }
+    .missions-badge {
+        width: 13px;
+        height: 13px;
+        font-size: 7px;
+        top: -3px;
+        right: -3px;
+    }
+
+    /* Modal misiones */
+    #modal-misiones .modal-box {
+        padding: 14px 12px !important;
+        max-width: 95vw !important;
+    }
+    #missions-list > div {
+        padding: 8px 10px !important;
+    }
+    #missions-list span[style*="font-size:11px"] {
+        font-size: 9px !important;
+    }
+    #missions-list p {
+        font-size: 8px !important;
+    }
+
+    /* Modal level up */
+    #modal-levelup .modal-box {
+        padding: 14px 12px !important;
+        max-width: 95vw !important;
+    }
+    #modal-levelup div[style*="font-size:2rem"] {
+        font-size: 1.4rem !important;
+    }
+
+    /* Barra EXP en cartera */
+    #exp-panel {
+        padding: 4px 8px !important;
+    }
+    #exp-level {
+        font-size: 8px !important;
+    }
+
+    /* Botón mascota bloqueada */
+    .btn-pet-locked {
+        font-size: 7px !important;
+        padding: 3px 5px !important;
+    }
+
+    /* Modal elegir comida */
+    #modal-food-choice .modal-box {
+        padding: 12px !important;
+        max-width: 95vw !important;
+    }
+}
+
+/* Landscape — misiones y niveles */
+@media (orientation: landscape) and (max-height: 500px) {
+    .btn-header-missions {
+        font-size: 0 !important;
+        padding: 3px 6px !important;
+    }
+    #exp-panel {
+        display: none !important;
+    }
+    #modal-misiones .modal-box {
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+        padding: 10px 12px !important;
+    }
+}

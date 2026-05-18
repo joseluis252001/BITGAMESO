@@ -565,6 +565,7 @@ const fetchMarket = () => {
     saveGame();
     if (typeof window.updateFinanceUI === 'function') window.updateFinanceUI();
     checkInvestmentGoal();
+    if (typeof window.checkLevelUp === 'function') window.checkLevelUp();
     // Diversificación protege/daña salud cada 10 ticks
     window._divTick = (window._divTick || 0) + 1;
     if (window._divTick >= 10) { window._divTick = 0; applyDiversificationBonus(); }
@@ -667,6 +668,7 @@ window.buy = (symbol) => {
         if (typeof applyPenguinBuyPenalty === 'function') applyPenguinBuyPenalty(a);
         if (typeof birdPaused !== 'undefined') { birdPaused = true; setTimeout(()=>{ birdPaused = false; }, 1000); }
         if (typeof window.applyBunnyPrediction === 'function') window.applyBunnyPrediction(symbol);
+        if (typeof window.updateMissionProgress === 'function') window.updateMissionProgress('comprar', 1);
         const discountMsg = actualPrice < a.price ? ` (descuento: ${fmt(a.price - actualPrice)})` : '';
         showToast(` Compraste ${a.symbol} por ${fmt(actualPrice)}${discountMsg}`);
         logEvent('compra', `Compraste ${a.symbol} — ${a.name}`, `Precio: ${fmt(actualPrice)} | Sector: ${a.type}`);
@@ -715,6 +717,10 @@ window.sellFromPortfolio = (symbol) => {
         changePetHealth(gain);
         showToast(` Vendiste ${symbol}! +${fmt(realProfit)}${x2tag}${petMsg} +${gain}️`);
         logEvent('venta', `Vendiste ${symbol} con GANANCIA`, `+${fmt(realProfit)}${x2tag}${petMsg}`);
+        if (typeof window.updateMissionProgress === 'function') {
+            window.updateMissionProgress('vender', 1);
+            window.updateMissionProgress('vender_ganancia', 1);
+        }
     } else if (realProfit < 0) {
         const petPassive = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.passive : null;
         const isDiamond  = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.diamond : false;
@@ -871,6 +877,9 @@ window.buyFood = (foodId, price) => {
     const nextPrice = Math.round(price * 2);
     showToast(`Compraste ${food.name} por ${price} | Próximo precio: ${nextPrice}`);
     logEvent('comida', `Compraste ${food.name}`, `Precio: ${price} | Efecto: ${catLabel[food.cat]}`);
+    if (typeof window.updateMissionProgress === 'function') {
+        window.updateMissionProgress('comprar_comida', 1, { cat: food.cat });
+    }
     updateUI();
     openFoodShop();
 };
@@ -911,6 +920,7 @@ const useFoodOnPet = () => {
     if (!foodId) { showToast(' Selecciona un ítem del inventario primero'); return; }
     const item = state.inventory.get(foodId);
     if (!item || item.qty <= 0) { showToast(' No tienes ese ítem'); return; }
+    if (typeof window.updateMissionProgress === 'function') window.updateMissionProgress('alimentar', 1);
 
     switch(item.cat) {
         case 'verdura':
@@ -2145,7 +2155,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof window.startSessionGuard === 'function') {
         window.startSessionGuard();
     }
-    loadGame(); // carga desde localStorage (ya actualizado por initCloudSync)
+    loadGame();
+    if (typeof window.initMissions === 'function') window.initMissions();
+    window._lastLevel = window.getCurrentLevel ? window.getCurrentLevel() : 0; // carga desde localStorage (ya actualizado por initCloudSync)
 
     // Actualizar monedas en pantalla inmediatamente tras cargar
     if (refs.monedasCount) {
@@ -2840,3 +2852,480 @@ window.setNewGoal = () => {
 };
 
 const checkInvestmentGoal = () => window.checkInvestmentGoal();
+
+// Mostrar razón de bloqueo de mascota
+window.showPetLockReason = (reason) => {
+    showToast(reason);
+};
+
+// ============================================================
+//  SISTEMA DE NIVELES (EXP) — BITGAMESO
+//  Basado en capital total. Recompensas de comida por nivel.
+// ============================================================
+
+// Tabla de niveles: [capital_requerido, [comidas_recompensa]]
+// Orden de menos a más importante: dulces → misc → frutas → verduras → proteína
+const LEVEL_TABLE = [
+    [100,        [{ id:'Candy-Blue-128', qty:2 }]],
+    [500,        [{ id:'Candy-Pink-128', qty:2 }]],
+    [1000,       [{ id:'Cookie-128', qty:2 }]],
+    [2000,       [{ id:'Bread-128', qty:2 }]],
+    [5000,       [{ id:'Cupcake-128', qty:2 }]],
+    [10000,      [{ id:'Mushroom-128', qty:2 }]],
+    [15000,      [{ id:'Apple-128', qty:3 }]],
+    [25000,      [{ id:'Banana-128', qty:3 }]],
+    [50000,      [{ id:'Orange-128', qty:3 }]],
+    [100000,     [{ id:'Strawberry-128', qty:3 }]],
+    [250000,     [{ id:'Pear-128', qty:3 }]],
+    [500000,     [{ id:'Blueberries-128', qty:4 }]],
+    [1000000,    [{ id:'Cherry-128', qty:4 }]],
+    [2500000,    [{ id:'Turnip-128', qty:4 }]],
+    [5000000,    [{ id:'Carrot-128', qty:4 }]],
+    [10000000,   [{ id:'Corn-128', qty:4 }]],
+    [25000000,   [{ id:'Potato-128', qty:4 }]],
+    [50000000,   [{ id:'Tomato-128', qty:5 }]],
+    [100000000,  [{ id:'Pumpkin-128', qty:5 }]],
+    [250000000,  [{ id:'Egg-128', qty:5 }]],
+    [500000000,  [{ id:'Fish-128', qty:5 }]],
+    [1000000000, [{ id:'Meat-128', qty:6 }]],
+];
+
+// Generar 2500 niveles escalando exponencialmente desde el nivel 23 en adelante
+const generateFullLevelTable = () => {
+    const table = [...LEVEL_TABLE];
+    let last = LEVEL_TABLE[LEVEL_TABLE.length - 1][0];
+    const foods = ['Carrot-128','Pumpkin-128','Fish-128','Meat-128','Egg-128'];
+    for (let i = table.length; i < 2500; i++) {
+        last = Math.round(last * 1.5);
+        const food = foods[i % foods.length];
+        const qty  = 3 + Math.floor(i / 500);
+        table.push([last, [{ id: food, qty }]]);
+    }
+    // Nivel 2500: toda la comida máxima
+    table[2499] = [table[2498][0] * 2, foodDatabase
+        ? foodDatabase.map(f => ({ id: f.id, qty: 99 }))
+        : [{ id: 'Meat-128', qty: 99 }]
+    ];
+    return table;
+};
+
+let _fullLevelTable = null;
+const getLevelTable = () => {
+    if (!_fullLevelTable) _fullLevelTable = generateFullLevelTable();
+    return _fullLevelTable;
+};
+
+// Calcular nivel actual según capital
+window.getCurrentLevel = () => {
+    const capital = typeof window.getBalance === 'function' ? window.getBalance().capital : state.monedas;
+    const table   = getLevelTable();
+    let level = 0;
+    for (let i = 0; i < table.length; i++) {
+        if (capital >= table[i][0]) level = i + 1;
+        else break;
+    }
+    return Math.min(level, 2500);
+};
+
+// Obtener progreso hacia el siguiente nivel
+window.getLevelProgress = () => {
+    const capital = typeof window.getBalance === 'function' ? window.getBalance().capital : state.monedas;
+    const table   = getLevelTable();
+    const level   = window.getCurrentLevel();
+    if (level >= 2500) return { level: 2500, pct: 100, current: capital, next: capital };
+    const current = level > 0 ? table[level - 1][0] : 0;
+    const next    = table[level][0];
+    const pct     = Math.min(100, ((capital - current) / (next - current)) * 100);
+    return { level, pct, current: capital, next };
+};
+
+// Verificar si subió de nivel
+window._lastLevel = 0;
+window.checkLevelUp = () => {
+    const lvl = window.getCurrentLevel();
+    if (lvl > window._lastLevel && window._lastLevel > 0) {
+        const table   = getLevelTable();
+        const rewards = table[lvl - 1]?.[1] || [];
+        showLevelUpModal(lvl, rewards);
+        // Dar recompensas
+        rewards.forEach(r => {
+            const food = foodDatabase?.find(f => f.id === r.id);
+            if (!food) return;
+            const existing = state.inventory.get(r.id) || { ...food, qty: 0 };
+            state.inventory.set(r.id, { ...existing, qty: (existing.qty || 0) + r.qty });
+        });
+        saveGame();
+        if (typeof renderInventory === 'function') renderInventory();
+    }
+    window._lastLevel = lvl;
+    updateLevelUI();
+};
+
+// Actualizar barra de EXP en UI
+const updateLevelUI = () => {
+    const { level, pct, next } = window.getLevelProgress();
+    const lvlEl  = document.getElementById('exp-level');
+    const barEl  = document.getElementById('exp-bar-fill');
+    const pctEl  = document.getElementById('exp-bar-pct');
+    const nextEl = document.getElementById('exp-next-val');
+    if (lvlEl)  lvlEl.textContent  = `Nv. ${level}`;
+    if (barEl)  barEl.style.width  = pct.toFixed(1) + '%';
+    if (pctEl)  pctEl.textContent  = pct.toFixed(1) + '%';
+    if (nextEl) nextEl.textContent = level >= 2500 ? 'MAX' : fmt(next);
+};
+
+// Modal de subida de nivel
+const showLevelUpModal = (level, rewards) => {
+    let modal = document.getElementById('modal-levelup');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-levelup';
+        modal.className = 'modal-overlay';
+        document.body.appendChild(modal);
+    }
+    const rewardHtml = rewards.map(r => {
+        const food = foodDatabase?.find(f => f.id === r.id);
+        return `<div style="display:flex;align-items:center;gap:8px;background:#FFF5BA;border-radius:10px;padding:6px 12px;">
+            <img src="../assets/food/${r.id}.png" style="width:32px;height:32px;object-fit:contain;">
+            <span style="color:#CBA6F7;font-weight:700;font-size:0.9rem;">${food?.name || r.id} x${r.qty}</span>
+        </div>`;
+    }).join('');
+
+    modal.innerHTML = `
+    <div class="modal-box" style="max-width:360px;text-align:center;border:3px solid #CBA6F7;box-shadow:5px 5px 0 #FFF5BA;">
+        <div style="font-size:2rem;font-weight:900;color:#CBA6F7;font-family:'Fredoka',sans-serif;margin-bottom:4px;">
+            NIVEL ${level}
+        </div>
+        <p style="color:#CBA6F7;font-size:0.85rem;margin-bottom:16px;opacity:0.8;">
+            ${level >= 2500 ? '¡Nivel maximo alcanzado! Eres un maestro inversor.' : '¡Subiste de nivel! Aqui tu recompensa:'}
+        </p>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+            ${rewardHtml}
+        </div>
+        <button onclick="document.getElementById('modal-levelup').style.display='none'" 
+            style="background:#CBA6F7;color:white;border:none;padding:10px 24px;border-radius:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;font-size:0.9rem;">
+            Continuar
+        </button>
+    </div>`;
+    modal.style.display = 'flex';
+};
+
+// ============================================================
+//  SISTEMA DE MISIONES — BITGAMESO
+//  3 misiones simultáneas. Al completar una, aparece otra.
+//  Categorías: normal, común, rara, épica, legendaria
+// ============================================================
+
+// Misiones especiales de bienvenida (solo una vez)
+const WELCOME_MISSIONS = [
+    {
+        id: 'welcome_1',
+        title: 'Primera inversión',
+        desc: 'Compra tu primera acción del mercado',
+        cat: 'normal',
+        tipo: 'comprar',
+        qty: 1,
+        done: false,
+        reward: { type: 'codigo', value: 'BITGAMESO' },
+        special: true,
+    },
+    {
+        id: 'welcome_2',
+        title: 'Bienvenido al mercado',
+        desc: 'Vende una acción del mercado',
+        cat: 'normal',
+        tipo: 'vender',
+        qty: 1,
+        done: false,
+        reward: { type: 'codigo', value: 'BIENVENIDA' },
+        special: true,
+    },
+];
+
+// Pool de misiones por categoría
+const MISSION_POOLS = {
+    normal: [
+        { title: 'Alimenta a tu mascota', desc: 'Alimenta a tu mascota {qty} veces', tipo: 'alimentar', qty: [3,5,8] },
+        { title: 'Compra comida', desc: 'Compra {qty} frutas', tipo: 'comprar_fruta', qty: [2,3,5] },
+        { title: 'Compra verduras', desc: 'Compra {qty} verduras', tipo: 'comprar_verdura', qty: [2,3,5] },
+        { title: 'Dulce inversor', desc: 'Compra {qty} dulces', tipo: 'comprar_dulce', qty: [3,5,8] },
+    ],
+    comun: [
+        { title: 'Inversor activo', desc: 'Compra {qty} acciones del mercado', tipo: 'comprar', qty: [2,3,5] },
+        { title: 'Toma ganancias', desc: 'Vende {qty} acciones con ganancia', tipo: 'vender_ganancia', qty: [1,2,3] },
+        { title: 'Compra proteína', desc: 'Compra {qty} proteínas para tu mascota', tipo: 'comprar_proteina', qty: [2,3] },
+    ],
+    rara: [
+        { title: 'Portafolio diverso', desc: 'Ten acciones de {qty} sectores distintos', tipo: 'diversificar', qty: [3,4,5] },
+        { title: 'Mascota feliz', desc: 'Lleva a tu mascota al {qty}% de salud', tipo: 'salud', qty: [80,90,100] },
+        { title: 'Gran comprador', desc: 'Compra {qty} acciones en total', tipo: 'comprar', qty: [8,10,15] },
+    ],
+    epica: [
+        { title: 'Millonario', desc: 'Llega a {qty} monedas de capital total', tipo: 'capital', qty: [50000,100000,500000] },
+        { title: 'Vendedor maestro', desc: 'Vende {qty} acciones en total', tipo: 'vender', qty: [10,15,20] },
+        { title: 'Salud perfecta', desc: 'Mantén a tu mascota al 100% de salud por {qty} ticks', tipo: 'salud_perfecta', qty: [20,30,50] },
+    ],
+    legendaria: [
+        { title: 'Coleccionista', desc: 'Desbloquea una nueva mascota', tipo: 'desbloquear_mascota', qty: [1] },
+        { title: 'Gran inversor', desc: 'Ten {qty} acciones en cartera simultáneamente', tipo: 'cartera_grande', qty: [5,8,10] },
+    ],
+};
+
+// Estado de misiones
+if (!state.misiones) state.misiones = [];
+if (!state.misionesCompletadas) state.misionesCompletadas = [];
+window._missionProgress = {};
+
+// Generar una misión aleatoria
+const generateMission = () => {
+    // Probabilidades: normal 40%, común 30%, rara 20%, épica 8%, legendaria 2%
+    const rand = Math.random() * 100;
+    const cat  = rand < 40 ? 'normal' : rand < 70 ? 'comun' : rand < 90 ? 'rara' : rand < 98 ? 'epica' : 'legendaria';
+    const pool = MISSION_POOLS[cat];
+    const tmpl = pool[Math.floor(Math.random() * pool.length)];
+    const qty  = tmpl.qty[Math.floor(Math.random() * tmpl.qty.length)];
+
+    // Recompensas por categoría
+    const foods = ['Apple-128','Carrot-128','Fish-128','Meat-128','Cookie-128','Pumpkin-128','Egg-128'];
+    let reward;
+    if (cat === 'normal')      reward = { type: 'comida', id: foods[Math.floor(Math.random()*3)], qty: 2 };
+    else if (cat === 'comun')  reward = Math.random() < 0.5
+        ? { type: 'comida', id: foods[Math.floor(Math.random()*foods.length)], qty: 3 }
+        : { type: 'monedas', qty: 1000 + Math.floor(Math.random()*4000) };
+    else if (cat === 'rara')   reward = { type: 'comida_elegir', qty: 5 };
+    else if (cat === 'epica')  reward = { type: 'monedas', qty: 10000 + Math.floor(Math.random()*40000) };
+    else                       reward = { type: 'mascota_aleatoria' };
+
+    return {
+        id:       `m_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+        title:    tmpl.title,
+        desc:     tmpl.desc.replace('{qty}', qty),
+        cat,
+        tipo:     tmpl.tipo,
+        qty,
+        progress: 0,
+        done:     false,
+        reward,
+    };
+};
+
+// Inicializar misiones
+window.initMissions = () => {
+    if (!state.misiones) state.misiones = [];
+    if (!state.misionesCompletadas) state.misionesCompletadas = [];
+
+    // Agregar misiones de bienvenida si no se han completado
+    WELCOME_MISSIONS.forEach(wm => {
+        if (!state.misionesCompletadas.includes(wm.id) && !state.misiones.find(m => m.id === wm.id)) {
+            state.misiones.unshift(wm);
+        }
+    });
+
+    // Completar hasta 3 misiones
+    while (state.misiones.length < 3) {
+        state.misiones.push(generateMission());
+    }
+    renderMissions();
+};
+
+// Renderizar misiones en el modal
+window.renderMissions = () => {
+    const el = document.getElementById('missions-list');
+    if (!el) return;
+
+    const catColors = {
+        normal:     '#B2F2BB',
+        comun:      '#A0E7E5',
+        rara:       '#CBA6F7',
+        epica:      '#FFB6C1',
+        legendaria: '#FFF5BA',
+    };
+    const catLabels = {
+        normal: 'Normal', comun: 'Común', rara: 'Rara', epica: 'Épica', legendaria: 'Legendaria'
+    };
+
+    el.innerHTML = state.misiones.map(m => {
+        const color = catColors[m.cat] || '#CBA6F7';
+        const pct   = Math.min(100, ((m.progress || 0) / m.qty) * 100);
+        const rewardText = m.reward?.type === 'monedas' ? `+${fmt(m.reward.qty)} monedas`
+            : m.reward?.type === 'comida' ? `x${m.reward.qty} comida`
+            : m.reward?.type === 'comida_elegir' ? 'Elige tu comida'
+            : m.reward?.type === 'codigo' ? `Código: ${m.reward.value}`
+            : m.reward?.type === 'mascota_aleatoria' ? 'Desbloquea mascota'
+            : 'Recompensa';
+
+        return `
+        <div style="background:#fdf6ff;border-radius:14px;padding:12px 14px;border:2px solid ${color};">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <span style="font-size:11px;font-weight:700;color:#CBA6F7;font-family:'Poppins',sans-serif;">${m.title}</span>
+                <span style="font-size:9px;font-weight:700;background:${color};color:#333;padding:2px 8px;border-radius:8px;">${catLabels[m.cat]}</span>
+            </div>
+            <p style="font-size:10px;color:#CBA6F7;opacity:.8;margin:0 0 6px;font-family:'Poppins',sans-serif;">${m.desc}</p>
+            <div style="background:#f0e7ff;border-radius:8px;height:6px;overflow:hidden;margin-bottom:4px;">
+                <div style="width:${pct.toFixed(0)}%;height:100%;background:${color};border-radius:8px;transition:width 0.3s;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:9px;color:#CBA6F7;opacity:.7;">${m.progress||0}/${m.qty}</span>
+                <span style="font-size:9px;font-weight:700;color:#CBA6F7;">${rewardText}</span>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Badge de misiones completables
+    const badge = document.getElementById('missions-badge');
+    if (badge) badge.style.display = 'none';
+};
+
+// Abrir modal
+window.openMisiones = () => {
+    window.initMissions();
+    document.getElementById('modal-misiones').style.display = 'flex';
+};
+
+// Actualizar progreso de una misión
+window.updateMissionProgress = (tipo, qty = 1, extra = {}) => {
+    if (!state.misiones) return;
+    let changed = false;
+
+    state.misiones.forEach((m, idx) => {
+        if (m.done) return;
+        let match = false;
+
+        if (m.tipo === tipo) match = true;
+        else if (tipo === 'comprar' && m.tipo === 'cartera_grande') match = true;
+        else if (tipo === 'alimentar' && m.tipo === 'salud') match = true;
+
+        // Misiones de tipo específico de comida
+        if (m.tipo === 'comprar_fruta' && tipo === 'comprar_comida' && extra.cat === 'fruta') match = true;
+        if (m.tipo === 'comprar_verdura' && tipo === 'comprar_comida' && extra.cat === 'verdura') match = true;
+        if (m.tipo === 'comprar_dulce' && tipo === 'comprar_comida' && extra.cat === 'dulce') match = true;
+        if (m.tipo === 'comprar_proteina' && tipo === 'comprar_comida' && extra.cat === 'proteina') match = true;
+
+        // Misiones de diversificación y capital
+        if (m.tipo === 'diversificar') {
+            const score = typeof window.calculateDiversificationScore === 'function' ? window.calculateDiversificationScore() : 0;
+            const sectors = score >= 100 ? 5 : score >= 80 ? 4 : score >= 60 ? 3 : score >= 40 ? 2 : 1;
+            if (sectors >= m.qty) { m.progress = m.qty; match = false; }
+        }
+        if (m.tipo === 'capital') {
+            const capital = typeof window.getBalance === 'function' ? window.getBalance().capital : state.monedas;
+            if (capital >= m.qty) { m.progress = m.qty; match = false; }
+        }
+        if (m.tipo === 'salud') {
+            if (state.saludMascota >= m.qty) { m.progress = m.qty; match = false; }
+        }
+
+        if (match) {
+            m.progress = (m.progress || 0) + qty;
+            changed = true;
+        }
+
+        // Completar misión
+        if ((m.progress || 0) >= m.qty && !m.done) {
+            m.done = true;
+            completeMission(m, idx);
+            changed = true;
+        }
+    });
+
+    if (changed) {
+        saveGame();
+        renderMissions();
+    }
+};
+
+// Completar misión y dar recompensa
+const completeMission = (m, idx) => {
+    state.misionesCompletadas = state.misionesCompletadas || [];
+    state.misionesCompletadas.push(m.id);
+    showToast(`Mision completada: ${m.title}`);
+
+    // Dar recompensa
+    const r = m.reward;
+    if (r?.type === 'monedas') {
+        state.monedas += r.qty;
+        showToast(`+${fmt(r.qty)} monedas de recompensa`);
+    } else if (r?.type === 'comida') {
+        const food = foodDatabase?.find(f => f.id === r.id);
+        if (food) {
+            const existing = state.inventory.get(r.id) || { ...food, qty: 0 };
+            state.inventory.set(r.id, { ...existing, qty: (existing.qty || 0) + r.qty });
+            if (typeof renderInventory === 'function') renderInventory();
+            showToast(`+${r.qty} ${food.name} de recompensa`);
+        }
+    } else if (r?.type === 'codigo') {
+        showToast(`Codigo desbloqueado: ${r.value} — usalo en el menu Codigo`);
+    } else if (r?.type === 'comida_elegir') {
+        showFoodChoiceModal(r.qty);
+    } else if (r?.type === 'mascota_aleatoria') {
+        unlockRandomPet();
+    }
+
+    // Reemplazar con nueva misión inmediatamente
+    setTimeout(() => {
+        state.misiones[idx] = generateMission();
+        saveGame();
+        renderMissions();
+    }, 1500);
+
+    // Mostrar badge
+    const badge = document.getElementById('missions-badge');
+    if (badge) { badge.style.display = 'block'; }
+};
+
+// Modal para elegir comida (misión rara)
+const showFoodChoiceModal = (qty) => {
+    let modal = document.getElementById('modal-food-choice');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-food-choice';
+        modal.className = 'modal-overlay';
+        document.body.appendChild(modal);
+    }
+    const foodOptions = foodDatabase?.slice(0, 12) || [];
+    modal.innerHTML = `
+    <div class="modal-box" style="max-width:380px;border:3px solid #CBA6F7;">
+        <h3 style="color:#CBA6F7;font-family:'Fredoka',sans-serif;margin-bottom:12px;">Elige tu recompensa</h3>
+        <p style="color:#CBA6F7;opacity:.7;font-size:0.82rem;margin-bottom:12px;">Selecciona una comida para recibir x${qty}</p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
+            ${foodOptions.map(f => `
+            <button onclick="chooseFoodReward('${f.id}',${qty})"
+                style="background:#fdf6ff;border:2px solid #f0e7ff;border-radius:10px;padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;">
+                <img src="../assets/food/${f.id}.png" style="width:28px;height:28px;object-fit:contain;">
+                <span style="font-size:7px;color:#CBA6F7;font-weight:700;">${f.name}</span>
+            </button>`).join('')}
+        </div>
+    </div>`;
+    modal.style.display = 'flex';
+};
+
+window.chooseFoodReward = (foodId, qty) => {
+    const food = foodDatabase?.find(f => f.id === foodId);
+    if (!food) return;
+    const existing = state.inventory.get(foodId) || { ...food, qty: 0 };
+    state.inventory.set(foodId, { ...existing, qty: (existing.qty || 0) + qty });
+    if (typeof renderInventory === 'function') renderInventory();
+    showToast(`+${qty} ${food.name} de recompensa`);
+    const modal = document.getElementById('modal-food-choice');
+    if (modal) modal.style.display = 'none';
+};
+
+// Desbloquear mascota aleatoria de la categoría actual
+const unlockRandomPet = () => {
+    const isDiamond = state.diamondVictoryAchieved;
+    const isGolden  = state.victoryAchieved;
+    const pool      = isDiamond ? PET_ORDER_DIAMOND : isGolden ? PET_ORDER_GOLDEN : PET_ORDER;
+    const locked    = pool.filter(id => {
+        const d = state.petData.get(id);
+        return !d?.unlocked;
+    });
+    if (!locked.length) { showToast('Ya tienes todas las mascotas de tu categoria desbloqueadas'); return; }
+    const randId = locked[Math.floor(Math.random() * locked.length)];
+    const def    = PET_DEFS[randId];
+    const data   = state.petData.get(randId) || { health: 0, unlocked: false };
+    data.unlocked = true;
+    data.health   = 50;
+    state.petData.set(randId, data);
+    showToast(`Mision legendaria: Desbloqueaste ${def.label}!`);
+    saveGame();
+};

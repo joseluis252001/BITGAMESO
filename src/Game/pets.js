@@ -1333,10 +1333,34 @@ const buildPetCard = (id, golden = false, diamond = false) => {
     } else if (canUnlock) {
         btnHtml = `<button class="btn-pet-unlock" onclick="unlockPet('${id}')">${cost.toLocaleString()}</button>`;
     } else {
-        const reason = diamond && !state.diamondVictoryAchieved ? 'Requiere Victoria Diamante'
-                     : golden  && !state.victoryAchieved        ? 'Requiere Victoria'
-                     : 'Bloqueado';
-        btnHtml = `<span class="pet-badge locked">${reason}</span>`;
+        // Mostrar precio opaco con tooltip explicando los requisitos
+        const idx      = PET_ORDER.indexOf(id);
+        const gIdx     = PET_ORDER_GOLDEN.indexOf(id);
+        const dIdx     = PET_ORDER_DIAMOND.indexOf(id);
+        const prevId   = diamond ? PET_ORDER_DIAMOND[dIdx - 1]
+                       : golden  ? PET_ORDER_GOLDEN[gIdx - 1]
+                       : PET_ORDER[idx - 1];
+        const prevDef  = prevId ? PET_DEFS[prevId] : null;
+        const prevData = prevId ? (state.petData.get(prevId) || {}) : {};
+        const needsVictory = (diamond && !state.diamondVictoryAchieved) || (golden && !state.victoryAchieved);
+
+        let tooltip = '';
+        if (needsVictory) {
+            tooltip = diamond ? 'Necesitas Victoria Diamante' : 'Necesitas Victoria Normal';
+        } else if (prevDef && Math.round(prevData.health || 0) < 100) {
+            tooltip = `Lleva a ${prevDef.label} al 100% de salud`;
+        } else if (state.monedas < cost) {
+            tooltip = `Necesitas ${cost.toLocaleString()} monedas`;
+        } else {
+            tooltip = 'Cumple los requisitos primero';
+        }
+
+        btnHtml = `<button class="btn-pet-unlock btn-pet-locked" 
+            title="${tooltip}"
+            onclick="event.stopPropagation(); showPetLockReason('${tooltip}')"
+            style="opacity:0.4;cursor:not-allowed;">
+            ${cost.toLocaleString()}
+        </button>`;
     }
 
     const hearts = getHeartConfig(Math.round(data.health));
@@ -1427,6 +1451,7 @@ window.unlockPet = (id) => {
     data.health   = 50;
     state.petData.set(id, data);
     _getShowToast()(`Desbloqueaste ${def.label}!`);
+    if (typeof window.updateMissionProgress === 'function') window.updateMissionProgress('desbloquear_mascota', 1);
     _getLogEvent()('mascota', `Desbloqueaste ${def.label}`, `Costo: ${def.cost.toLocaleString()}`);
     _getUpdateUI()();
     openPetSelector();

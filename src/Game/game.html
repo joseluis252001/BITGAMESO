@@ -42,6 +42,11 @@
                 <img src="../assets/settings/Gem-Small.png" alt="Código" class="btn-header-icon">
                 Código
             </button>
+            <button class="btn-header btn-header-missions" id="btn-misiones" onclick="openMisiones()">
+                <img src="../assets/settings/Ranking-128.png" alt="Misiones" class="btn-header-icon">
+                Misiones
+                <span id="missions-badge" class="missions-badge" style="display:none;">!</span>
+            </button>
         </div>
 
         <div class="header-right">
@@ -95,16 +100,16 @@
                     <img src="../assets/coins/Coins-1-Chest-128.png" class="section-icon" alt="Cartera">
                     Cartera
                 </h2>
-                <!-- BARRA DE META DE INVERSIÓN -->
-                <div id="goal-panel" class="goal-panel">
+                <!-- BARRA DE EXP / NIVEL -->
+                <div id="exp-panel" class="goal-panel">
                     <div class="goal-header">
-                        <span class="goal-label">Meta: <span id="goal-meta-value">$100,000</span></span>
-                        <button onclick="setNewGoal()" class="goal-btn-change">Cambiar</button>
+                        <span class="goal-label" id="exp-level">Nv. 0</span>
+                        <span class="goal-label" style="opacity:.7;">Próximo: <span id="exp-next-val">-</span></span>
                     </div>
                     <div class="goal-bar-wrap">
-                        <div id="goal-progress-bar" class="goal-bar-fill" style="width:0%"></div>
+                        <div id="exp-bar-fill" class="goal-bar-fill" style="width:0%;background:linear-gradient(90deg,#FFB6C1,#CBA6F7);"></div>
                     </div>
-                    <span id="goal-progress-pct" class="goal-pct">0%</span>
+                    <span id="exp-bar-pct" class="goal-pct">0%</span>
                 </div>
             </div>
             <div id="portfolio-list" class="portfolio-list">
@@ -214,6 +219,23 @@
                     Comprar
                 </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ====== MODAL: MISIONES ====== -->
+    <div id="modal-misiones" class="modal-overlay" style="display:none;">
+        <div class="modal-box" style="max-width:420px;padding:20px 24px;border:3px solid #CBA6F7;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="margin:0;color:#CBA6F7;font-family:'Fredoka',sans-serif;font-size:1.3rem;">Misiones</h3>
+                <button onclick="document.getElementById('modal-misiones').style.display='none'"
+                    style="background:none;border:none;cursor:pointer;padding:2px;">
+                    <img src="../assets/arrows/X-Error-128.png" style="width:26px;height:26px;" alt="Cerrar">
+                </button>
+            </div>
+            <div id="missions-list" style="display:flex;flex-direction:column;gap:10px;">
+                <p style="color:#CBA6F7;opacity:.6;text-align:center;font-size:0.85rem;">Cargando misiones...</p>
             </div>
         </div>
     </div>
