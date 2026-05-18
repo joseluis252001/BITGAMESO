@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="/src/assets/logo/Coin-128.png">
+    <link rel="shortcut icon" href="/src/assets/logo/Coin-128.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Security Headers como meta tags -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.jsdelivr.net/npm/@supabase/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.resend.com; frame-ancestors 'none';">
@@ -35,11 +37,6 @@
                 <img src="../assets/settings/Gem-Small.png" alt="Código" class="btn-header-icon">
                 Código
             </button>
-            <button class="btn-header btn-header-missions" id="btn-misiones" onclick="openMisiones()">
-                <img src="../assets/settings/Ranking-128.png" alt="Misiones" class="btn-header-icon">
-                Misiones
-                <span id="missions-badge" class="missions-badge" style="display:none;">!</span>
-            </button>
         </div>
 
         <div class="header-right">
@@ -50,7 +47,33 @@
                 <span id="nombre-usuario">joseluis</span>
                 <img src="../assets/arrows/Arrow-Down-128.png" class="chevron-img" alt="▾">
             </div>
-
+            <div id="settings-dropdown-menu" class="settings-dropdown" style="display:none;">
+                <div class="avatar-options">
+                    <img src="../assets/avatares/Avatar-Boy-1-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 1">
+                    <img src="../assets/avatares/Avatar-Boy-2-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 2">
+                    <img src="../assets/avatares/Avatar-Boy-3-200.png"  onclick="handleAvatarChange(this.src)" alt="Boy 3">
+                    <img src="../assets/avatares/Avatar-Boy-4-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 4">
+                    <img src="../assets/avatares/Avatar-Boy-5-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 5">
+                    <img src="../assets/avatares/Avatar-Boy-6-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 6">
+                    <img src="../assets/avatares/Avatar-Boy-7-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 7">
+                    <img src="../assets/avatares/Avatar-Girl-1-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 1">
+                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 2">
+                    <img src="../assets/avatares/Avatar-Girl-3-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 3">
+                    <img src="../assets/avatares/Avatar-Girl-4-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 4">
+                    <img src="../assets/avatares/Avatar-Girl-5-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 5">
+                    <img src="../assets/avatares/Avatar-Girl-6-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 6">
+                    <img src="../assets/avatares/Avatar-Girl-7-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 7">
+                    <img src="../assets/avatares/Avatar-Girl-8-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 8">
+                </div>
+                <hr class="dropdown-divider">
+                <button onclick="handleLogout()" class="btn-logout">
+                    Cerrar Sesión
+                </button>
+                <hr class="dropdown-divider">
+                <button class="btn-bug-report" onclick="document.getElementById('settings-dropdown-menu').style.display='none'; setTimeout(function(){ if(window.openBugReport) window.openBugReport(); }, 50);">
+                    Reportar un bug
+                </button>
+            </div>
         </div>
     </header>
 
@@ -62,7 +85,7 @@
                 <span>Monedas:</span>
                 <span id="monedas-count">1000.00</span>
             </div>
-
+            <div id="active-effects" class="active-effects"></div>
         </div>
         <div class="nav-actions">
             <button id="btn-depositar"><img src="../assets/coins/Coins-2-Bag-128.png" class="btn-nav-icon"> Depositar</button>
@@ -88,22 +111,10 @@
         <div class="bottom-row">
         <!-- CARTERA -->
         <aside class="portfolio-aside card">
-            <div class="portfolio-header-row">
-                <h2 style="margin:0;">
-                    <img src="../assets/coins/Coins-1-Chest-128.png" class="section-icon" alt="Cartera">
-                    Cartera
-                </h2>
-                <div id="exp-panel" class="goal-panel">
-                    <div class="goal-header">
-                        <span class="goal-label" id="exp-level">Nv. 0</span>
-                        <span class="goal-label" style="opacity:.7;">Próximo: <span id="exp-next-val">-</span></span>
-                    </div>
-                    <div class="goal-bar-wrap">
-                        <div id="exp-bar-fill" class="goal-bar-fill" style="width:0%;background:linear-gradient(90deg,#FFB6C1,#CBA6F7);"></div>
-                    </div>
-                    <span id="exp-bar-pct" class="goal-pct">0%</span>
-                </div>
-            </div>
+            <h2>
+                <img src="../assets/coins/Coins-1-Chest-128.png" class="section-icon" alt="Cartera">
+                Cartera
+            </h2>
             <div id="portfolio-list" class="portfolio-list">
                 <p class="empty-msg">Aún no tienes posiciones.</p>
             </div>
@@ -123,8 +134,6 @@
             <div id="pet-hearts" class="pet-hearts"></div>
             <p class="pet-health-label"><span id="pet-health-value">75</span>% salud</p>
             <p id="pet-message">¡Todo bajo control!</p>
-            <!-- Efectos de comida activos -->
-            <div id="active-effects" class="active-effects pet-effects-bar"></div>
             <!-- Habilidad activa de la mascota -->
             <div id="pet-ability-area" class="pet-ability-area"></div>
             <button id="btn-cambiar-mascota" class="btn-change-pet" onclick="openPetSelector()">
@@ -139,9 +148,6 @@
                     Mercado Global
                     <button class="btn-market-info" onclick="openMarketInfo()" title="¿Qué es cada sector?">
                         <img src="../assets/arrows/Arrow-Down-128.png" alt="Info sectores" class="market-info-icon">
-                    </button>
-                    <button id="btn-pause-market" class="btn-pause-market" onclick="togglePause()" title="Pausar/Reanudar">
-                        <img id="pause-icon" src="../assets/settings/Sun-Day-256.png" alt="Pausar" class="pause-icon">
                     </button>
                 </h2>
                 <p id="market-updated" style="font-size:10px;color:#aaa;">Sincronizando...</p>
@@ -232,10 +238,10 @@
     <!-- ====== MODAL: GAME OVER ====== -->
     <div id="modal-gameover" class="modal-overlay" style="display:none;">
         <div class="modal-box gameover-box">
-            <h2>GAME OVER</h2>
+            <h2>💀 GAME OVER</h2>
             <p id="gameover-reason">Tu mascota murió de hambre...</p>
-            <button onclick="resetGame()" class="btn-restart">Volver a intentar</button>
-            <button onclick="handleLogout()" class="btn-logout-go">Ir al Menú</button>
+            <button onclick="resetGame()" class="btn-restart">🔄 Volver a intentar</button>
+            <button onclick="handleLogout()" class="btn-logout-go">🚪 Ir al Menú</button>
         </div>
     </div>
 
@@ -388,100 +394,5 @@
     <script src="pets.js"></script>
     <script src="game.js"></script>
     <script src="tutorial.js" defer></script>
-
-    <!-- MODAL: GRÁFICA -->
-    <div id="modal-chart" class="modal-overlay" style="display:none;">
-        <div class="modal-box" style="max-width:720px;padding:14px 16px;border:3px solid #FFF5BA;box-shadow:5px 5px 0px #FFF5BA;display:flex;flex-direction:column;gap:8px;max-height:92vh;overflow:hidden;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <h3 id="chart-title" style="margin:0;color:#CBA6F7;font-family:'Fredoka',sans-serif;font-size:1.2rem;">Gráfica</h3>
-                    <p id="chart-subtitle" style="margin:0;font-size:10px;color:#CBA6F7;opacity:.7;">Últimos 5 minutos</p>
-                </div>
-                <button onclick="closeChart()" style="background:none;border:none;cursor:pointer;">
-                    <img src="../assets/arrows/X-Error-128.png" style="width:26px;height:26px;" alt="Cerrar">
-                </button>
-            </div>
-            <div id="chart-selector" style="max-height:160px;overflow-y:auto;scrollbar-width:thin;"></div>
-            <div style="position:relative;width:100%;height:160px;background:#fdf6ff;border-radius:12px;border:2px solid #f0e7ff;overflow:hidden;padding:6px;flex-shrink:0;">
-                <canvas id="chart-canvas" style="width:100%;height:100%;display:block;"></canvas>
-                <div id="chart-tooltip" style="position:absolute;display:none;background:white;border:2px solid #CBA6F7;border-radius:10px;padding:5px 8px;font-size:10px;font-family:'Poppins',sans-serif;color:#CBA6F7;pointer-events:none;z-index:10;"></div>
-            </div>
-            <div id="chart-stats" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-            <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:2px;">
-                <button id="btn-pause-chart" onclick="togglePause()" style="background:white;border:2px solid #CBA6F7;border-radius:10px;padding:5px 8px;cursor:pointer;display:flex;align-items:center;gap:4px;font-size:11px;color:#CBA6F7;font-family:'Poppins',sans-serif;font-weight:700;">
-                    <img id="pause-icon-chart" src="../assets/settings/Sun-Day-256.png" style="width:18px;height:18px;" alt="Pausa">
-                    <span id="pause-label-chart">En vivo</span>
-                </button>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <span id="chart-price-display" style="font-size:1rem;font-weight:700;color:#CBA6F7;font-family:'Fredoka',sans-serif;"></span>
-                    <button id="chart-buy-btn" onclick="chartBuySelected()" class="btn-action btn-buy" style="padding:6px 16px;font-size:0.85rem;">Comprar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: MISIONES -->
-    <div id="modal-misiones" class="modal-overlay" style="display:none;">
-        <div class="modal-box" style="max-width:420px;padding:20px 24px;border:3px solid #CBA6F7;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h3 style="margin:0;color:#CBA6F7;font-family:'Fredoka',sans-serif;font-size:1.3rem;">Misiones</h3>
-                <button onclick="document.getElementById('modal-misiones').style.display='none'" style="background:none;border:none;cursor:pointer;">
-                    <img src="../assets/arrows/X-Error-128.png" style="width:26px;height:26px;" alt="Cerrar">
-                </button>
-            </div>
-            <div id="missions-list" style="display:flex;flex-direction:column;gap:10px;">
-                <p style="color:#CBA6F7;opacity:.6;text-align:center;font-size:0.85rem;">Cargando misiones...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: VICTORIA DIAMANTE -->
-    <div id="modal-diamond-victory" class="modal-overlay" style="display:none;">
-        <div class="modal-box" style="border-color:#a8d8ff;box-shadow:5px 5px 0px #a8d8ff;max-width:420px;text-align:center;">
-            <div style="color:#a8d8ff;font-size:2rem;letter-spacing:8px;">* * *</div>
-            <h2 style="color:#6ec6ff;font-size:2rem;font-family:'Fredoka',sans-serif;">FELICIDADES</h2>
-            <p style="color:#CBA6F7;font-size:1rem;font-weight:700;margin:8px 0;">Por completar el juego</p>
-            <div style="background:#f0f8ff;border-radius:14px;padding:16px 20px;margin:12px 0;border:2px solid #a8d8ff;">
-                <p style="color:#CBA6F7;font-size:0.88rem;line-height:1.7;margin:0;">
-                    Muchas gracias por jugar.<br>
-                    Este juego fue creado solo para fines educativos y de entretenimiento.<br><br>
-                    Si gustas seguir jugando, solo dale a continuar.<br>
-                    ¡Diviértete!<br><br>
-                    <strong>BITGAMESO</strong> está contento de que hayas seguido hasta el final.
-                </p>
-            </div>
-            <button onclick="document.getElementById('modal-diamond-victory').style.display='none'" class="btn-victory-continue" style="background:linear-gradient(135deg,#a8d8ff,#6ec6ff);border-color:#6ec6ff;">
-                Continuar
-            </button>
-        </div>
-    </div>
-
-    <!-- DROPDOWN PERFIL fuera del header -->
-    <div id="settings-dropdown-menu" class="settings-dropdown" style="display:none;position:fixed;top:60px;right:12px;z-index:999999;">
-        <div class="avatar-options">
-            <img src="../assets/avatares/Avatar-Boy-1-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 1">
-            <img src="../assets/avatares/Avatar-Boy-2-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 2">
-            <img src="../assets/avatares/Avatar-Boy-3-200.png"  onclick="handleAvatarChange(this.src)" alt="Boy 3">
-            <img src="../assets/avatares/Avatar-Boy-4-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 4">
-            <img src="../assets/avatares/Avatar-Boy-5-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 5">
-            <img src="../assets/avatares/Avatar-Boy-6-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 6">
-            <img src="../assets/avatares/Avatar-Boy-7-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 7">
-            <img src="../assets/avatares/Avatar-Girl-1-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 1">
-            <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 2">
-            <img src="../assets/avatares/Avatar-Girl-3-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 3">
-            <img src="../assets/avatares/Avatar-Girl-4-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 4">
-            <img src="../assets/avatares/Avatar-Girl-5-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 5">
-            <img src="../assets/avatares/Avatar-Girl-6-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 6">
-            <img src="../assets/avatares/Avatar-Girl-7-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 7">
-            <img src="../assets/avatares/Avatar-Girl-8-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 8">
-        </div>
-        <hr class="dropdown-divider">
-        <button onclick="handleLogout()" class="btn-logout">Cerrar Sesión</button>
-        <hr class="dropdown-divider">
-        <button class="btn-bug-report" onclick="document.getElementById('settings-dropdown-menu').style.display='none'; setTimeout(function(){ if(window.openBugReport) window.openBugReport(); }, 50);">
-            Reportar un bug
-        </button>
-    </div>
-
 </body>
 </html>
