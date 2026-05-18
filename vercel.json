@@ -1,9 +1,7 @@
 {
   "version": 2,
-  "redirects": [
-    { "source": "/", "destination": "/src/PaginaMenu/menu-index.html", "permanent": false }
-  ],
   "rewrites": [
+    { "source": "/", "destination": "/src/PaginaMenu/menu-index.html" },
     { "source": "/juego",          "destination": "/src/Game/game.html" },
     { "source": "/login",          "destination": "/src/InicioCuenta/inico.html" },
     { "source": "/registro",       "destination": "/src/CrearCuenta/registro.html" },
