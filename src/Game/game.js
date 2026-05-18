@@ -2678,24 +2678,4 @@ const initChartTooltip=()=>{
     canvas.addEventListener('mouseleave',()=>{ tooltip.style.display='none'; });
 };
 
-// ============================================================
-//  SESIÓN ÚNICA
-// ============================================================
-const SUPABASE_URL_CLIENT = 'https://pvugnjnnfyvkfqhnecpz.supabase.co';
-const SUPABASE_KEY_CLIENT = 'sb_publishable_i8guONbRc21Ska2Jy6VA-A_pV19OyiM';
-window.startSessionGuard = async () => {
-    const check = async () => {
-        const userId=localStorage.getItem('bitgameso_user_id'),localToken=localStorage.getItem('bitgameso_session_token');
-        if(!userId||!localToken)return;
-        try {
-            const res=await fetch(`${SUPABASE_URL_CLIENT}/rest/v1/profiles?id=eq.${userId}&select=active_session_token`,{headers:{'apikey':SUPABASE_KEY_CLIENT,'Authorization':`Bearer ${SUPABASE_KEY_CLIENT}`}});
-            const data=await res.json(); const remoteToken=data?.[0]?.active_session_token;
-            if(remoteToken&&remoteToken!==localToken){
-                localStorage.removeItem('bitgameso_session_token');
-                alert('Tu sesión fue iniciada en otro dispositivo. Serás redirigido.');
-                window.location.href='/src/PaginaMenu/menu-index.html';
-            }
-        } catch(e){console.warn('SessionGuard:',e);}
-    };
-    await check(); setInterval(check,30000);
-};
+// SessionGuard gestionado por game-sync.js
