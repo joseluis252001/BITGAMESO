@@ -180,7 +180,7 @@ const PET_DEFS = {
         id: 'Frog-128', label: 'Rana', cost: 100000, order: 13,
         marketSpeed: 1,
         passive: 'frog',
-        desc: ' Vender en negativo = ganancia | -15% salud cada 40s | -30% salud al vender en negativo',
+        desc: 'Seguro contra Crashes: -50% pérdida de salud en crash de mercado | -15% salud cada 40s',
         passiveDesc: [
             ' Vender en negativo convierte la pérdida en ganancia',
             ' -15% salud cada 40 segundos',
@@ -298,7 +298,7 @@ const GOLDEN_DEFS = (() => {
         'chicken_white': [' Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2 e inflación +250%'],
         'chicken_yellow':[' Mercado x3 permanente','Resetea toda la inflación','Proteínas: precio x2.5 e inflación +450%','100% de ganar lo que pagaste al vender'],
         'cow':           ['Compras en mercado −50%','Ganancias en ventas x300%','−11% salud cada 30 segundos'],
-        'frog':          ['Vender en negativo = ganancia','−10% salud cada 40 segundos','−30% salud al vender en negativo'],
+        'frog':          ['Seguro contra crashes: -25% pérdida de salud en crash','-10% salud cada 40 segundos','Bono +10% al vender en positivo'],
         'penguin':       ['Pescado 100% gratis','+100% ganancia en ventas','+6% interés adicional','70% de repetir acción al vender','+2000 monedas cada 2 minutos','Compra en rojo = salud −30% | −12%/50s'],
         'penguin_pink':  ['Pescado 100% gratis','+140% ganancia en ventas','+16% interés adicional','100% de repetir acción al vender','+3000 monedas cada 2 minutos','Compra en rojo = salud −40% | −12%/50s'],
         'shark':         [' Mercado x4 permanente','Resetea toda la inflación','Ventas multiplicadas x16','Con 3+ del mismo sector: +30% bono y +60% extra','−15% salud cada 2 minutos'],
@@ -360,7 +360,7 @@ const DIAMOND_DEFS = (() => {
     const diamondDescMap = {
         'bear':          ['Mercado x6 permanente','Dulces con 30% descuento','Penalizacion minima en ventas negativas'],
         'bird':          ['Mercado x9 permanente','+3 monedas cada 2 segundos','Comida cuesta x2 en vez de x4','Pausa al operar igual'],
-        'bunny':         ['Turbo x12 por 90s (cooldown 2 min)','Mercado x12 durante el turbo'],
+        'bunny':         ['Turbo x12 por 90s (cooldown 2 min)','Mercado x12 durante el turbo','Predice tendencia de los próximos 3 activos que compres'],
         'cat_beige':     ['Mercado x6 permanente','Dulces y Pescado duran x12','-1% salud cada 20 segundos'],
         'cat_blue':      ['Mercado x6 permanente','Dulces y Pescado duran x15','-3% salud cada 20 segundos'],
         'cat_pink':      ['Mercado x6 permanente','Dulces y Pescado duran x18','-5% salud cada 25 segundos'],
@@ -371,7 +371,7 @@ const DIAMOND_DEFS = (() => {
         'chicken_white': ['Mercado x5 permanente','Resetea inflacion cada 30s','Proteinas: precio x1.5'],
         'chicken_yellow':['Mercado x5 permanente','Resetea inflacion cada 20s','Proteinas gratis','150% de ganar lo que pagaste al vender'],
         'cow':           ['Compras en mercado -75%','Ganancias en ventas x450%','-8% salud cada 30 segundos'],
-        'frog':          ['Vender en negativo = ganancia (sin efectos negativos)','Sin pérdida de salud por ventas negativas','Sin pérdida de salud cada 40 segundos'],
+        'frog':          ['Inmunidad total a crashes de mercado','Sin pérdida de salud periódica','Bono +20% al vender en positivo'],
         'penguin':       ['Pescado 100% gratis','+150% ganancia en ventas','+10% interes adicional','90% de repetir accion al vender','+5000 monedas cada 2 minutos','Compra en rojo = salud -15%'],
         'penguin_pink':  ['Pescado 100% gratis','+210% ganancia en ventas','+24% interes adicional','100% de repetir accion al vender','+8000 monedas cada 2 minutos','Sin penalizacion por compra en rojo'],
         'shark':         ['Mercado x6 permanente','Resetea inflacion','Ventas multiplicadas x24','Con 3+ del mismo sector: +45% bono','-8% salud cada 2 minutos'],
@@ -585,6 +585,26 @@ const startPassivesForPet = (petId) => {
 
         case 'shark':
             petHungerTimer = setInterval(() => { if(window._isPaused) return; _getChangePH()(-15); _getCheckGO()(); }, 120000); break;
+
+        case 'sheep': {
+            // Oveja Diamante: ingreso pasivo cada 60s si salud > 90%
+            const isDiamond = PET_DEFS[state.currentPet]?.diamond;
+            const isGolden  = PET_DEFS[state.currentPet]?.golden;
+            if (isDiamond) {
+                petHungerTimer = setInterval(() => {
+                    if (window._isPaused) return;
+                    const health = state.petData.get(state.currentPet)?.health || 0;
+                    if (health > 90) {
+                        const capital  = typeof window.getBalance === 'function' ? window.getBalance().capital : state.monedas;
+                        const ingreso  = capital * 0.01;
+                        state.monedas += ingreso;
+                        if (typeof _getShowToast === 'function') _getShowToast()(`Oveja Diamante: +${ingreso.toLocaleString('es', {maximumFractionDigits:2})} dividendos pasivos!`);
+                        if (typeof saveGame === 'function') saveGame();
+                    }
+                }, 60000);
+            }
+            break;
+        }
 
         case 'frog': {
             // Rana normal: -15% salud cada 40s
@@ -838,14 +858,24 @@ const applyPetSellModifiers = (pos, cur, baseProfit) => {
     let extraMsg = '';
 
     switch(pet) {
-        case 'bear':
-            // Penalizacion negativa, no cambia con dorada
-            if (baseProfit < 0) {
-                const penalty = Math.abs(pos.buyPrice);
-                payout -= penalty;
-                extraMsg += ` | Penalizacion -${_getFmt()(penalty)}`;
+        case 'bear': {
+            // Descuento 15% solo si la posición tiene más de 5 minutos
+            const buyTime   = pos.buyTime || 0;
+            const heldMs    = Date.now() - buyTime;
+            const heldMins  = heldMs / 60000;
+            const isGolden  = def?.golden;
+            const isDiamond = def?.diamond;
+            const minWait   = isDiamond ? 2 : isGolden ? 3 : 5; // diamante 2min, dorado 3min, normal 5min
+            if (heldMins >= minWait && baseProfit > 0) {
+                const discPct = isDiamond ? 0.25 : isGolden ? 0.20 : 0.15;
+                const bonus   = payout * discPct;
+                payout += bonus;
+                extraMsg += ` | Bono largo plazo +${(discPct*100).toFixed(0)}% (${heldMins.toFixed(1)}min)`;
+            } else if (heldMins < minWait) {
+                extraMsg += ` | Mantén ${(minWait - heldMins).toFixed(1)}min más para bono`;
             }
             break;
+        }
 
         case 'cow':
             if (baseProfit > 0) {
@@ -891,15 +921,17 @@ const applyPetSellModifiers = (pos, cur, baseProfit) => {
         }
 
         case 'shark': {
-            const sharkMult = def?.golden ? 16 : 8;
-            payout = pos.buyPrice * sharkMult;
-            extraMsg += def?.golden ? ' | x16' : ' | x8';
-            const counts = countBySector();
-            if ((counts.get(pos.type) || 0) >= 3) {
-                const extra = pos.buyPrice * (0.15 + 0.30) * gm;
-                payout += extra;
-                extraMsg += def?.golden ? ' | Bono sector x2' : ' | +15% +30% extra';
-            }
+            // Bono proporcional al índice de diversificación (0-100)
+            const divScore   = typeof window.calculateDiversificationScore === 'function'
+                ? window.calculateDiversificationScore() : 0;
+            const diamond    = def?.diamond;
+            const isGolden   = def?.golden;
+            // Normal: hasta +50% de bono. Dorado: hasta +100%. Diamante: hasta +150%
+            const maxBonus   = diamond ? 1.5 : isGolden ? 1.0 : 0.5;
+            const bonusPct   = (divScore / 100) * maxBonus;
+            const bonusAmt   = pos.buyPrice * bonusPct;
+            payout += bonusAmt;
+            extraMsg += ` | Div.Bono +${(bonusPct * 100).toFixed(0)}% (Score:${divScore})`;
             break;
         }
 
@@ -1001,6 +1033,36 @@ window.activatePenguinFreeFish = () => {
 };
 
 // Conejo: Turbo x4 (dorado x8 por 60s)
+// Conejito Diamante: predicción de tendencia en próximos 3 activos
+window._bunnyPredictions = 0;
+window.applyBunnyPrediction = (symbol) => {
+    const def = PET_DEFS[state.currentPet];
+    if (!def?.diamond || def?.passive !== 'bunny') return;
+    if (!bunnyTurboActive) return;
+    if (window._bunnyPredictions >= 3) return;
+
+    const asset = state.market.get(symbol);
+    if (!asset) return;
+
+    // Tendencia basada en el historial reciente
+    const history = typeof chartHistory !== 'undefined' ? chartHistory.get(symbol) : null;
+    let trend = 0;
+    if (history && history.length >= 5) {
+        const recent = history.slice(-5);
+        trend = recent[4].price - recent[0].price;
+    } else {
+        trend = (Math.random() - 0.5) * asset.price * 0.05;
+    }
+
+    const dir = trend >= 0 ? '▲ Tendencia SUBIDA' : '▼ Tendencia BAJADA';
+    _getShowToast()(`Conejito predice: ${symbol} ${dir} (predicción ${window._bunnyPredictions + 1}/3)`);
+    window._bunnyPredictions++;
+    if (window._bunnyPredictions >= 3) {
+        window._bunnyPredictions = 0;
+        _getShowToast()('Predicciones del Conejito agotadas. Activa Turbo de nuevo.');
+    }
+};
+
 window.activateBunnyTurbo = () => {
     if (bunnyTurboCooldown) { _getShowToast()(' Turbo en cooldown, espera 3 minutos'); return; }
     if (bunnyTurboActive)   { _getShowToast()(' Turbo ya activo!'); return; }

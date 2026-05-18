@@ -125,14 +125,19 @@ window.getAssetCategory = (type) => ASSET_CATEGORY_MAP[type] || 'propiedad';
 // Los bonos suben 0.5% garantizado por tick en vez de ser volátiles
 window.applyBondTick = () => {
  if (!state || !state.market) return;
+ // Pingüino aumenta rendimiento de bonos a 0.8%
+ const pet = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.passive : null;
+ const isPenguin = pet === 'penguin' || pet === 'penguin_pink';
+ const bondRate  = isPenguin ? 1.008 : 1.005;
+ const bondPct   = isPenguin ? 0.8 : 0.5;
  state.market.forEach((asset, sym) => {
  const cat = window.getAssetCategory(asset.type || '');
  if (cat === 'prestamo') {
- const newPrice = asset.price * 1.005; // +0.5% garantizado
+ const newPrice = asset.price * bondRate;
  state.market.set(sym, {
  ...asset,
  price: newPrice,
- changePercent: 0.5,
+ changePercent: bondPct,
  });
  }
  });

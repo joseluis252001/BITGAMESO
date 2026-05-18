@@ -525,7 +525,20 @@ const fetchMarket = () => {
             if (Math.random() < 0.01) {
                 const crashAmt = 0.10 + Math.random() * 0.15;
                 next = Math.max(0.000001, oldPrice * (1 - crashAmt));
-                showToast(` Crash en ${a.symbol}! -${(crashAmt*100).toFixed(1)}%`);
+                const petP = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.passive : null;
+                const crashMsg = (petP === 'frog')
+                    ? ` Crash en ${a.symbol}! -${(crashAmt*100).toFixed(1)}% (Rana te protegió!)`
+                    : ` Crash en ${a.symbol}! -${(crashAmt*100).toFixed(1)}%`;
+                showToast(crashMsg);
+                // Rana reduce pérdida de salud en crash
+                if (petP !== 'frog') {
+                    if (typeof changePetHealth === 'function') changePetHealth(-5);
+                } else {
+                    const isDiamond = PET_DEFS[state.currentPet]?.diamond;
+                    if (!isDiamond) {
+                        if (typeof changePetHealth === 'function') changePetHealth(-2); // mitad del daño
+                    }
+                }
             } else {
                 next = Math.max(0.000001, oldPrice * (1 + (Math.random() * vol * 2 - vol)));
             }
@@ -647,9 +660,10 @@ window.buy = (symbol) => {
     const actualPrice = typeof applyPetBuyModifiers === 'function' ? applyPetBuyModifiers(a.price) : a.price;
     if (state.monedas >= actualPrice) {
         state.monedas -= actualPrice;
-        state.portfolio.set(symbol, { symbol:a.symbol, name:a.name, buyPrice:actualPrice, type:a.type });
+        state.portfolio.set(symbol, { symbol:a.symbol, name:a.name, buyPrice:actualPrice, type:a.type, buyTime: Date.now() });
         if (typeof applyPenguinBuyPenalty === 'function') applyPenguinBuyPenalty(a);
         if (typeof birdPaused !== 'undefined') { birdPaused = true; setTimeout(()=>{ birdPaused = false; }, 1000); }
+        if (typeof window.applyBunnyPrediction === 'function') window.applyBunnyPrediction(symbol);
         const discountMsg = actualPrice < a.price ? ` (descuento: ${fmt(a.price - actualPrice)})` : '';
         showToast(` Compraste ${a.symbol} por ${fmt(actualPrice)}${discountMsg}`);
         logEvent('compra', `Compraste ${a.symbol} — ${a.name}`, `Precio: ${fmt(actualPrice)} | Sector: ${a.type}`);
@@ -702,13 +716,16 @@ window.sellFromPortfolio = (symbol) => {
         const petPassive = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.passive : null;
         const isDiamond  = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.diamond : false;
         if (petPassive === 'frog') {
-            // Rana: pérdida se convierte en ganancia
-            const gainAmount = Math.abs(realProfit);
-            state.monedas += gainAmount * 2; // devolver lo perdido + convertir en ganancia
-            const healthLoss = isDiamond ? 0 : 30;
-            if (healthLoss > 0) changePetHealth(-healthLoss);
-            showToast(` ¡Rana convirtió la pérdida en ganancia! +${fmt(gainAmount)}${healthLoss > 0 ? ` -${healthLoss}️` : ''}`);
-            logEvent('venta', `Vendiste ${symbol} con RANA (pérdida→ganancia)`, `+${fmt(gainAmount)}`);
+            // Rana: seguro — acepta la pérdida pero reduce daño a la mascota
+            const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20), 20);
+            const reduction = isDiamond ? 1.0 : def?.golden ? 0.75 : 0.5;
+            const reducedLoss = Math.round(loss * (1 - reduction));
+            if (reducedLoss > 0) changePetHealth(-reducedLoss);
+            // Bono en positivo para dorada/diamante
+            const bonus = isDiamond ? 0.20 : def?.golden ? 0.10 : 0;
+            if (bonus > 0) state.monedas += Math.abs(realProfit) * bonus;
+            showToast(` Rana amortiguó el crash. Pérdida reducida -${reducedLoss}️${bonus > 0 ? ` +${fmt(Math.abs(realProfit)*bonus)} bono` : ''}`);
+            logEvent('venta', `Vendiste ${symbol} con pérdida (Rana amortiguó)`, fmt(realProfit));
         } else {
             const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
             changePetHealth(-loss);
