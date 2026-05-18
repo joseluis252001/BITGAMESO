@@ -544,6 +544,12 @@ const fetchMarket = () => {
     renderMarket();
     renderPortfolio();
     saveGame();
+    if (typeof window.updateFinanceUI === 'function') window.updateFinanceUI();
+    if (typeof checkInvestmentGoal === 'function') checkInvestmentGoal();
+    if (typeof window.checkLevelUp === 'function') window.checkLevelUp();
+    window._divTick = (window._divTick || 0) + 1;
+    if (window._divTick >= 10) { window._divTick = 0; if (typeof applyDiversificationBonus === 'function') applyDiversificationBonus(); }
+    if (typeof recordChartTick === 'function') recordChartTick();
 };
 
 const startMarket = (speed = SPEED_NORMAL) => {
