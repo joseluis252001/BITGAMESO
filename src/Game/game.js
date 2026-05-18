@@ -16,8 +16,6 @@ const state = {
     inventory:    new Map(),
     foodInflation: new Map(),   // foodId → cantidad comprada (precio x2 por compra)
     sectorBonus:   new Map(),   // type → bonusApplied (bool) cuando llega a 3 acciones
-    metaFinanciera: 100000,
-    metaAlcanzada:  false,
     effectsTime: {
         marketFast:   0,
         doubleProfit: 0,
@@ -494,52 +492,20 @@ let _marketTimeout = null;
 
 const _marketLoop = () => {
     if (!_marketRunning) return;
-    if (window._isPaused) {
-        _marketTimeout = setTimeout(_marketLoop, 500);
-        return;
-    }
     fetchMarket();
     _marketTimeout = setTimeout(_marketLoop, _marketSpeed);
 };
 
 const fetchMarket = () => {
-    if (window._isPaused) return; // Pausado
     // Aplicar tick de bonos ANTES de actualizar precios volátiles
     if (typeof window.applyBondTick === 'function') window.applyBondTick();
     window._lastMarketUpdate = Date.now();
     assetDatabase.forEach(a => {
-        const oldPrice   = state.market.get(a.symbol)?.price || a.basePrice;
-        const cat        = typeof window.getAssetCategory === 'function' ? window.getAssetCategory(a.type) : 'propiedad';
-        const isBond     = cat === 'prestamo';
-        let next;
-        if (isBond) {
-            next = oldPrice * 1.005;
-        } else {
-            let vol = 0.025;
-            if (Math.random() < 0.01) {
-                const crashAmt = 0.10 + Math.random() * 0.15;
-                next = Math.max(0.000001, oldPrice * (1 - crashAmt));
-                const petP = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.passive : null;
-                const crashMsg = (petP === 'frog')
-                    ? ` Crash en ${a.symbol}! -${(crashAmt*100).toFixed(1)}% (Rana te protegió!)`
-                    : ` Crash en ${a.symbol}! -${(crashAmt*100).toFixed(1)}%`;
-                showToast(crashMsg);
-                if (state.portfolio.has(a.symbol)) {
-                    if (petP !== 'frog') {
-                        if (typeof changePetHealth === 'function') changePetHealth(-3);
-                    } else {
-                        const isDiamond = PET_DEFS[state.currentPet]?.diamond;
-                        if (!isDiamond) {
-                            if (typeof changePetHealth === 'function') changePetHealth(-1);
-                        }
-                    }
-                }
-            } else {
-                next = Math.max(0.000001, oldPrice * (1 + (Math.random() * vol * 2 - vol)));
-            }
-        }
+        const old  = state.market.get(a.symbol)?.price || a.basePrice;
+        const vol  = 0.025;
+        const next = Math.max(0.000001, old*(1+(Math.random()*vol*2-vol)));
         const prevFuture = state.market.get(a.symbol)?._future;
-        const entry = { ...a, price: next, changePercent: ((next - oldPrice) / oldPrice) * 100 };
+        const entry = { ...a, price:next, changePercent:((next-old)/old)*100 };
         if (prevFuture !== undefined) entry._future = prevFuture;
         state.market.set(a.symbol, entry);
     });
@@ -554,12 +520,6 @@ const fetchMarket = () => {
     renderMarket();
     renderPortfolio();
     saveGame();
-    if (typeof window.updateFinanceUI === 'function') window.updateFinanceUI();
-    checkInvestmentGoal();
-    if (typeof window.checkLevelUp === 'function') window.checkLevelUp();
-    window._divTick = (window._divTick || 0) + 1;
-    if (window._divTick >= 10) { window._divTick = 0; applyDiversificationBonus(); }
-    if (typeof recordChartTick === 'function') recordChartTick();
 };
 
 const startMarket = (speed = SPEED_NORMAL) => {
@@ -620,21 +580,10 @@ const renderMarket = () => {
                 ${catBadge}
             </div>
             <div class="asset-type">${a.type}</div>
-            <div class="asset-price">
-                ${(() => {
-                    const discPrice = typeof window.applyPetBuyModifiers === 'function' ? window.applyPetBuyModifiers(a.price) : a.price;
-                    const hasDisc = discPrice < a.price;
-                    return hasDisc
-                        ? `<span style="text-decoration:line-through;opacity:.5;font-size:.8em;">${fmt(a.price)}</span> <span style="color:#52b788;font-weight:700;">${fmt(discPrice)}</span>`
-                        : fmt(a.price);
-                })()} ${futureTag}
-            </div>
+            <div class="asset-price">${fmt(a.price)} ${futureTag}</div>
             <div class="asset-change ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${Math.abs(a.changePercent).toFixed(2)}%</div>
             <div class="market-btns">
                 <button class="btn-asset-info" onclick="showAssetFicha('${a.symbol}')" title="Ver ficha técnica">Info</button>
-                <button class="btn-chart-open" onclick="openChart('${a.symbol}')" title="Ver gráfica">
-                    <img src="../assets/settings/Ranking-128.png" style="width:16px;height:16px;vertical-align:middle;" alt="Gráfica">
-                </button>
                 <button class="btn-action btn-buy ${owned?'btn-disabled':''}"
                         onclick="buy('${a.symbol}')"
                         ${owned?'disabled':''}>Comprar</button>
@@ -653,7 +602,7 @@ window.buy = (symbol) => {
     const actualPrice = typeof applyPetBuyModifiers === 'function' ? applyPetBuyModifiers(a.price) : a.price;
     if (state.monedas >= actualPrice) {
         state.monedas -= actualPrice;
-        state.portfolio.set(symbol, { symbol:a.symbol, name:a.name, buyPrice:actualPrice, type:a.type, buyTime: Date.now() });
+        state.portfolio.set(symbol, { symbol:a.symbol, name:a.name, buyPrice:actualPrice, type:a.type });
         if (typeof applyPenguinBuyPenalty === 'function') applyPenguinBuyPenalty(a);
         if (typeof birdPaused !== 'undefined') { birdPaused = true; setTimeout(()=>{ birdPaused = false; }, 1000); }
         const discountMsg = actualPrice < a.price ? ` (descuento: ${fmt(a.price - actualPrice)})` : '';
@@ -661,10 +610,6 @@ window.buy = (symbol) => {
         logEvent('compra', `Compraste ${a.symbol} — ${a.name}`, `Precio: ${fmt(actualPrice)} | Sector: ${a.type}`);
         updateUI();
         checkSectorBonus();
-        if (typeof window.updateFinanceUI === 'function') window.updateFinanceUI();
-        checkInvestmentGoal();
-        if (typeof window.applyBunnyPrediction === 'function') window.applyBunnyPrediction(symbol);
-        if (typeof window.updateMissionProgress === 'function') window.updateMissionProgress('comprar', 1);
     } else {
         showToast(' ¡No tienes suficientes monedas!');
     }
@@ -706,36 +651,11 @@ window.sellFromPortfolio = (symbol) => {
         changePetHealth(gain);
         showToast(` Vendiste ${symbol}! +${fmt(realProfit)}${x2tag}${petMsg} +${gain}️`);
         logEvent('venta', `Vendiste ${symbol} con GANANCIA`, `+${fmt(realProfit)}${x2tag}${petMsg}`);
-        if (typeof window.updateMissionProgress === 'function') {
-            window.updateMissionProgress('vender', 1);
-            window.updateMissionProgress('vender_ganancia', 1);
-        }
     } else if (realProfit < 0) {
-        const petPassive = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.passive : null;
-        const isDiamond  = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.diamond : false;
-        if (petPassive === 'frog') {
-            const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20), 20);
-            const reduction = isDiamond ? 1.0 : def?.golden ? 0.75 : 0.5;
-            const reducedLoss = Math.round(loss * (1 - reduction));
-            if (reducedLoss > 0) changePetHealth(-reducedLoss);
-            const bonus = isDiamond ? 0.20 : def?.golden ? 0.10 : 0;
-            if (bonus > 0) state.monedas += Math.abs(realProfit) * bonus;
-            showToast(` Rana amortiguó el crash. Pérdida reducida -${reducedLoss}️${bonus > 0 ? ` +${fmt(Math.abs(realProfit)*bonus)} bono` : ''}`);
-            logEvent('venta', `Vendiste ${symbol} con pérdida (Rana amortiguó)`, fmt(realProfit));
-            const msgElFrog = document.getElementById('pet-message');
-            if (msgElFrog) {
-                msgElFrog.textContent = 'Los seguros protegen contra catástrofes financieras.';
-                msgElFrog.style.color = '#A0E7E5';
-                msgElFrog.style.fontWeight = '700';
-                setTimeout(() => { if (msgElFrog) { msgElFrog.style.color = ''; msgElFrog.style.fontWeight = ''; } }, 4000);
-            }
-        } else {
-            const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
-            changePetHealth(-loss);
-            showToast(` Vendiste ${symbol}. ${fmt(Math.abs(realProfit))}${x2tag}${petMsg} -${loss}️`);
-            logEvent('venta', `Vendiste ${symbol} con PÉRDIDA`, `${fmt(Math.abs(realProfit))}${x2tag}${petMsg}`);
-        }
-        if (typeof window.updateMissionProgress === 'function') window.updateMissionProgress('vender', 1);
+        const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
+        changePetHealth(-loss);
+        showToast(` Vendiste ${symbol}. ${fmt(Math.abs(realProfit))}${x2tag}${petMsg} -${loss}️`);
+        logEvent('venta', `Vendiste ${symbol} con PÉRDIDA`, `${fmt(Math.abs(realProfit))}${x2tag}${petMsg}`);
     } else {
         showToast(`️ Vendiste ${symbol}${petMsg}`);
     }
@@ -841,16 +761,10 @@ window.buyFood = (foodId, price) => {
     state.monedas -= price;
     const existing = state.inventory.get(foodId);
     state.inventory.set(foodId, { ...food, price, qty:(existing?.qty||0)+1 });
-    if (typeof window.updateMissionProgress === 'function') {
-        window.updateMissionProgress('comprar_comida', 1, { cat: food.cat });
-    }
 
     // Inflación: registrar compra para que la próxima cueste x2
-    const inflFree = typeof isFoodInflationFree === 'function' && isFoodInflationFree(foodId);
-    if (!inflFree) {
-        const timesB = (state.foodInflation.get(foodId) || 0) + 1;
-        state.foodInflation.set(foodId, timesB);
-    }
+    const timesB = (state.foodInflation.get(foodId) || 0) + 1;
+    state.foodInflation.set(foodId, timesB);
 
     // Cooldown 2 horas para categoría "otros"
     if (food.cat === 'misc') {
@@ -900,7 +814,6 @@ const useFoodOnPet = () => {
     if (!foodId) { showToast(' Selecciona un ítem del inventario primero'); return; }
     const item = state.inventory.get(foodId);
     if (!item || item.qty <= 0) { showToast(' No tienes ese ítem'); return; }
-    if (typeof window.updateMissionProgress === 'function') window.updateMissionProgress('alimentar', 1);
 
     switch(item.cat) {
         case 'verdura':
@@ -1054,7 +967,6 @@ const changePetHealth = (delta) => {
     state.saludMascota = Math.max(0, Math.min(100, state.saludMascota+delta));
     renderPetHealth();
     if (typeof syncPetHealthToData === 'function') syncPetHealthToData();
-    if (state.saludMascota <= 0) checkGameOver();
 };
 
 // ============================================================
@@ -2110,12 +2022,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Cargar progreso: primero nube, luego local
     if (typeof window.initCloudSync === 'function') {
-        await window.initCloudSync();
+        await window.initCloudSync(); // carga desde Supabase si hay guardado más reciente
     }
-    if (typeof window.startSessionGuard === 'function') window.startSessionGuard();
-    loadGame();
-    if (typeof window.initMissions === 'function') window.initMissions();
-    window._lastLevel = window.getCurrentLevel ? window.getCurrentLevel() : 0; // carga desde localStorage (ya actualizado por initCloudSync)
+    loadGame(); // carga desde localStorage (ya actualizado por initCloudSync)
 
     // Actualizar monedas en pantalla inmediatamente tras cargar
     if (refs.monedasCount) {
@@ -2355,480 +2264,4 @@ window.submitBugInline = async () => {
         status.textContent = 'Error al enviar. Intenta de nuevo.';
         btn.disabled = false;
     }
-};
-
-// ============================================================
-//  MOSTRAR RAZÓN DE BLOQUEO DE MASCOTA
-// ============================================================
-window.showPetLockReason = (reason) => { showToast(reason); };
-
-// ============================================================
-//  PAUSA GLOBAL
-// ============================================================
-window._isPaused = false;
-
-window.togglePause = () => {
-    window._isPaused = !window._isPaused;
-    updatePauseUI();
-    if (window._isPaused) { pauseEverything(); } else { resumeEverything(); }
-};
-
-const pauseEverything = () => {
-    _marketRunning = false;
-    if (typeof _marketTimeout !== 'undefined') clearTimeout(_marketTimeout);
-    if (typeof marketTimer !== 'undefined') clearInterval(marketTimer);
-    showToast('Mercado pausado');
-};
-
-const resumeEverything = () => {
-    if (typeof startMarket === 'function') startMarket(typeof _marketSpeed !== 'undefined' ? _marketSpeed : 5000);
-    showToast('Mercado reanudado');
-};
-
-const updatePauseUI = () => {
-    const isPaused = window._isPaused;
-    const iconSrc  = isPaused ? '../assets/settings/Stopwatch.png' : '../assets/settings/Sun-Day-256.png';
-    const label    = isPaused ? 'Pausado' : 'En vivo';
-    const icon1 = document.getElementById('pause-icon');
-    if (icon1) icon1.src = iconSrc;
-    const btn1 = document.getElementById('btn-pause-market');
-    if (btn1) { btn1.style.background = isPaused ? '#FFB6C1' : 'white'; btn1.style.borderColor = isPaused ? '#FFB6C1' : '#CBA6F7'; }
-    const icon2 = document.getElementById('pause-icon-chart');
-    if (icon2) icon2.src = iconSrc;
-    const label2 = document.getElementById('pause-label-chart');
-    if (label2) label2.textContent = label;
-    const btn2 = document.getElementById('btn-pause-chart');
-    if (btn2) { btn2.style.background = isPaused ? '#FFB6C1' : 'white'; btn2.style.borderColor = isPaused ? '#FFB6C1' : '#CBA6F7'; btn2.style.color = isPaused ? 'white' : '#CBA6F7'; }
-};
-
-// ============================================================
-//  DIVERSIFICACIÓN PROTEGE SALUD
-// ============================================================
-const applyDiversificationBonus = () => {
-    if (!state || !state.portfolio || state.portfolio.size === 0) return;
-    const score = typeof window.calculateDiversificationScore === 'function' ? window.calculateDiversificationScore() : 0;
-    if (score >= 80)      { if (typeof changePetHealth === 'function') changePetHealth(2); }
-    else if (score >= 60) { if (typeof changePetHealth === 'function') changePetHealth(1); }
-    else if (score < 20 && state.portfolio.size > 0) { if (typeof changePetHealth === 'function') changePetHealth(-1); }
-};
-
-// ============================================================
-//  META DE INVERSIÓN
-// ============================================================
-window.checkInvestmentGoal = () => {
-    if (!state || state.metaAlcanzada) return;
-    const capital = typeof window.getBalance === 'function' ? window.getBalance().capital : state.monedas;
-    const meta    = state.metaFinanciera || 100000;
-    const pct     = Math.min(100, (capital / meta) * 100);
-    const barEl   = document.getElementById('goal-progress-bar');
-    const pctEl   = document.getElementById('goal-progress-pct');
-    const metaEl  = document.getElementById('goal-meta-value');
-    if (barEl)  barEl.style.width  = pct.toFixed(1) + '%';
-    if (pctEl)  pctEl.textContent  = pct.toFixed(1) + '%';
-    if (metaEl) metaEl.textContent = fmt(meta);
-    if (capital >= meta && !state.metaAlcanzada) {
-        state.metaAlcanzada = true;
-        showToast('¡Alcanzaste tu meta! Puedes establecer una nueva.');
-        if (typeof changePetHealth === 'function') changePetHealth(20);
-        saveGame();
-    }
-};
-window.setNewGoal = () => {
-    const nuevaMeta = parseFloat(prompt('¿Nueva meta de capital?'));
-    if (!isNaN(nuevaMeta) && nuevaMeta > 0) {
-        state.metaFinanciera = nuevaMeta;
-        state.metaAlcanzada  = false;
-        saveGame();
-        window.checkInvestmentGoal();
-        showToast('Nueva meta: ' + fmt(nuevaMeta));
-    }
-};
-const checkInvestmentGoal = () => window.checkInvestmentGoal();
-
-// ============================================================
-//  SISTEMA DE NIVELES EXP
-// ============================================================
-const LEVEL_TABLE = [
-    [100,[{id:'Candy-Blue-128',qty:2}]],[500,[{id:'Candy-Pink-128',qty:2}]],
-    [1000,[{id:'Cookie-128',qty:2}]],[2000,[{id:'Bread-128',qty:2}]],
-    [5000,[{id:'Cupcake-128',qty:2}]],[10000,[{id:'Mushroom-128',qty:2}]],
-    [15000,[{id:'Apple-128',qty:3}]],[25000,[{id:'Banana-128',qty:3}]],
-    [50000,[{id:'Orange-128',qty:3}]],[100000,[{id:'Strawberry-128',qty:3}]],
-    [250000,[{id:'Pear-128',qty:3}]],[500000,[{id:'Blueberries-128',qty:4}]],
-    [1000000,[{id:'Cherry-128',qty:4}]],[2500000,[{id:'Turnip-128',qty:4}]],
-    [5000000,[{id:'Carrot-128',qty:4}]],[10000000,[{id:'Corn-128',qty:4}]],
-    [25000000,[{id:'Potato-128',qty:4}]],[50000000,[{id:'Tomato-128',qty:5}]],
-    [100000000,[{id:'Pumpkin-128',qty:5}]],[250000000,[{id:'Egg-128',qty:5}]],
-    [500000000,[{id:'Fish-128',qty:5}]],[1000000000,[{id:'Meat-128',qty:6}]],
-];
-let _fullLevelTable = null;
-const getLevelTable = () => {
-    if (!_fullLevelTable) {
-        _fullLevelTable = [...LEVEL_TABLE];
-        let last = LEVEL_TABLE[LEVEL_TABLE.length-1][0];
-        const foods = ['Carrot-128','Pumpkin-128','Fish-128','Meat-128','Egg-128'];
-        for (let i = _fullLevelTable.length; i < 2500; i++) {
-            last = Math.round(last * 1.5);
-            _fullLevelTable.push([last, [{id: foods[i%foods.length], qty: 3+Math.floor(i/500)}]]);
-        }
-        _fullLevelTable[2499] = [_fullLevelTable[2498][0]*2, [{id:'Meat-128',qty:99},{id:'Fish-128',qty:99},{id:'Pumpkin-128',qty:99}]];
-    }
-    return _fullLevelTable;
-};
-window.getCurrentLevel = () => {
-    const capital = typeof window.getBalance === 'function' ? window.getBalance().capital : state.monedas;
-    const table = getLevelTable();
-    let level = 0;
-    for (let i = 0; i < table.length; i++) { if (capital >= table[i][0]) level = i+1; else break; }
-    return Math.min(level, 2500);
-};
-window.getLevelProgress = () => {
-    const capital = typeof window.getBalance === 'function' ? window.getBalance().capital : state.monedas;
-    const table = getLevelTable();
-    const level = window.getCurrentLevel();
-    if (level >= 2500) return { level:2500, pct:100, current:capital, next:capital };
-    const current = level > 0 ? table[level-1][0] : 0;
-    const next    = table[level][0];
-    const pct     = Math.min(100, ((capital-current)/(next-current))*100);
-    return { level, pct, current:capital, next };
-};
-window._lastLevel = 0;
-window.checkLevelUp = () => {
-    const lvl = window.getCurrentLevel();
-    if (lvl > window._lastLevel && window._lastLevel > 0) {
-        const table = getLevelTable();
-        const rewards = table[lvl-1]?.[1] || [];
-        showLevelUpModal(lvl, rewards);
-        rewards.forEach(r => {
-            const food = foodDatabase?.find(f => f.id === r.id);
-            if (!food) return;
-            const existing = state.inventory.get(r.id) || { ...food, qty:0 };
-            state.inventory.set(r.id, { ...existing, qty:(existing.qty||0)+r.qty });
-        });
-        saveGame();
-        if (typeof renderInventory === 'function') renderInventory();
-    }
-    window._lastLevel = lvl;
-    updateLevelUI();
-};
-const updateLevelUI = () => {
-    const { level, pct, next } = window.getLevelProgress();
-    const lvlEl = document.getElementById('exp-level');
-    const barEl = document.getElementById('exp-bar-fill');
-    const pctEl = document.getElementById('exp-bar-pct');
-    const nextEl = document.getElementById('exp-next-val');
-    if (lvlEl)  lvlEl.textContent  = `Nv. ${level}`;
-    if (barEl)  barEl.style.width  = pct.toFixed(1)+'%';
-    if (pctEl)  pctEl.textContent  = pct.toFixed(1)+'%';
-    if (nextEl) nextEl.textContent = level >= 2500 ? 'MAX' : fmt(next);
-};
-const showLevelUpModal = (level, rewards) => {
-    let modal = document.getElementById('modal-levelup');
-    if (!modal) { modal = document.createElement('div'); modal.id='modal-levelup'; modal.className='modal-overlay'; document.body.appendChild(modal); }
-    const rewardHtml = rewards.map(r => {
-        const food = foodDatabase?.find(f => f.id===r.id);
-        return `<div style="display:flex;align-items:center;gap:8px;background:#FFF5BA;border-radius:10px;padding:6px 12px;">
-            <img src="../assets/food/${r.id}.png" style="width:32px;height:32px;object-fit:contain;">
-            <span style="color:#CBA6F7;font-weight:700;font-size:0.9rem;">${food?.name||r.id} x${r.qty}</span>
-        </div>`;
-    }).join('');
-    modal.innerHTML = `<div class="modal-box" style="max-width:360px;text-align:center;border:3px solid #CBA6F7;box-shadow:5px 5px 0 #FFF5BA;">
-        <div style="font-size:2rem;font-weight:900;color:#CBA6F7;font-family:'Fredoka',sans-serif;margin-bottom:4px;">NIVEL ${level}</div>
-        <p style="color:#CBA6F7;font-size:0.85rem;margin-bottom:16px;opacity:0.8;">${level>=2500?'¡Nivel máximo! Eres un maestro inversor.':'¡Subiste de nivel! Tu recompensa:'}</p>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">${rewardHtml}</div>
-        <button onclick="document.getElementById('modal-levelup').style.display='none'"
-            style="background:#CBA6F7;color:white;border:none;padding:10px 24px;border-radius:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;font-size:0.9rem;">
-            Continuar
-        </button>
-    </div>`;
-    modal.style.display = 'flex';
-};
-
-// ============================================================
-//  SISTEMA DE MISIONES
-// ============================================================
-const WELCOME_MISSIONS = [
-    { id:'welcome_1', title:'Primera inversión', desc:'Compra tu primera acción del mercado', cat:'normal', tipo:'comprar', qty:1, progress:0, done:false, reward:{type:'codigo',value:'BITGAMESO'}, special:true },
-    { id:'welcome_2', title:'Bienvenido al mercado', desc:'Vende una acción del mercado', cat:'normal', tipo:'vender', qty:1, progress:0, done:false, reward:{type:'codigo',value:'BIENVENIDA'}, special:true },
-];
-const MISSION_POOLS = {
-    normal:     [ {title:'Alimenta tu mascota',desc:'Alimenta a tu mascota {qty} veces',tipo:'alimentar',qty:[3,5,8]}, {title:'Compra frutas',desc:'Compra {qty} frutas',tipo:'comprar_fruta',qty:[2,3,5]}, {title:'Compra verduras',desc:'Compra {qty} verduras',tipo:'comprar_verdura',qty:[2,3,5]}, {title:'Dulce inversor',desc:'Compra {qty} dulces',tipo:'comprar_dulce',qty:[3,5,8]} ],
-    comun:      [ {title:'Inversor activo',desc:'Compra {qty} acciones',tipo:'comprar',qty:[2,3,5]}, {title:'Toma ganancias',desc:'Vende {qty} acciones con ganancia',tipo:'vender_ganancia',qty:[1,2,3]}, {title:'Proteína',desc:'Compra {qty} proteínas',tipo:'comprar_proteina',qty:[2,3]} ],
-    rara:       [ {title:'Portafolio diverso',desc:'Ten acciones de {qty} sectores',tipo:'diversificar',qty:[3,4,5]}, {title:'Mascota feliz',desc:'Lleva tu mascota al {qty}% de salud',tipo:'salud',qty:[80,90,100]}, {title:'Gran comprador',desc:'Compra {qty} acciones',tipo:'comprar',qty:[8,10,15]} ],
-    epica:      [ {title:'Millonario',desc:'Llega a {qty} de capital',tipo:'capital',qty:[50000,100000,500000]}, {title:'Vendedor maestro',desc:'Vende {qty} acciones',tipo:'vender',qty:[10,15,20]} ],
-    legendaria: [ {title:'Coleccionista',desc:'Desbloquea una nueva mascota',tipo:'desbloquear_mascota',qty:[1]}, {title:'Gran inversor',desc:'Ten {qty} acciones en cartera',tipo:'cartera_grande',qty:[5,8,10]} ],
-};
-const generateMission = () => {
-    const rand = Math.random()*100;
-    const cat  = rand<40?'normal':rand<70?'comun':rand<90?'rara':rand<98?'epica':'legendaria';
-    const pool = MISSION_POOLS[cat];
-    const tmpl = pool[Math.floor(Math.random()*pool.length)];
-    const qty  = tmpl.qty[Math.floor(Math.random()*tmpl.qty.length)];
-    const foods = ['Apple-128','Carrot-128','Fish-128','Meat-128','Cookie-128','Pumpkin-128','Egg-128'];
-    let reward;
-    if (cat==='normal')      reward={type:'comida',id:foods[Math.floor(Math.random()*3)],qty:2};
-    else if (cat==='comun')  reward=Math.random()<0.5?{type:'comida',id:foods[Math.floor(Math.random()*foods.length)],qty:3}:{type:'monedas',qty:1000+Math.floor(Math.random()*4000)};
-    else if (cat==='rara')   reward={type:'comida_elegir',qty:5};
-    else if (cat==='epica')  reward={type:'monedas',qty:10000+Math.floor(Math.random()*40000)};
-    else                     reward={type:'mascota_aleatoria'};
-    return { id:`m_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, title:tmpl.title, desc:tmpl.desc.replace('{qty}',qty), cat, tipo:tmpl.tipo, qty, progress:0, done:false, reward };
-};
-window.initMissions = () => {
-    if (!state.misiones) state.misiones = [];
-    if (!state.misionesCompletadas) state.misionesCompletadas = [];
-    WELCOME_MISSIONS.forEach(wm => {
-        if (!state.misionesCompletadas.includes(wm.id) && !state.misiones.find(m=>m.id===wm.id)) state.misiones.unshift({...wm});
-    });
-    while (state.misiones.length < 3) state.misiones.push(generateMission());
-    renderMissions();
-};
-window.renderMissions = () => {
-    const el = document.getElementById('missions-list');
-    if (!el) return;
-    const catColors = { normal:'#B2F2BB', comun:'#A0E7E5', rara:'#CBA6F7', epica:'#FFB6C1', legendaria:'#FFF5BA' };
-    const catLabels = { normal:'Normal', comun:'Común', rara:'Rara', epica:'Épica', legendaria:'Legendaria' };
-    el.innerHTML = state.misiones.map(m => {
-        const color = catColors[m.cat]||'#CBA6F7';
-        const pct   = Math.min(100,((m.progress||0)/m.qty)*100);
-        const rewardText = m.reward?.type==='monedas'?`+${fmt(m.reward.qty)} monedas`:m.reward?.type==='comida'?`x${m.reward.qty} comida`:m.reward?.type==='comida_elegir'?'Elige tu comida':m.reward?.type==='codigo'?`Código: ${m.reward.value}`:'Desbloquea mascota';
-        return `<div style="background:#FFFFFF;border-radius:14px;padding:12px 14px;border:2px solid ${color};">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                <span style="font-size:11px;font-weight:700;color:#CBA6F7;font-family:'Poppins',sans-serif;">${m.title}</span>
-                <span style="font-size:9px;font-weight:700;background:${color};color:#CBA6F7;padding:2px 8px;border-radius:8px;">${catLabels[m.cat]}</span>
-            </div>
-            <p style="font-size:10px;color:#CBA6F7;margin:0 0 6px;font-family:'Poppins',sans-serif;">${m.desc}</p>
-            <div style="background:#FFF5BA;border-radius:8px;height:6px;overflow:hidden;margin-bottom:4px;">
-                <div style="width:${pct.toFixed(0)}%;height:100%;background:${color};border-radius:8px;transition:width 0.3s;"></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:9px;color:#CBA6F7;opacity:.7;">${m.progress||0}/${m.qty}</span>
-                <span style="font-size:9px;font-weight:700;color:#CBA6F7;">${rewardText}</span>
-            </div>
-        </div>`;
-    }).join('');
-};
-window.openMisiones = () => {
-    window.initMissions();
-    document.getElementById('modal-misiones').style.display = 'flex';
-};
-window.updateMissionProgress = (tipo, qty=1, extra={}) => {
-    if (!state.misiones) return;
-    let changed = false;
-    state.misiones.forEach((m,idx) => {
-        if (m.done) return;
-        let match = false;
-        if (m.tipo===tipo) match=true;
-        if (m.tipo==='comprar_fruta'    && tipo==='comprar_comida' && extra.cat==='fruta')    match=true;
-        if (m.tipo==='comprar_verdura'  && tipo==='comprar_comida' && extra.cat==='verdura')  match=true;
-        if (m.tipo==='comprar_dulce'    && tipo==='comprar_comida' && extra.cat==='dulce')    match=true;
-        if (m.tipo==='comprar_proteina' && tipo==='comprar_comida' && extra.cat==='proteina') match=true;
-        if (m.tipo==='diversificar') {
-            const score   = typeof window.calculateDiversificationScore==='function'?window.calculateDiversificationScore():0;
-            const sectors = score>=100?5:score>=80?4:score>=60?3:score>=40?2:1;
-            if (sectors>=m.qty){m.progress=m.qty;match=false;}
-        }
-        if (m.tipo==='capital') {
-            const capital=typeof window.getBalance==='function'?window.getBalance().capital:state.monedas;
-            if (capital>=m.qty){m.progress=m.qty;match=false;}
-        }
-        if (m.tipo==='salud'){if(state.saludMascota>=m.qty){m.progress=m.qty;match=false;}}
-        if (match){m.progress=(m.progress||0)+qty;changed=true;}
-        if ((m.progress||0)>=m.qty&&!m.done){m.done=true;completeMission(m,idx);changed=true;}
-    });
-    if (changed){saveGame();renderMissions();}
-};
-const completeMission=(m,idx)=>{
-    state.misionesCompletadas=state.misionesCompletadas||[];
-    state.misionesCompletadas.push(m.id);
-    showToast(`Mision completada: ${m.title}`);
-    const r=m.reward;
-    if(r?.type==='monedas'){state.monedas+=r.qty;showToast(`+${fmt(r.qty)} monedas`);}
-    else if(r?.type==='comida'){const food=foodDatabase?.find(f=>f.id===r.id);if(food){const ex=state.inventory.get(r.id)||{...food,qty:0};state.inventory.set(r.id,{...ex,qty:(ex.qty||0)+r.qty});if(typeof renderInventory==='function')renderInventory();showToast(`+${r.qty} ${food.name}`);}}
-    else if(r?.type==='codigo'){showToast(`Código desbloqueado: ${r.value}`);}
-    else if(r?.type==='comida_elegir'){showFoodChoiceModal(r.qty);}
-    else if(r?.type==='mascota_aleatoria'){unlockRandomPet();}
-    setTimeout(()=>{state.misiones[idx]=generateMission();saveGame();renderMissions();},1500);
-    const badge=document.getElementById('missions-badge');
-    if(badge)badge.style.display='block';
-};
-const showFoodChoiceModal=(qty)=>{
-    let modal=document.getElementById('modal-food-choice');
-    if(!modal){modal=document.createElement('div');modal.id='modal-food-choice';modal.className='modal-overlay';document.body.appendChild(modal);}
-    const foodOptions=foodDatabase?.slice(0,12)||[];
-    modal.innerHTML=`<div class="modal-box" style="max-width:380px;border:3px solid #CBA6F7;">
-        <h3 style="color:#CBA6F7;font-family:'Fredoka',sans-serif;margin-bottom:12px;">Elige tu recompensa</h3>
-        <p style="color:#CBA6F7;opacity:.7;font-size:0.82rem;margin-bottom:12px;">Selecciona una comida para recibir x${qty}</p>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
-            ${foodOptions.map(f=>`<button onclick="chooseFoodReward('${f.id}',${qty})" style="background:#fdf6ff;border:2px solid #f0e7ff;border-radius:10px;padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;">
-                <img src="../assets/food/${f.id}.png" style="width:28px;height:28px;object-fit:contain;">
-                <span style="font-size:7px;color:#CBA6F7;font-weight:700;">${f.name}</span>
-            </button>`).join('')}
-        </div>
-    </div>`;
-    modal.style.display='flex';
-};
-window.chooseFoodReward=(foodId,qty)=>{
-    const food=foodDatabase?.find(f=>f.id===foodId);
-    if(!food)return;
-    const ex=state.inventory.get(foodId)||{...food,qty:0};
-    state.inventory.set(foodId,{...ex,qty:(ex.qty||0)+qty});
-    if(typeof renderInventory==='function')renderInventory();
-    showToast(`+${qty} ${food.name}`);
-    const modal=document.getElementById('modal-food-choice');
-    if(modal)modal.style.display='none';
-};
-const unlockRandomPet=()=>{
-    const isDiamond=state.diamondVictoryAchieved;
-    const isGolden=state.victoryAchieved;
-    const pool=isDiamond?PET_ORDER_DIAMOND:isGolden?PET_ORDER_GOLDEN:PET_ORDER;
-    const locked=pool.filter(id=>!state.petData.get(id)?.unlocked);
-    if(!locked.length){showToast('Ya tienes todas las mascotas desbloqueadas');return;}
-    const randId=locked[Math.floor(Math.random()*locked.length)];
-    const def=PET_DEFS[randId];
-    const data=state.petData.get(randId)||{health:0,unlocked:false};
-    data.unlocked=true;data.health=50;
-    state.petData.set(randId,data);
-    showToast(`Legendaria: Desbloqueaste ${def.label}!`);
-    saveGame();
-};
-
-// ============================================================
-//  GRÁFICA EN TIEMPO REAL
-// ============================================================
-const CHART_MAX_POINTS = 300;
-const chartHistory     = new Map();
-let   chartSymbol      = null;
-
-const recordChartTick = () => {
-    const now = Date.now();
-    state.market.forEach((asset,sym) => {
-        if (!chartHistory.has(sym)) chartHistory.set(sym,[]);
-        const arr=chartHistory.get(sym);
-        arr.push({price:asset.price,time:now});
-        if(arr.length>CHART_MAX_POINTS)arr.shift();
-    });
-    if(chartSymbol&&document.getElementById('modal-chart')?.style.display!=='none'){
-        drawChart();updateChartUI();
-    }
-};
-window.openChart=(symbol)=>{
-    chartSymbol=symbol;
-    document.getElementById('modal-chart').style.display='flex';
-    buildChartSelector(symbol);updateChartUI();drawChart();
-    setTimeout(initChartTooltip,50);
-};
-window.closeChart=()=>{document.getElementById('modal-chart').style.display='none';};
-const buildChartSelector=(selected)=>{
-    const el=document.getElementById('chart-selector');
-    if(!el)return;
-    const byType=new Map();
-    state.market.forEach((asset,sym)=>{const type=asset.type||'Otros';if(!byType.has(type))byType.set(type,[]);byType.get(type).push(sym);});
-    const typeColors={'IA':'#CBA6F7','Bluechip':'#A0E7E5','Digital':'#FFB6C1','Gaming':'#B2F2BB','NFT':'#FFF5BA','Metaverso':'#CBA6F7','Meme':'#FFB6C1','Fintech':'#A0E7E5','Energía':'#B2F2BB','Biotech':'#FFF5BA','Espacio':'#CBA6F7','DeFi':'#A0E7E5'};
-    let html='';
-    byType.forEach((symbols,type)=>{
-        const color=typeColors[type]||'#CBA6F7';
-        html+=`<div style="width:100%;margin-bottom:6px;"><div style="font-size:9px;font-weight:700;color:${color};font-family:'Poppins',sans-serif;margin-bottom:3px;text-transform:uppercase;letter-spacing:1px;">${type}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;">${symbols.map(sym=>`<button onclick="switchChart('${sym}')" style="padding:3px 8px;border-radius:8px;border:2px solid ${color};font-size:10px;font-family:'Poppins',sans-serif;cursor:pointer;background:${sym===selected?color:'white'};color:${sym===selected?'white':color};font-weight:600;transition:0.2s;white-space:nowrap;">${sym}</button>`).join('')}</div></div>`;
-    });
-    el.innerHTML=html;
-};
-window.switchChart=(sym)=>{chartSymbol=sym;buildChartSelector(sym);updateChartUI();drawChart();};
-const updateChartUI=()=>{
-    const asset=state.market.get(chartSymbol);
-    if(!asset)return;
-    document.getElementById('chart-title').textContent=`${asset.symbol} — ${asset.name}`;
-    document.getElementById('chart-subtitle').textContent=`${asset.type} · Últimos 5 minutos`;
-    const discPrice=typeof window.applyPetBuyModifiers==='function'?window.applyPetBuyModifiers(asset.price):asset.price;
-    const owned=state.portfolio.has(chartSymbol);
-    const priceEl=document.getElementById('chart-price-display');
-    const buyBtn=document.getElementById('chart-buy-btn');
-    if(discPrice<asset.price){priceEl.innerHTML=`<span style="text-decoration:line-through;opacity:.5;font-size:.8em;">${fmt(asset.price)}</span> <span style="color:#52b788;font-weight:700;">${fmt(discPrice)}</span>`;}
-    else{priceEl.textContent=fmt(asset.price);}
-    if(owned){buyBtn.textContent='Ya tienes este activo';buyBtn.disabled=true;buyBtn.className='btn-action btn-disabled';}
-    else{buyBtn.textContent=`Comprar ${chartSymbol}`;buyBtn.disabled=false;buyBtn.className='btn-action btn-buy';}
-    const arr=chartHistory.get(chartSymbol)||[];
-    const statsEl=document.getElementById('chart-stats');
-    if(arr.length>=2){
-        const first=arr[0].price,last=arr[arr.length-1].price,minP=Math.min(...arr.map(p=>p.price)),maxP=Math.max(...arr.map(p=>p.price)),change=((last-first)/first)*100,isUp=change>=0;
-        const statStyle="background:#f9f0ff;border-radius:10px;padding:5px 10px;font-size:10px;font-family:'Poppins',sans-serif;flex-shrink:0;min-width:70px;";
-        statsEl.innerHTML=`<div style="${statStyle}"><span style="color:#CBA6F7;opacity:.7;">Cambio 5min</span><br><strong style="color:${isUp?'#52b788':'#FFB6C1'};">${isUp?'▲':'▼'} ${Math.abs(change).toFixed(2)}%</strong></div>
-        <div style="${statStyle}"><span style="color:#CBA6F7;opacity:.7;">Mínimo</span><br><strong style="color:#CBA6F7;">${fmt(minP)}</strong></div>
-        <div style="${statStyle}"><span style="color:#CBA6F7;opacity:.7;">Máximo</span><br><strong style="color:#CBA6F7;">${fmt(maxP)}</strong></div>
-        <div style="${statStyle}"><span style="color:#CBA6F7;opacity:.7;">Actual</span><br><strong style="color:#CBA6F7;">${fmt(last)}</strong></div>`;
-    } else {statsEl.innerHTML='<span style="color:#aaa;font-size:11px;">Acumulando datos...</span>';}
-};
-const drawChart=()=>{
-    const canvas=document.getElementById('chart-canvas');
-    if(!canvas)return;
-    const ctx=canvas.getContext('2d');
-    const arr=chartHistory.get(chartSymbol)||[];
-    const W=canvas.offsetWidth||600,H=canvas.offsetHeight||200;
-    canvas.width=W*window.devicePixelRatio;canvas.height=H*window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio,window.devicePixelRatio);
-    ctx.clearRect(0,0,W,H);
-    if(arr.length<2){ctx.fillStyle='#CBA6F7';ctx.font='13px Poppins, sans-serif';ctx.textAlign='center';ctx.fillText('Acumulando datos...',W/2,H/2);return;}
-    const prices=arr.map(p=>p.price),minP=Math.min(...prices),maxP=Math.max(...prices),range=maxP-minP||1;
-    const pad={top:16,right:16,bottom:24,left:60};
-    const cW=W-pad.left-pad.right,cH=H-pad.top-pad.bottom;
-    const toX=i=>pad.left+(i/(arr.length-1))*cW;
-    const toY=p=>pad.top+(1-(p-minP)/range)*cH;
-    ctx.strokeStyle='#f0e7ff';ctx.lineWidth=1;
-    for(let i=0;i<=4;i++){const y=pad.top+(i/4)*cH;ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+cW,y);ctx.stroke();const val=maxP-(i/4)*range;ctx.fillStyle='#CBA6F7';ctx.font='9px Poppins, sans-serif';ctx.textAlign='right';ctx.fillText(fmt(val),pad.left-4,y+3);}
-    const isUp=prices[prices.length-1]>=prices[0];
-    const grad=ctx.createLinearGradient(0,pad.top,0,pad.top+cH);
-    grad.addColorStop(0,isUp?'rgba(178,242,187,0.5)':'rgba(255,182,193,0.5)');
-    grad.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.beginPath();ctx.moveTo(toX(0),toY(prices[0]));
-    prices.forEach((p,i)=>{if(i>0)ctx.lineTo(toX(i),toY(p));});
-    ctx.lineTo(toX(prices.length-1),pad.top+cH);ctx.lineTo(toX(0),pad.top+cH);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-    ctx.beginPath();ctx.strokeStyle=isUp?'#52b788':'#FFB6C1';ctx.lineWidth=2;ctx.lineJoin='round';
-    prices.forEach((p,i)=>{i===0?ctx.moveTo(toX(i),toY(p)):ctx.lineTo(toX(i),toY(p));});ctx.stroke();
-    const lastX=toX(prices.length-1),lastY=toY(prices[prices.length-1]);
-    ctx.beginPath();ctx.arc(lastX,lastY,5,0,Math.PI*2);ctx.fillStyle=isUp?'#B2F2BB':'#FFB6C1';ctx.fill();ctx.strokeStyle='white';ctx.lineWidth=2;ctx.stroke();
-    if(arr.length>=2){const startTime=new Date(arr[0].time).toLocaleTimeString(),endTime=new Date(arr[arr.length-1].time).toLocaleTimeString();ctx.fillStyle='#CBA6F7';ctx.font='9px Poppins, sans-serif';ctx.textAlign='left';ctx.fillText(startTime,pad.left,H-6);ctx.textAlign='right';ctx.fillText(endTime,pad.left+cW,H-6);}
-};
-window.chartBuySelected=()=>{if(!chartSymbol)return;buy(chartSymbol);updateChartUI();};
-const initChartTooltip=()=>{
-    const canvas=document.getElementById('chart-canvas');
-    const tooltip=document.getElementById('chart-tooltip');
-    if(!canvas||!tooltip)return;
-    canvas.addEventListener('mousemove',(e)=>{
-        const arr=chartHistory.get(chartSymbol)||[];
-        if(arr.length<2)return;
-        const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,W=rect.width,pad={left:60,right:16},cW=W-pad.left-pad.right;
-        const idx=Math.round(((mx-pad.left)/cW)*(arr.length-1));
-        const pt=arr[Math.max(0,Math.min(idx,arr.length-1))];
-        if(!pt)return;
-        tooltip.style.display='block';tooltip.style.left=`${mx+10}px`;tooltip.style.top='10px';
-        tooltip.innerHTML=`<strong>${fmt(pt.price)}</strong><br><span style="opacity:.7">${new Date(pt.time).toLocaleTimeString()}</span>`;
-    });
-    canvas.addEventListener('mouseleave',()=>{tooltip.style.display='none';});
-};
-
-// ============================================================
-//  SESIÓN ÚNICA
-// ============================================================
-const SUPABASE_URL_CLIENT = 'https://pvugnjnnfyvkfqhnecpz.supabase.co';
-const SUPABASE_KEY_CLIENT = 'sb_publishable_i8guONbRc21Ska2Jy6VA-A_pV19OyiM';
-window.startSessionGuard = async () => {
-    const checkSession = async () => {
-        const userId=localStorage.getItem('bitgameso_user_id');
-        const localToken=localStorage.getItem('bitgameso_session_token');
-        if(!userId||!localToken)return;
-        try {
-            const res=await fetch(`${SUPABASE_URL_CLIENT}/rest/v1/profiles?id=eq.${userId}&select=active_session_token`,{headers:{'apikey':SUPABASE_KEY_CLIENT,'Authorization':`Bearer ${SUPABASE_KEY_CLIENT}`}});
-            const data=await res.json();
-            const remoteToken=data?.[0]?.active_session_token;
-            if(remoteToken&&remoteToken!==localToken){
-                const sesion=localStorage.getItem('bitgameso_sesion_activa');
-                const saveKey=sesion?`bitgameso_save_${sesion}`:null;
-                if(saveKey){const raw=localStorage.getItem(saveKey);if(raw)await window.syncSaveToCloud(raw);}
-                localStorage.removeItem('bitgameso_session_token');
-                alert('Tu sesión fue iniciada en otro dispositivo. Serás redirigido al inicio.');
-                window.location.href='/src/PaginaMenu/menu-index.html';
-            }
-        } catch(e){console.warn('SessionGuard error:',e);}
-    };
-    await checkSession();
-    setInterval(checkSession,30000);
 };
