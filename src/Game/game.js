@@ -729,6 +729,14 @@ window.sellFromPortfolio = (symbol) => {
             if (bonus > 0) state.monedas += Math.abs(realProfit) * bonus;
             showToast(` Rana amortiguó el crash. Pérdida reducida -${reducedLoss}️${bonus > 0 ? ` +${fmt(Math.abs(realProfit)*bonus)} bono` : ''}`);
             logEvent('venta', `Vendiste ${symbol} con pérdida (Rana amortiguó)`, fmt(realProfit));
+            // Mensaje educativo en pet-message
+            const msgElFrog = document.getElementById('pet-message');
+            if (msgElFrog) {
+                msgElFrog.textContent = 'Los seguros protegen contra catástrofes financieras.';
+                msgElFrog.style.color = '#A0E7E5';
+                msgElFrog.style.fontWeight = '700';
+                setTimeout(() => { if (msgElFrog) { msgElFrog.style.color = ''; msgElFrog.style.fontWeight = ''; } }, 4000);
+            }
         } else {
             const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
             changePetHealth(-loss);

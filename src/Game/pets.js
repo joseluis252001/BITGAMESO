@@ -599,6 +599,19 @@ const startPassivesForPet = (petId) => {
                         const ingreso  = capital * 0.01;
                         state.monedas += ingreso;
                         if (typeof _getShowToast === 'function') _getShowToast()(`Oveja Diamante: +${ingreso.toLocaleString('es', {maximumFractionDigits:2})} dividendos pasivos!`);
+                        // Mensaje educativo en el pet-message
+                        const msgEl = document.getElementById('pet-message');
+                        if (msgEl) {
+                            msgEl.textContent = '¡Tus inversiones están trabajando para ti!';
+                            msgEl.style.color  = '#52b788';
+                            msgEl.style.fontWeight = '700';
+                            setTimeout(() => {
+                                if (msgEl) {
+                                    msgEl.style.color = '';
+                                    msgEl.style.fontWeight = '';
+                                }
+                            }, 5000);
+                        }
                         if (typeof saveGame === 'function') saveGame();
                     }
                 }, 60000);
@@ -871,6 +884,14 @@ const applyPetSellModifiers = (pos, cur, baseProfit) => {
                 const bonus   = payout * discPct;
                 payout += bonus;
                 extraMsg += ` | Bono largo plazo +${(discPct*100).toFixed(0)}% (${heldMins.toFixed(1)}min)`;
+                // Mensaje educativo en pet-message
+                const msgElBear = document.getElementById('pet-message');
+                if (msgElBear) {
+                    msgElBear.textContent = 'La paciencia y disciplina siempre son recompensadas.';
+                    msgElBear.style.color = '#B2F2BB';
+                    msgElBear.style.fontWeight = '700';
+                    setTimeout(() => { if (msgElBear) { msgElBear.style.color = ''; msgElBear.style.fontWeight = ''; } }, 4000);
+                }
             } else if (heldMins < minWait) {
                 extraMsg += ` | Mantén ${(minWait - heldMins).toFixed(1)}min más para bono`;
             }

@@ -51,11 +51,28 @@ window.renderBalance = () => {
 
  // Índice de diversificación junto al capital
  if (elDivScore) {
- const score = window.calculateDiversificationScore();
+ const score    = window.calculateDiversificationScore();
+ const isShark  = typeof PET_DEFS !== 'undefined' && (PET_DEFS[state?.currentPet]?.passive === 'shark');
  elDivScore.textContent = `${score}/100`;
- elDivScore.style.color = score >= 80 ? '#52b788'
- : score >= 50 ? '#CBA6F7'
- : '#e67e22';
+
+ if (isShark && score >= 80) {
+     // Tiburón activo + diversificación alta → verde brillante con animación
+     elDivScore.style.color      = '#52b788';
+     elDivScore.style.fontWeight = '900';
+     elDivScore.style.textShadow = '0 0 8px #52b788, 0 0 16px #B2F2BB';
+     elDivScore.title = `Bono Tiburón: +${(score * 0.5).toFixed(0)}% en ventas`;
+ } else if (isShark) {
+     // Tiburón activo pero diversificación baja → naranja con aviso
+     elDivScore.style.color      = '#e67e22';
+     elDivScore.style.fontWeight = '700';
+     elDivScore.style.textShadow = 'none';
+     elDivScore.title = `Diversifica más para maximizar el bono del Tiburón`;
+ } else {
+     elDivScore.style.color      = score >= 80 ? '#52b788' : score >= 50 ? '#CBA6F7' : '#e67e22';
+     elDivScore.style.fontWeight = '700';
+     elDivScore.style.textShadow = 'none';
+     elDivScore.title = '';
+ }
  }
 };
 
@@ -125,19 +142,14 @@ window.getAssetCategory = (type) => ASSET_CATEGORY_MAP[type] || 'propiedad';
 // Los bonos suben 0.5% garantizado por tick en vez de ser volátiles
 window.applyBondTick = () => {
  if (!state || !state.market) return;
- // Pingüino aumenta rendimiento de bonos a 0.8%
- const pet = typeof PET_DEFS !== 'undefined' ? PET_DEFS[state.currentPet]?.passive : null;
- const isPenguin = pet === 'penguin' || pet === 'penguin_pink';
- const bondRate  = isPenguin ? 1.008 : 1.005;
- const bondPct   = isPenguin ? 0.8 : 0.5;
  state.market.forEach((asset, sym) => {
  const cat = window.getAssetCategory(asset.type || '');
  if (cat === 'prestamo') {
- const newPrice = asset.price * bondRate;
+ const newPrice = asset.price * 1.005; // +0.5% garantizado
  state.market.set(sym, {
  ...asset,
  price: newPrice,
- changePercent: bondPct,
+ changePercent: 0.5,
  });
  }
  });
@@ -162,7 +174,7 @@ window.getAssetFicha = (symbol) => {
  type: asset.type || '—',
  category: cat,
  riesgo: cat === 'prestamo' ? 'Bajo' : 'Alto',
- horizonte: cat === 'prestamo' ? 'Corto plazo — ideal para proteger ahorros' : 'Largo plazo — solo capital que no necesites pronto',
+ horizonte: cat === 'prestamo' ? 'Largo plazo (estable)' : 'Corto/Mediano plazo',
  rendimiento: cat === 'prestamo' ? '+0.5% por tick garantizado' : 'Variable (mercado)',
  precio: asset.price,
  };
@@ -310,10 +322,9 @@ window.showAssetFicha = (symbol) => {
  <td style="padding:8px 0; font-weight:700; color:#CBA6F7;">${fmt(ficha.precio)}</td>
  </tr>
  </table>
- <p style="margin:14px 0 0; font-size:0.75rem; color:#CBA6F7; opacity:0.7; text-align:left; line-height:1.6;">
- <strong>Bonos:</strong> Crecimiento constante y predecible. Ideal para proteger ahorros a corto plazo.<br>
- <strong>Acciones/Cripto:</strong> Mayor potencial de ganancia, pero pueden caer abruptamente.<br>
- <em>Regla de oro: nunca inviertas dinero que puedas necesitar pronto en acciones.</em>
+ <p style="margin:14px 0 0; font-size:0.75rem; color:#CBA6F7; opacity:0.6; text-align:center;">
+ Los bonos tienen crecimiento estable del 0.5% por tick.<br>
+ Las acciones tienen mayor volatilidad y potencial.
  </p>
  </div>
  `;
