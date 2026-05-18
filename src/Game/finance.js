@@ -157,7 +157,7 @@ window.getAssetFicha = (symbol) => {
  type: asset.type || '—',
  category: cat,
  riesgo: cat === 'prestamo' ? 'Bajo' : 'Alto',
- horizonte: cat === 'prestamo' ? 'Largo plazo (estable)' : 'Corto/Mediano plazo',
+ horizonte: cat === 'prestamo' ? 'Corto plazo — ideal para proteger ahorros' : 'Largo plazo — solo capital que no necesites pronto',
  rendimiento: cat === 'prestamo' ? '+0.5% por tick garantizado' : 'Variable (mercado)',
  precio: asset.price,
  };
@@ -305,9 +305,10 @@ window.showAssetFicha = (symbol) => {
  <td style="padding:8px 0; font-weight:700; color:#CBA6F7;">${fmt(ficha.precio)}</td>
  </tr>
  </table>
- <p style="margin:14px 0 0; font-size:0.75rem; color:#CBA6F7; opacity:0.6; text-align:center;">
- Los bonos tienen crecimiento estable del 0.5% por tick.<br>
- Las acciones tienen mayor volatilidad y potencial.
+ <p style="margin:14px 0 0; font-size:0.75rem; color:#CBA6F7; opacity:0.7; text-align:left; line-height:1.6;">
+ <strong>Bonos:</strong> Crecimiento constante y predecible. Ideal para proteger ahorros a corto plazo.<br>
+ <strong>Acciones/Cripto:</strong> Mayor potencial de ganancia, pero pueden caer abruptamente.<br>
+ <em>Regla de oro: nunca inviertas dinero que puedas necesitar pronto en acciones.</em>
  </p>
  </div>
  `;

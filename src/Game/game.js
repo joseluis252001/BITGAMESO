@@ -16,6 +16,8 @@ const state = {
     inventory:    new Map(),
     foodInflation: new Map(),   // foodId → cantidad comprada (precio x2 por compra)
     sectorBonus:   new Map(),   // type → bonusApplied (bool) cuando llega a 3 acciones
+    metaFinanciera: 100000,   // Meta por defecto: $100,000
+    metaAlcanzada:  false,
     effectsTime: {
         marketFast:   0,
         doubleProfit: 0,
@@ -508,11 +510,29 @@ const fetchMarket = () => {
     if (typeof window.applyBondTick === 'function') window.applyBondTick();
     window._lastMarketUpdate = Date.now();
     assetDatabase.forEach(a => {
-        const old  = state.market.get(a.symbol)?.price || a.basePrice;
-        const vol  = 0.025;
-        const next = Math.max(0.000001, old*(1+(Math.random()*vol*2-vol)));
+        const oldPrice   = state.market.get(a.symbol)?.price || a.basePrice;
+        const cat        = typeof window.getAssetCategory === 'function' ? window.getAssetCategory(a.type) : 'propiedad';
+        const isBond     = cat === 'prestamo';
+
+        let next;
+        if (isBond) {
+            // Bonos: crecimiento constante +0.5% por tick (sin volatilidad)
+            next = oldPrice * 1.005;
+        } else {
+            // Acciones/Cripto: volatilidad normal 2.5%, con posibilidad de crash
+            let vol = 0.025;
+            // Crash ocasional (1% de probabilidad): caída entre 10% y 25%
+            if (Math.random() < 0.01) {
+                const crashAmt = 0.10 + Math.random() * 0.15;
+                next = Math.max(0.000001, oldPrice * (1 - crashAmt));
+                showToast(` Crash en ${a.symbol}! -${(crashAmt*100).toFixed(1)}%`);
+            } else {
+                next = Math.max(0.000001, oldPrice * (1 + (Math.random() * vol * 2 - vol)));
+            }
+        }
+
         const prevFuture = state.market.get(a.symbol)?._future;
-        const entry = { ...a, price:next, changePercent:((next-old)/old)*100 };
+        const entry = { ...a, price: next, changePercent: ((next - oldPrice) / oldPrice) * 100 };
         if (prevFuture !== undefined) entry._future = prevFuture;
         state.market.set(a.symbol, entry);
     });
@@ -527,6 +547,11 @@ const fetchMarket = () => {
     renderMarket();
     renderPortfolio();
     saveGame();
+    if (typeof window.updateFinanceUI === 'function') window.updateFinanceUI();
+    checkInvestmentGoal();
+    // Diversificación protege/daña salud cada 10 ticks
+    window._divTick = (window._divTick || 0) + 1;
+    if (window._divTick >= 10) { window._divTick = 0; applyDiversificationBonus(); }
     // Registrar tick en historial de gráfica
     if (typeof recordChartTick === 'function') recordChartTick();
 };
@@ -630,6 +655,8 @@ window.buy = (symbol) => {
         logEvent('compra', `Compraste ${a.symbol} — ${a.name}`, `Precio: ${fmt(actualPrice)} | Sector: ${a.type}`);
         updateUI();
         checkSectorBonus();
+        if (typeof window.updateFinanceUI === 'function') window.updateFinanceUI();
+        checkInvestmentGoal();
     } else {
         showToast(' ¡No tienes suficientes monedas!');
     }
@@ -1179,6 +1206,24 @@ const renderPortfolio = () => {
 // ============================================================
 //  GAME OVER
 // ============================================================
+// ── Diversificación protege salud — se llama en fetchMarket ─
+const applyDiversificationBonus = () => {
+    if (!state || !state.portfolio || state.portfolio.size === 0) return;
+    const score = typeof window.calculateDiversificationScore === 'function'
+        ? window.calculateDiversificationScore() : 0;
+
+    // Si diversificación >= 60, recuperar 1 punto de salud cada tick
+    // Si diversificación >= 80, recuperar 2 puntos
+    // Si diversificación < 20 con cartera activa, perder 1 punto extra
+    if (score >= 80) {
+        if (typeof changePetHealth === 'function') changePetHealth(2);
+    } else if (score >= 60) {
+        if (typeof changePetHealth === 'function') changePetHealth(1);
+    } else if (score < 20 && state.portfolio.size > 0) {
+        if (typeof changePetHealth === 'function') changePetHealth(-1);
+    }
+};
+
 const checkGameOver = () => {
     if (state.saludMascota <= 0) { triggerGameOver(' Tu mascota murió de hambre...'); return; }
     if (state.monedas <= 0) {
@@ -2726,3 +2771,42 @@ const updatePauseUI = () => {
 const _origFetchMarket = window.fetchMarket || null;
 // El check se hace dentro del _marketLoop existente
 // Necesitamos que _marketLoop respete _isPaused
+
+// ============================================================
+//  META DE INVERSIÓN
+// ============================================================
+window.checkInvestmentGoal = () => {
+    if (!state || state.metaAlcanzada) return;
+    const capital = typeof window.getBalance === 'function' ? window.getBalance().capital : state.monedas;
+    const meta    = state.metaFinanciera || 100000;
+
+    // Actualizar barra de progreso
+    const pct     = Math.min(100, (capital / meta) * 100);
+    const barEl   = document.getElementById('goal-progress-bar');
+    const pctEl   = document.getElementById('goal-progress-pct');
+    const metaEl  = document.getElementById('goal-meta-value');
+    if (barEl)  barEl.style.width  = pct.toFixed(1) + '%';
+    if (pctEl)  pctEl.textContent  = pct.toFixed(1) + '%';
+    if (metaEl) metaEl.textContent = fmt(meta);
+
+    // Meta alcanzada
+    if (capital >= meta && !state.metaAlcanzada) {
+        state.metaAlcanzada = true;
+        showToast(' ¡Alcanzaste tu meta de inversión! Puedes establecer una nueva.');
+        if (typeof changePetHealth === 'function') changePetHealth(20);
+        saveGame();
+    }
+};
+
+window.setNewGoal = () => {
+    const nuevaMeta = parseFloat(prompt('¿Cuál es tu nueva meta de capital? (ej: 500000)'));
+    if (!isNaN(nuevaMeta) && nuevaMeta > 0) {
+        state.metaFinanciera = nuevaMeta;
+        state.metaAlcanzada  = false;
+        saveGame();
+        window.checkInvestmentGoal();
+        showToast(` Nueva meta: ${fmt(nuevaMeta)}`);
+    }
+};
+
+const checkInvestmentGoal = () => window.checkInvestmentGoal();
