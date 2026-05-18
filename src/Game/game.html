@@ -52,33 +52,7 @@
                 <span id="nombre-usuario">joseluis</span>
                 <img src="../assets/arrows/Arrow-Down-128.png" class="chevron-img" alt="▾">
             </div>
-            <div id="settings-dropdown-menu" class="settings-dropdown" style="display:none;">
-                <div class="avatar-options">
-                    <img src="../assets/avatares/Avatar-Boy-1-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 1">
-                    <img src="../assets/avatares/Avatar-Boy-2-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 2">
-                    <img src="../assets/avatares/Avatar-Boy-3-200.png"  onclick="handleAvatarChange(this.src)" alt="Boy 3">
-                    <img src="../assets/avatares/Avatar-Boy-4-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 4">
-                    <img src="../assets/avatares/Avatar-Boy-5-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 5">
-                    <img src="../assets/avatares/Avatar-Boy-6-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 6">
-                    <img src="../assets/avatares/Avatar-Boy-7-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 7">
-                    <img src="../assets/avatares/Avatar-Girl-1-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 1">
-                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 2">
-                    <img src="../assets/avatares/Avatar-Girl-3-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 3">
-                    <img src="../assets/avatares/Avatar-Girl-4-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 4">
-                    <img src="../assets/avatares/Avatar-Girl-5-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 5">
-                    <img src="../assets/avatares/Avatar-Girl-6-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 6">
-                    <img src="../assets/avatares/Avatar-Girl-7-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 7">
-                    <img src="../assets/avatares/Avatar-Girl-8-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 8">
-                </div>
-                <hr class="dropdown-divider">
-                <button onclick="handleLogout()" class="btn-logout">
-                    Cerrar Sesión
-                </button>
-                <hr class="dropdown-divider">
-                <button class="btn-bug-report" onclick="document.getElementById('settings-dropdown-menu').style.display='none'; setTimeout(function(){ if(window.openBugReport) window.openBugReport(); }, 50);">
-                    Reportar un bug
-                </button>
-            </div>
+
         </div>
     </header>
 
@@ -470,5 +444,34 @@
     <script src="pets.js"></script>
     <script src="game.js"></script>
     <script src="tutorial.js" defer></script>
+
+    <!-- DROPDOWN PERFIL — fuera del header para no ser cortado -->
+    <div id="settings-dropdown-menu" class="settings-dropdown" style="display:none;position:fixed;top:60px;right:12px;z-index:999999;">
+                <div class="avatar-options">
+                    <img src="../assets/avatares/Avatar-Boy-1-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 1">
+                    <img src="../assets/avatares/Avatar-Boy-2-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 2">
+                    <img src="../assets/avatares/Avatar-Boy-3-200.png"  onclick="handleAvatarChange(this.src)" alt="Boy 3">
+                    <img src="../assets/avatares/Avatar-Boy-4-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 4">
+                    <img src="../assets/avatares/Avatar-Boy-5-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 5">
+                    <img src="../assets/avatares/Avatar-Boy-6-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 6">
+                    <img src="../assets/avatares/Avatar-Boy-7-128.png"  onclick="handleAvatarChange(this.src)" alt="Boy 7">
+                    <img src="../assets/avatares/Avatar-Girl-1-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 1">
+                    <img src="../assets/avatares/Avatar-Girl-2-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 2">
+                    <img src="../assets/avatares/Avatar-Girl-3-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 3">
+                    <img src="../assets/avatares/Avatar-Girl-4-128.png" onclick="handleAvatarChange(this.src)" alt="Girl 4">
+                    <img src="../assets/avatares/Avatar-Girl-5-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 5">
+                    <img src="../assets/avatares/Avatar-Girl-6-200.png" onclick="handleAvatarChange(this.src)" alt="Girl 6">
+                    <img src="../assets/avatares/Avatar-Girl-7-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 7">
+                    <img src="../assets/avatares/Avatar-Girl-8-256.png" onclick="handleAvatarChange(this.src)" alt="Girl 8">
+                </div>
+                <hr class="dropdown-divider">
+                <button onclick="handleLogout()" class="btn-logout">
+                    Cerrar Sesión
+                </button>
+                <hr class="dropdown-divider">
+                <button class="btn-bug-report" onclick="document.getElementById('settings-dropdown-menu').style.display='none'; setTimeout(function(){ if(window.openBugReport) window.openBugReport(); }, 50);">
+                    Reportar un bug
+                </button>
+    </div>
 </body>
 </html>
