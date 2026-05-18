@@ -1053,6 +1053,8 @@ const changePetHealth = (delta) => {
     state.saludMascota = Math.max(0, Math.min(100, state.saludMascota+delta));
     renderPetHealth();
     if (typeof syncPetHealthToData === 'function') syncPetHealthToData();
+    // Verificar game over si la salud llega a 0
+    if (state.saludMascota <= 0) checkGameOver();
 };
 
 // ============================================================
