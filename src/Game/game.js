@@ -18,8 +18,6 @@ const state = {
     sectorBonus:   new Map(),   // type → bonusApplied (bool) cuando llega a 3 acciones
     metaFinanciera: 100000,
     metaAlcanzada: false,
-    misiones: [],
-    misionesCompletadas: [],
     effectsTime: {
         marketFast:   0,
         doubleProfit: 0,
@@ -636,7 +634,7 @@ window.buy = (symbol) => {
     if (state.monedas >= actualPrice) {
         state.monedas -= actualPrice;
         state.portfolio.set(symbol, { symbol:a.symbol, name:a.name, buyPrice:actualPrice, type:a.type, buyTime:Date.now() });
-        if(typeof window.updateMissionProgress==='function') window.updateMissionProgress('comprar',1);
+        if(typeof window.misionOnComprar==='function') window.misionOnComprar(symbol, a.type);
         if (typeof applyPenguinBuyPenalty === 'function') applyPenguinBuyPenalty(a);
         if (typeof birdPaused !== 'undefined') { birdPaused = true; setTimeout(()=>{ birdPaused = false; }, 1000); }
         const discountMsg = actualPrice < a.price ? ` (descuento: ${fmt(a.price - actualPrice)})` : '';
@@ -685,7 +683,8 @@ window.sellFromPortfolio = (symbol) => {
         changePetHealth(gain);
         showToast(` Vendiste ${symbol}! +${fmt(realProfit)}${x2tag}${petMsg} +${gain}️`);
         logEvent('venta', `Vendiste ${symbol} con GANANCIA`, `+${fmt(realProfit)}${x2tag}${petMsg}`);
-        if(typeof window.updateMissionProgress==='function'){window.updateMissionProgress('vender',1);window.updateMissionProgress('vender_ganancia',1);}
+        if(typeof window.misionOnVender==='function') window.misionOnVender(symbol, pos.type, realProfit, pos.buyPrice);
+        if(typeof window.misionOnGanarMonedas==='function' && realProfit>0) window.misionOnGanarMonedas(realProfit);
     } else if (realProfit < 0) {
         const loss = Math.min(Math.round((Math.abs(realProfit)/pos.buyPrice)*20),20);
         changePetHealth(-loss);
@@ -809,7 +808,6 @@ window.buyFood = (foodId, price) => {
     const nextPrice = Math.round(price * 2);
     showToast(`Compraste ${food.name} por ${price} | Próximo precio: ${nextPrice}`);
     logEvent('comida', `Compraste ${food.name}`, `Precio: ${price} | Efecto: ${catLabel[food.cat]}`);
-    if(typeof window.updateMissionProgress==='function') window.updateMissionProgress('comprar_comida',1,{cat:food.cat});
     updateUI();
     openFoodShop();
 };
@@ -850,7 +848,7 @@ const useFoodOnPet = () => {
     if (!foodId) { showToast(' Selecciona un ítem del inventario primero'); return; }
     const item = state.inventory.get(foodId);
     if (!item || item.qty <= 0) { showToast(' No tienes ese ítem'); return; }
-    if(typeof window.updateMissionProgress==='function') window.updateMissionProgress('alimentar',1);
+    if(typeof window.misionOnAlimentar==='function') window.misionOnAlimentar();
 
     switch(item.cat) {
         case 'verdura':
@@ -1001,10 +999,17 @@ const renderPetHealth = () => {
 };
 
 const changePetHealth = (delta) => {
+    const prevSalud = state.saludMascota;
     state.saludMascota = Math.max(0, Math.min(100, state.saludMascota+delta));
     renderPetHealth();
     if (typeof syncPetHealthToData === 'function') syncPetHealthToData();
     if (state.saludMascota <= 0) checkGameOver();
+    if (state.saludMascota === 100 && prevSalud < 100) {
+        if (typeof window.misionOnSalud100 === 'function') window.misionOnSalud100();
+    }
+    if (state.saludMascota < 40 && prevSalud >= 40) {
+        if (typeof window.misionOnSaludBaja === 'function') window.misionOnSaludBaja(state.saludMascota);
+    }
 };
 
 // ============================================================
@@ -2060,13 +2065,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Cargar progreso: primero nube, luego local
     if (typeof window.initCloudSync === 'function') {
-        await window.initCloudSync();
-    }
-    if (typeof window.startSessionGuard === 'function') {
-        window.startSessionGuard();
+        await window.initCloudSync(); // carga desde Supabase si hay guardado más reciente
     }
     loadGame();
-    if (typeof window.initMissions === 'function') window.initMissions();
     window._lastLevel = window.getCurrentLevel ? window.getCurrentLevel() : 0;
     if (typeof window.checkLevelUp === 'function') setTimeout(window.checkLevelUp, 500);
 
@@ -2473,131 +2474,7 @@ const showLevelUpModal = (level, rewards) => {
     modal.style.display = 'flex';
 };
 
-// ============================================================
-//  SISTEMA DE MISIONES
-// ============================================================
-const WELCOME_MISSIONS = [
-    {id:'welcome_1',title:'Primera inversión',desc:'Compra tu primera acción del mercado',cat:'normal',tipo:'comprar',qty:1,progress:0,done:false,reward:{type:'codigo',value:'BITGAMESO'},special:true},
-    {id:'welcome_2',title:'Bienvenido al mercado',desc:'Vende una acción del mercado',cat:'normal',tipo:'vender',qty:1,progress:0,done:false,reward:{type:'codigo',value:'BIENVENIDA'},special:true},
-];
-const MISSION_POOLS = {
-    normal:     [{title:'Alimenta tu mascota',desc:'Alimenta a tu mascota {qty} veces',tipo:'alimentar',qty:[3,5,8]},{title:'Compra frutas',desc:'Compra {qty} frutas',tipo:'comprar_fruta',qty:[2,3,5]},{title:'Compra verduras',desc:'Compra {qty} verduras',tipo:'comprar_verdura',qty:[2,3,5]},{title:'Dulce inversor',desc:'Compra {qty} dulces',tipo:'comprar_dulce',qty:[3,5,8]}],
-    comun:      [{title:'Inversor activo',desc:'Compra {qty} acciones',tipo:'comprar',qty:[2,3,5]},{title:'Toma ganancias',desc:'Vende {qty} acciones con ganancia',tipo:'vender_ganancia',qty:[1,2,3]},{title:'Proteína',desc:'Compra {qty} proteínas',tipo:'comprar_proteina',qty:[2,3]}],
-    rara:       [{title:'Portafolio diverso',desc:'Ten acciones de {qty} sectores',tipo:'diversificar',qty:[3,4,5]},{title:'Mascota feliz',desc:'Lleva tu mascota al {qty}% de salud',tipo:'salud',qty:[80,90,100]},{title:'Gran comprador',desc:'Compra {qty} acciones',tipo:'comprar',qty:[8,10,15]}],
-    epica:      [{title:'Millonario',desc:'Llega a {qty} de capital',tipo:'capital',qty:[50000,100000,500000]},{title:'Vendedor maestro',desc:'Vende {qty} acciones',tipo:'vender',qty:[10,15,20]}],
-    legendaria: [{title:'Coleccionista',desc:'Desbloquea una nueva mascota',tipo:'desbloquear_mascota',qty:[1]},{title:'Gran inversor',desc:'Ten {qty} acciones en cartera',tipo:'cartera_grande',qty:[5,8,10]}],
-};
-if (!state.misiones) state.misiones = [];
-if (!state.misionesCompletadas) state.misionesCompletadas = [];
-const generateMission = () => {
-    const rand=Math.random()*100;
-    const cat=rand<40?'normal':rand<70?'comun':rand<90?'rara':rand<98?'epica':'legendaria';
-    const pool=MISSION_POOLS[cat]; const tmpl=pool[Math.floor(Math.random()*pool.length)];
-    const qty=tmpl.qty[Math.floor(Math.random()*tmpl.qty.length)];
-    const foods=['Apple-128','Carrot-128','Fish-128','Meat-128','Cookie-128','Pumpkin-128','Egg-128'];
-    let reward;
-    if(cat==='normal') reward={type:'comida',id:foods[Math.floor(Math.random()*3)],qty:2};
-    else if(cat==='comun') reward=Math.random()<0.5?{type:'comida',id:foods[Math.floor(Math.random()*foods.length)],qty:3}:{type:'monedas',qty:1000+Math.floor(Math.random()*4000)};
-    else if(cat==='rara') reward={type:'comida_elegir',qty:5};
-    else if(cat==='epica') reward={type:'monedas',qty:10000+Math.floor(Math.random()*40000)};
-    else reward={type:'mascota_aleatoria'};
-    return {id:`m_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,title:tmpl.title,desc:tmpl.desc.replace('{qty}',qty),cat,tipo:tmpl.tipo,qty,progress:0,done:false,reward};
-};
-window.initMissions = () => {
-    if (!state.misiones) state.misiones=[];
-    if (!state.misionesCompletadas) state.misionesCompletadas=[];
-    WELCOME_MISSIONS.forEach(wm => {
-        if (!state.misionesCompletadas.includes(wm.id) && !state.misiones.find(m=>m.id===wm.id)) state.misiones.unshift({...wm});
-    });
-    while (state.misiones.length<3) state.misiones.push(generateMission());
-    renderMissions();
-};
-window.renderMissions = () => {
-    const el=document.getElementById('missions-list'); if (!el) return;
-    const catColors={normal:'#B2F2BB',comun:'#A0E7E5',rara:'#CBA6F7',epica:'#FFB6C1',legendaria:'#FFF5BA'};
-    const catLabels={normal:'Normal',comun:'Común',rara:'Rara',epica:'Épica',legendaria:'Legendaria'};
-    el.innerHTML = state.misiones.map(m => {
-        const color=catColors[m.cat]||'#CBA6F7';
-        const pct=Math.min(100,((m.progress||0)/m.qty)*100);
-        const rewardText=m.reward?.type==='monedas'?`+${fmt(m.reward.qty)} monedas`:m.reward?.type==='comida'?`x${m.reward.qty} comida`:m.reward?.type==='comida_elegir'?'Elige tu comida':m.reward?.type==='codigo'?`Código: ${m.reward.value}`:'Desbloquea mascota';
-        return `<div style="background:#FFFFFF;border-radius:14px;padding:12px 14px;border:2px solid ${color};">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                <span style="font-size:11px;font-weight:700;color:#CBA6F7;font-family:'Poppins',sans-serif;">${m.title}</span>
-                <span style="font-size:9px;font-weight:700;background:${color};color:#CBA6F7;padding:2px 8px;border-radius:8px;">${catLabels[m.cat]}</span>
-            </div>
-            <p style="font-size:10px;color:#CBA6F7;margin:0 0 6px;font-family:'Poppins',sans-serif;">${m.desc}</p>
-            <div style="background:#FFF5BA;border-radius:8px;height:6px;overflow:hidden;margin-bottom:4px;">
-                <div style="width:${pct.toFixed(0)}%;height:100%;background:${color};border-radius:8px;transition:width 0.3s;"></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:9px;color:#CBA6F7;opacity:.7;">${m.progress||0}/${m.qty}</span>
-                <span style="font-size:9px;font-weight:700;color:#CBA6F7;">${rewardText}</span>
-            </div>
-        </div>`;
-    }).join('');
-    const badge=document.getElementById('missions-badge'); if(badge) badge.style.display='none';
-};
-window.openMisiones = () => { window.initMissions(); document.getElementById('modal-misiones').style.display='flex'; };
-window.updateMissionProgress = (tipo, qty=1, extra={}) => {
-    if (!state.misiones) return; let changed=false;
-    state.misiones.forEach((m,idx) => {
-        if (m.done) return; let match=false;
-        if (m.tipo===tipo) match=true;
-        if (m.tipo==='comprar_fruta'    && tipo==='comprar_comida' && extra.cat==='fruta')    match=true;
-        if (m.tipo==='comprar_verdura'  && tipo==='comprar_comida' && extra.cat==='verdura')  match=true;
-        if (m.tipo==='comprar_dulce'    && tipo==='comprar_comida' && extra.cat==='dulce')    match=true;
-        if (m.tipo==='comprar_proteina' && tipo==='comprar_comida' && extra.cat==='proteina') match=true;
-        if (m.tipo==='diversificar') { const s=typeof window.calculateDiversificationScore==='function'?window.calculateDiversificationScore():0; const sec=s>=100?5:s>=80?4:s>=60?3:s>=40?2:1; if(sec>=m.qty){m.progress=m.qty;match=false;} }
-        if (m.tipo==='capital') { const cap=typeof window.getBalance==='function'?window.getBalance().capital:state.monedas; if(cap>=m.qty){m.progress=m.qty;match=false;} }
-        if (m.tipo==='salud') { if(state.saludMascota>=m.qty){m.progress=m.qty;match=false;} }
-        if (match) { m.progress=(m.progress||0)+qty; changed=true; }
-        if ((m.progress||0)>=m.qty&&!m.done) { m.done=true; completeMission(m,idx); changed=true; }
-    });
-    if (changed) { saveGame(); renderMissions(); }
-};
-const completeMission=(m,idx)=>{
-    state.misionesCompletadas=state.misionesCompletadas||[];
-    state.misionesCompletadas.push(m.id);
-    showToast(`Mision completada: ${m.title}`);
-    const r=m.reward;
-    if(r?.type==='monedas'){state.monedas+=r.qty;showToast(`+${fmt(r.qty)} monedas`);}
-    else if(r?.type==='comida'){const food=foodDatabase?.find(f=>f.id===r.id);if(food){const ex=state.inventory.get(r.id)||{...food,qty:0};state.inventory.set(r.id,{...ex,qty:(ex.qty||0)+r.qty});if(typeof renderInventory==='function')renderInventory();showToast(`+${r.qty} ${food.name}`);}}
-    else if(r?.type==='codigo'){showToast(`Código desbloqueado: ${r.value}`);}
-    else if(r?.type==='comida_elegir'){showFoodChoiceModal(r.qty);}
-    else if(r?.type==='mascota_aleatoria'){unlockRandomPet();}
-    setTimeout(()=>{state.misiones[idx]=generateMission();saveGame();renderMissions();},1500);
-    const badge=document.getElementById('missions-badge'); if(badge) badge.style.display='block';
-};
-const showFoodChoiceModal=(qty)=>{
-    let modal=document.getElementById('modal-food-choice');
-    if(!modal){modal=document.createElement('div');modal.id='modal-food-choice';modal.className='modal-overlay';document.body.appendChild(modal);}
-    const foodOptions=foodDatabase?.slice(0,12)||[];
-    modal.innerHTML=`<div class="modal-box" style="max-width:380px;border:3px solid #CBA6F7;">
-        <h3 style="color:#CBA6F7;font-family:'Fredoka',sans-serif;margin-bottom:12px;">Elige tu recompensa</h3>
-        <p style="color:#CBA6F7;opacity:.7;font-size:0.82rem;margin-bottom:12px;">Selecciona una comida para recibir x${qty}</p>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
-            ${foodOptions.map(f=>`<button onclick="chooseFoodReward('${f.id}',${qty})" style="background:#fdf6ff;border:2px solid #f0e7ff;border-radius:10px;padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;"><img src="../assets/food/${f.id}.png" style="width:28px;height:28px;object-fit:contain;"><span style="font-size:7px;color:#CBA6F7;font-weight:700;">${f.name}</span></button>`).join('')}
-        </div></div>`;
-    modal.style.display='flex';
-};
-window.chooseFoodReward=(foodId,qty)=>{
-    const food=foodDatabase?.find(f=>f.id===foodId); if(!food)return;
-    const ex=state.inventory.get(foodId)||{...food,qty:0};
-    state.inventory.set(foodId,{...ex,qty:(ex.qty||0)+qty});
-    if(typeof renderInventory==='function')renderInventory();
-    showToast(`+${qty} ${food.name}`);
-    const modal=document.getElementById('modal-food-choice'); if(modal)modal.style.display='none';
-};
-const unlockRandomPet=()=>{
-    const isDiamond=state.diamondVictoryAchieved; const isGolden=state.victoryAchieved;
-    const pool=isDiamond?PET_ORDER_DIAMOND:isGolden?PET_ORDER_GOLDEN:PET_ORDER;
-    const locked=pool.filter(id=>!state.petData.get(id)?.unlocked);
-    if(!locked.length){showToast('Ya tienes todas las mascotas desbloqueadas');return;}
-    const randId=locked[Math.floor(Math.random()*locked.length)];
-    const def=PET_DEFS[randId]; const data=state.petData.get(randId)||{health:0,unlocked:false};
-    data.unlocked=true; data.health=50; state.petData.set(randId,data);
-    showToast(`Legendaria: Desbloqueaste ${def.label}!`); saveGame();
-};
+
 
 // ============================================================
 //  GRÁFICA EN TIEMPO REAL
