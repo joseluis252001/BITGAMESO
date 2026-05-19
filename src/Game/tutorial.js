@@ -167,6 +167,12 @@ const lowerAllElevated = () => {
 const enableOverlayBlock = () => {
     const overlay = document.getElementById('tutorial-overlay');
     if (overlay) overlay.style.pointerEvents = 'all'; // BLOQUEA clics
+    // Asegurar que elementos elevados sigan por encima del overlay
+    document.querySelectorAll('[data-tut-elevated]').forEach(el => {
+        el.removeAttribute('data-tut-elevated');
+        el.style.zIndex = '9993';
+        el.style.position = 'relative';
+    });
 };
 
 const disableOverlayBlock = () => {
@@ -302,6 +308,18 @@ const renderTutorialStep = () => {
             const el = document.querySelector(step.target);
             if (el) { elevateElement(el); highlightElement(el, step); }
         }, 400);
+    }
+    // Para el mercado específicamente — forzar elevación con scroll
+    if (step.target === '.market-main') {
+        setTimeout(() => {
+            const el = document.querySelector('.market-main');
+            if (el) {
+                el.style.position = 'relative';
+                el.style.zIndex   = '9993';
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => highlightElement(el, step), 600);
+            }
+        }, 200);
     }
 
     // En pasos 'next'/'finish', elevar la burbuja (ya tiene z-index 9995 en CSS)
