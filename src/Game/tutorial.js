@@ -275,7 +275,7 @@ const renderTutorialStep = () => {
                 elevateElement(el);
                 highlightElement(el, step);
                 // Para elementos grandes (secciones), también elevar sus hijos directos
-                if (el.classList.contains('market-main') || el.classList.contains('portfolio-aside') || el.classList.contains('pet-aside')) {
+                if (el.classList.contains('market-header') || el.classList.contains('market-main') || el.classList.contains('portfolio-aside') || el.classList.contains('pet-aside')) {
                     el.style.position = 'relative';
                     el.style.zIndex   = '9993';
                 }
@@ -310,7 +310,7 @@ const renderTutorialStep = () => {
         }, 400);
     }
     // Para secciones grandes — usar clip-path para recortar hueco en el overlay
-    if (step.target && (step.target === '.market-main' || step.target === '.portfolio-aside' || step.target === '.pet-aside')) {
+    if (step.target && (step.target === '.market-header' || step.target === '.market-main' || step.target === '.portfolio-aside' || step.target === '.pet-aside')) {
         setTimeout(() => {
             const el = document.querySelector(step.target);
             const overlay = document.getElementById('tutorial-overlay');
