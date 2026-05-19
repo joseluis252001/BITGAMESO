@@ -37,6 +37,7 @@ const TUTORIAL_STEPS = [
     {
         target:   '.market-main',
         arrowDir: 'up',
+        highlight: true,
         mascot:   'Este es el Mercado Global. Los precios cambian solos cada pocos segundos. Tu objetivo: comprar barato y vender cuando el precio suba. La inversión aparece en tu Cartera.',
         waitFor:  'next',
         scrollTo: true,
@@ -75,6 +76,7 @@ const TUTORIAL_STEPS = [
         mascot:   'Ahora presiona "Enviar" para darme la comida. Recuerda: "Vender" te da monedas, "Enviar" me alimenta a mi.',
         waitFor:  'use_food_tutorial',
         scrollTo: true,
+        highlight: true,
     },
     // PASO 9 — Mascotas
     {
@@ -288,6 +290,14 @@ const renderTutorialStep = () => {
     if (step.waitFor === 'buy_food_tutorial')      setupBuyFoodTutorial();
     if (step.waitFor === 'select_food_tutorial')   setupSelectFoodTutorial();
     if (step.waitFor === 'use_food_tutorial')      setupUseFoodTutorial();
+
+    // Forzar highlight en elementos con target aunque tengan waitFor especial
+    if (step.target && step.highlight) {
+        setTimeout(() => {
+            const el = document.querySelector(step.target);
+            if (el) { elevateElement(el); highlightElement(el, step); }
+        }, 400);
+    }
 
     // En pasos 'next'/'finish', elevar la burbuja (ya tiene z-index 9995 en CSS)
     // y también el botón de cerrar si existe
@@ -847,13 +857,43 @@ const setupSelectFoodTutorial = () => {
         addActionGlow(invEl);
     }
 
+    // Resaltar la manzana específicamente en el inventario
+    const highlightAppleInInventory = () => {
+        const invItems = document.querySelectorAll('.inv-item');
+        invItems.forEach(item => {
+            const img = item.querySelector('img');
+            const isApple = img && (img.src.includes('Apple') || img.alt.toLowerCase().includes('manzana'));
+            if (isApple) {
+                item.style.boxShadow = '0 0 0 3px #CBA6F7, 0 0 16px rgba(203,166,247,0.9)';
+                item.style.transform = 'scale(1.15)';
+                item.style.transition = 'all 0.2s';
+                item.style.zIndex = '99999';
+            } else {
+                item.style.opacity = '0.3';
+                item.style.pointerEvents = 'none';
+            }
+        });
+    };
+    setTimeout(highlightAppleInInventory, 300);
+
     const check = setInterval(() => {
         if (!tutorialActive) { clearInterval(check); return; }
+        // Mantener el resaltado mientras no se seleccione
+        if (!state.selectedFood) {
+            highlightAppleInInventory();
+        }
         if (state.selectedFood) {
             clearInterval(check);
+            // Restaurar estilos del inventario
+            document.querySelectorAll('.inv-item').forEach(item => {
+                item.style.boxShadow = '';
+                item.style.transform = '';
+                item.style.opacity = '';
+                item.style.pointerEvents = '';
+                item.style.zIndex = '';
+            });
             removeActionGlow();
             lowerAllElevated();
-            // Restaurar overlay
             const ov = document.getElementById('tutorial-overlay');
             if (ov) ov.style.display = '';
             enableOverlayBlock();
