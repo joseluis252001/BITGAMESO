@@ -2060,7 +2060,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Cargar progreso: primero nube, luego local
     if (typeof window.initCloudSync === 'function') {
-        await window.initCloudSync(); // carga desde Supabase si hay guardado más reciente
+        await window.initCloudSync();
+    }
+    if (typeof window.startSessionGuard === 'function') {
+        window.startSessionGuard();
     }
     loadGame();
     if (typeof window.initMissions === 'function') window.initMissions();
