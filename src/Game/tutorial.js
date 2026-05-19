@@ -309,15 +309,27 @@ const renderTutorialStep = () => {
             if (el) { elevateElement(el); highlightElement(el, step); }
         }, 400);
     }
-    // Para el mercado específicamente — forzar elevación con scroll
-    if (step.target === '.market-main') {
+    // Para secciones grandes — usar clip-path para recortar hueco en el overlay
+    if (step.target && (step.target === '.market-main' || step.target === '.portfolio-aside' || step.target === '.pet-aside')) {
         setTimeout(() => {
-            const el = document.querySelector('.market-main');
-            if (el) {
-                el.style.position = 'relative';
-                el.style.zIndex   = '9993';
+            const el = document.querySelector(step.target);
+            const overlay = document.getElementById('tutorial-overlay');
+            if (el && overlay) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => highlightElement(el, step), 600);
+                setTimeout(() => {
+                    const r = el.getBoundingClientRect();
+                    const pad = 10;
+                    const t = Math.max(0, r.top - pad);
+                    const l = Math.max(0, r.left - pad);
+                    const b = Math.min(window.innerHeight, r.bottom + pad);
+                    const ri = Math.min(window.innerWidth, r.right + pad);
+                    // Recortar hueco en el overlay usando clip-path polygon
+                    overlay.style.clipPath = `polygon(
+                        0% 0%, 100% 0%, 100% 100%, 0% 100%,
+                        0% ${t}px, ${l}px ${t}px, ${l}px ${b}px, ${ri}px ${b}px, ${ri}px ${t}px, 0% ${t}px
+                    )`;
+                    highlightElement(el, step);
+                }, 700);
             }
         }, 200);
     }
@@ -474,6 +486,9 @@ const removeHighlight = () => {
         if (el) el.remove();
     });
     removeActionGlow();
+    // Limpiar clip-path del overlay
+    const overlay = document.getElementById('tutorial-overlay');
+    if (overlay) overlay.style.clipPath = '';
 };
 
 const addActionGlow = (el) => {
