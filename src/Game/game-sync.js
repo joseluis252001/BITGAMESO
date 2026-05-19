@@ -226,7 +226,7 @@ window.startSessionGuard = async () => {
 
                 // Mostrar aviso y redirigir
                 alert('Tu sesión fue iniciada en otro dispositivo. Serás redirigido al inicio.');
-                window.location.href = '/src/PaginaMenu/menu-index.html';
+                window.location.href = '/';
             }
         } catch(e) {
             console.warn('SessionGuard error:', e);
