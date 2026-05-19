@@ -268,6 +268,11 @@ const renderTutorialStep = () => {
             if (el) {
                 elevateElement(el);
                 highlightElement(el, step);
+                // Para elementos grandes (secciones), también elevar sus hijos directos
+                if (el.classList.contains('market-main') || el.classList.contains('portfolio-aside') || el.classList.contains('pet-aside')) {
+                    el.style.position = 'relative';
+                    el.style.zIndex   = '9993';
+                }
             }
         };
         if (step.scrollTo) {
